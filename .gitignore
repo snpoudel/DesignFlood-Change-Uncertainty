@@ -1,0 +1,5 @@
+/data
+/output
+/.git
+/__pycache__
+/*.log
