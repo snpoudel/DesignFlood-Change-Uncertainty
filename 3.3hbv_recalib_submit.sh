@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=idw-lstm            # Job name
-#SBATCH --output=idw-lstm%j.log       # Output file name (%j expands to jobID)
-#SBATCH --error=idw-lstm%j.log        # Error file name (%j expands to jobID)
+#SBATCH --job-name=idw-hbvr            # Job name
+#SBATCH --output=idw-hbvr%j.log       # Output file name (%j expands to jobID)
+#SBATCH --error=idw-hbvr%j.log        # Error file name (%j expands to jobID)
 #SBATCH --time=06:00:00                 # Time limit (HH:MM:SS)
 #SBATCH --nodes=2                       #5 Number of nodes
 #SBATCH --ntasks=100                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well

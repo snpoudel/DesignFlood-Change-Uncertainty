@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
-def run_lstm_model(lstm_dataset):
+def run_lstm_model(lstm_dataset, new_data):
     #Hyperparameters
     input_size = 3 #number of features in input at a time step
     hidden_size = 64 #64 #number of features in the hidden state
@@ -100,4 +100,20 @@ def run_lstm_model(lstm_dataset):
     with torch.no_grad(): #no need to calculate gradients
         model_output = model(sequences) #make predictions using lstm model
         model_output = model_output.numpy() #convert model output to numpy array
-        return model_output #return model output
+          
+
+    #Make predictions for new data using lstm model
+    data = new_data
+    features = data.iloc[:, :-1].values # 2d array of features, everything is features exccept last column
+    #normalize features
+    scaler = StandardScaler() #standardize features by removing the mean and scaling to unit variance
+    features = scaler.fit_transform(features) #fit to data, then transform it
+    #create sequences
+    sequences,_ = create_sequences(features, labels, sequence_length) #create sequences and targets from features and labels
+    #convert data to pytorch tensors 
+    sequences = torch.tensor(sequences, dtype=torch.float32) #convert sequences to tensor
+    with torch.no_grad():
+        new_model_output = model(sequences)
+        new_model_output = new_model_output.numpy()
+
+    return model_output, new_model_output #return output of lstm model function

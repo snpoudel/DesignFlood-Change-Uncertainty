@@ -19,20 +19,3 @@ for stn in gauge_stns['id']:
     #save the synthetic precipitation to a csv file
     stn_precip_future.to_csv(f'data/future/future_gauge_precip/{stn}.csv', index=False)
     
-#make exceedance probability plot
-def make_nep_plot(data_hist, data_future):
-    sorted_data = np.sort(data_hist)
-    sorted_probability = np.arange(1,len(sorted_data)+1)/len(sorted_data)
-    plt.figure(figsize=(4,3))
-    plt.plot(sorted_probability, sorted_data, marker='o', linestyle='-',
-             color='blue', markersize=0, linewidth=1.5, label='Historical', alpha=0.8)
-    sorted_data = np.sort(data_future)
-    sorted_probability = np.arange(1,len(sorted_data)+1)/len(sorted_data)
-    plt.plot(sorted_probability, sorted_data, marker='o', linestyle='--',
-             color='red', markersize=0, linewidth=1.5, label='Future', alpha=0.8)
-    plt.xlabel('Non-Exceedance Probability')
-    plt.ylabel('Precipitation (mm/day)')
-    plt.legend()
-    plt.grid(True, linestyle='--', alpha=0.3)
-
-make_nep_plot(data_hist=stn_precip_hist['PRCP'], data_future=stn_precip_future['PRCP'])

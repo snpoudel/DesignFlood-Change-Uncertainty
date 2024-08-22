@@ -54,8 +54,6 @@ for grid in grid_coverage: #1
     true_hbv_flow = true_hbv_flow.reset_index(drop=True)
     #read true precipitation
     true_precip = pd.read_csv(f'data/true_precip/true_precip{id}.csv')
-    true_precip = true_precip[365:] #remove the first 365 days
-    true_precip = true_precip.reset_index(drop=True)
 
     for combination in range(10): #2
         #Read real streamflow from interpolated precipitation
@@ -77,8 +75,6 @@ for grid in grid_coverage: #1
             real_lstm_flow = pd.read_csv(f'output/lstm_idw_streamflow/lstm_idw_{id}_coverage{grid}_comb{combination}.csv')
             #read real precipitation
             real_precip = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv')
-            real_precip = real_precip[365:] #remove the first 365 days
-            real_precip = real_precip.reset_index(drop=True)
 
             #now calculate nse, rmse, pbias, kge, hfb for real hbv and hymod streamflow against true hbv streamflow
             #calculate results only for validation period
@@ -109,10 +105,10 @@ for grid in grid_coverage: #1
             hfb_lstm = high_flow_bias(true_hbv_flow['streamflow'][val_pd:], real_lstm_flow['streamflow'][val_pd:])
 
             #for precipitation
-            nse_precip = nse(true_precip['PRECIP'][val_pd:], real_precip['PRECIP'][val_pd:])
-            rmse_precip = rmse(true_precip['PRECIP'][val_pd:], real_precip['PRECIP'][val_pd:])
-            pbias_precip = pbias(true_precip['PRECIP'][val_pd:], real_precip['PRECIP'][val_pd:])
-            kge_precip = kge(true_precip['PRECIP'][val_pd:], real_precip['PRECIP'][val_pd:])
+            nse_precip = nse(true_precip['PRECIP'], real_precip['PRECIP'])
+            rmse_precip = rmse(true_precip['PRECIP'], real_precip['PRECIP'])
+            pbias_precip = pbias(true_precip['PRECIP'], real_precip['PRECIP'])
+            kge_precip = kge(true_precip['PRECIP'], real_precip['PRECIP'])
 
             #save the results in a dataframe
             df_result = pd.DataFrame({'station_id':[id], 'grid':[grid], 'combination':[combination],

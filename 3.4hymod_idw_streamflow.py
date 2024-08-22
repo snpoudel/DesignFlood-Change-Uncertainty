@@ -104,9 +104,10 @@ combination_sets = np.tile(combination_sets, 10)
 grid = station_coverage[rank//10] #select grid coverage based on rank
 combination = combination_sets[rank]
 
+
+#--HISTORICAL OBSERVATION--#
 #Read interpolated precipitation
 precip_in = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv')
-
 #Read temperature era5
 temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
 #filter temperature for the year 2000-2020
@@ -130,4 +131,31 @@ q_sim = np.round(q_sim, 4)
 output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
 #save output dataframe
 output_df.to_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{grid}_comb{combination}.csv')
+
+
+
+
+#--FUTURE OBSERVATION--#
+#Read interpolated precipitation
+precip_in = pd.read_csv(f'data/future/future_idw_precip/future_idw_precip{id}_coverage{grid}_comb{combination}.csv')
+#Read temperature era5
+temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
+#filter temperature for the year 2000-2020
+temp_in = temp_in[temp_in['time'] >= '2000-01-01']
+temp_in = temp_in[temp_in['time'] <= '2020-12-31']
+temp_in = temp_in.reset_index(drop=True)
+#Read latitude
+lat_in_df = lat_basin[lat_basin['STAID'] == id]
+lat_in = lat_in_df['LAT_CENT'].iloc[0]
+
+#Parameters are same as historical
+
+#run hymod model
+q_sim = hymod(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
+q_sim = np.round(q_sim, 4)
+
+#keep result in a dataframe
+output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
+#save output dataframe
+output_df.to_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage{grid}_comb{combination}.csv')
 

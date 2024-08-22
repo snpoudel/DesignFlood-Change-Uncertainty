@@ -63,4 +63,3 @@ for date in precip_keep['DATE'].unique():
 
 #save the basin wise precipitation data to a csv file
 precip_df.to_csv(f'data/true_precip/true_precip{basin_id}.csv', index=False)
-

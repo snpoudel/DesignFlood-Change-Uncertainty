@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=idw-lstm            # Job name
-#SBATCH --output=idw-lstm%j.log       # Output file name (%j expands to jobID)
-#SBATCH --error=idw-lstm%j.log        # Error file name (%j expands to jobID)
+#SBATCH --job-name=idw-prcp            # Job name
+#SBATCH --output=idw-prcp%j.log       # Output file name (%j expands to jobID)
+#SBATCH --error=idw-prcp%j.log        # Error file name (%j expands to jobID)
 #SBATCH --time=06:00:00                 # Time limit (HH:MM:SS)
 #SBATCH --nodes=2                       #5 Number of nodes
 #SBATCH --ntasks=100                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
 #SBATCH --cpus-per-task=1               # Number of CPU cores per task
-#SBATCH --mem=4G                        # Memory per CPU core (adjust as needed)
+#SBATCH --mem=2G                        # Memory per CPU core (adjust as needed)
 #SBATCH --exclusive                     # Exclusive node allocation
 #SBATCH --mail-type=END
 #SBATCH --mail-user=sp2596@cornell.edu
@@ -18,4 +18,4 @@ module load python/3.11.5
 source ~/pyenv-hmodel/bin/activate
 
 # Run your Python script with mpi
-mpirun python3 3.4hymod_idw_streamflow.py
+mpirun python3 2.4idw_gauge_precip_hist_future.py
