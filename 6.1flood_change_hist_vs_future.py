@@ -1,7 +1,6 @@
 #import libraries
 import numpy as np
 import pandas as pd
-import multiprocessing
 from pyextremes import EVA #https://georgebv.github.io/pyextremes/quickstart/
 
 #write a function that takes in a pandas series and returns the extreme values
@@ -42,7 +41,7 @@ basin_id = '01108000'
 #True precipitation
 #read true precipitation
 true_precip = pd.read_csv(f'data/true_precip/true_precip{basin_id}.csv')
-#future_true_precip = pd.read_csv(f'data/future/future_true_precip/future_true_precip{basin_id}.csv')
+future_true_precip = pd.read_csv(f'data/future/future_true_precip/future_true_precip{basin_id}.csv')
 
 #HBV true model
 #read the streamflow data
@@ -75,7 +74,9 @@ for grid in grid_list:
         #--HISTORICAL DATA--#
         #Interpolated precipitation
         idw_precip = pd.read_csv(f'data/idw_precip/idw_precip{basin_id}_coverage{grid}_comb{comb}.csv')
+        future_idw_precip = pd.read_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_coverage{grid}_comb{comb}.csv')
         precip_rmse = np.sqrt(np.mean((true_precip['PRECIP'] - idw_precip['PRECIP'])**2)) #calculate the rmse
+        precip_rmse_future = np.sqrt(np.mean((future_true_precip['PRECIP'] - future_idw_precip['PRECIP'])**2))
  
         #HBV true model
         #read the streamflow data

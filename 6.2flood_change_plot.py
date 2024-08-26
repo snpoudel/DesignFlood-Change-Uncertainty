@@ -41,7 +41,7 @@ plt.clf()
 
 
 ##--Future flood--##
-flood_future = flood[flood['model'].isin(['HBV True', 'HBV True Future', 'HBV Recalib Future', 'Hymod Future', "LSTM Future"])]
+flood_future = flood[flood['model'].isin([ 'HBV True Future', 'HBV Recalib Future', 'Hymod Future', "LSTM Future"])]
 fig, axs = plt.subplots(2,1, figsize=(6,6), sharex=True)
 sns.scatterplot(data=flood_future, x='precip_rmse', y='20yr_flood', hue='model', alpha=0.6, ax =axs[0])
 for variable in flood_future['model'].unique():

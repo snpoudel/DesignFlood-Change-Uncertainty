@@ -6,17 +6,23 @@ import matplotlib.pyplot as plt
 def make_nep_plot(data_hist, data_future):
     sorted_data = np.sort(data_hist)
     sorted_probability = np.arange(1,len(sorted_data)+1)/len(sorted_data)
-    plt.figure(figsize=(6,4))
-    plt.plot(sorted_probability, sorted_data, marker='o', linestyle='-',
-             color='red', markersize=0, linewidth=3, label='Historical', alpha=0.8)
+    plt.figure(figsize=(3,2))
+    plt.plot(sorted_probability, sorted_data, marker='o', linestyle='-.',
+             color='blue', markersize=0, linewidth=2, label='Historical', alpha=0.8)
     sorted_data = np.sort(data_future)
     sorted_probability = np.arange(1,len(sorted_data)+1)/len(sorted_data)
-    plt.plot(sorted_probability, sorted_data, marker='o', linestyle='--',
-             color='grey', markersize=0, linewidth=3, label='Future', alpha=0.8)
+    #make y axis log scale that works of 0 values
+    #plt.yscale('symlog', linthresh=0.1)
+    plt.yscale('log')
+    plt.plot(sorted_probability, sorted_data, marker='o', linestyle='-',
+             color='red', markersize=0, linewidth=2, label='Future', alpha=0.8)
+    plt.ylim(0.001,300)
+    plt.xlim(0.25,1.05)
     plt.xlabel('Non-Exceedance Probability')
-    plt.ylabel('Mean Areal Precipitation (mm/day)')
+    plt.ylabel('MAP (mm/day)')
     plt.legend()
     plt.grid(True, linestyle='--', alpha=0.3)
+    plt.tight_layout()
 
 #Load data
 df_hist = pd.read_csv("data/true_precip/true_precip01108000.csv")
@@ -26,4 +32,4 @@ df_future = pd.read_csv('data/future/future_true_precip/future_true_precip011080
 make_nep_plot(data_hist=df_hist['PRECIP'], data_future=df_future['PRECIP'])
 
 #Save the plot
-plt.savefig('output/nep_plot.png', dpi=300)
+plt.savefig('output/nep_plot_logscale.png', dpi=300)
