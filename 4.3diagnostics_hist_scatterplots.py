@@ -31,24 +31,25 @@ rmse_melt = pd.melt(df, id_vars=['RMSE(PRECIP)'],
              value_vars=['RMSE(HBV)', 'RMSE(RECAL_HBV)', 'RMSE(HYMOD)', 'RMSE(LSTM)'])
 
 # Plot scatter points
-fig,axs = plt.subplots(3,1,figsize=(6, 6),sharex=True)
+fig,axs = plt.subplots(3,1,figsize=(5, 6),sharex=True)
 sns.scatterplot(data=nse_melt, x='RMSE(PRECIP)', y='value', hue='variable', alpha=0.6, ax=axs[0])
 # Compute and plot LOWESS lines
 for variable in nse_melt['variable'].unique():
     subset = nse_melt[nse_melt['variable'] == variable]
-    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=1)  # Adjust frac as needed
-    axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=4)
+    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.8)  # Adjust frac as needed
+    axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
 axs[0].set_xlabel('Precipitation RMSE (mm/day)')
 axs[0].set_ylabel('Streamflow NSE')
 axs[0].grid(True, linestyle ='--', alpha = 0.5)
-axs[0].get_legend().remove()
-
+axs[0].legend(title='', loc='best')
+new_labels = ['HBV', 'RECALIBRATED HBV', 'HYMOD', 'LSTM']
+for t, l in zip(axs[0].get_legend().texts, new_labels):t.set_text(l)
 sns.scatterplot(data=kge_melt, x='RMSE(PRECIP)', y='value', hue='variable', alpha=0.6,ax=axs[1])
 # Compute and plot LOWESS lines
 for variable in kge_melt['variable'].unique():
     subset = kge_melt[kge_melt['variable'] == variable]
-    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=1)  # Adjust frac as needed
-    axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=4)
+    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.8)  # Adjust frac as needed
+    axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
 # Customize the plot
 axs[1].set_xlabel('Precipitation RMSE (mm/day)')
 axs[1].set_ylabel('Streamflow KGE')
@@ -59,15 +60,13 @@ sns.scatterplot(data=rmse_melt, x='RMSE(PRECIP)', y='value', hue='variable', alp
 # Compute and plot LOWESS lines
 for variable in rmse_melt['variable'].unique():
     subset = rmse_melt[rmse_melt['variable'] == variable]
-    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=1)  # Adjust frac as needed
-    axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=4)
+    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.8)  # Adjust frac as needed
+    axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
 # Customize the plot
 axs[2].set_xlabel('Precipitation RMSE (mm/day)')
 axs[2].set_ylabel('Streamflow RMSE')
 axs[2].grid(True, linestyle ='--', alpha = 0.5)
-axs[2].legend(title='', loc='best')
-new_labels = ['HBV', 'RECALIBRATED HBV', 'HYMOD', 'LSTM']
-for t, l in zip(axs[2].get_legend().texts, new_labels):t.set_text(l)
+axs[2].get_legend().remove()
 #save the plot
 plt.tight_layout()
 plt.savefig('output/scatterplot_nse_kge_rmse.png', dpi=300)
@@ -84,12 +83,12 @@ hfb_melt = pd.melt(df, id_vars=['RMSE(PRECIP)'],
 
 fig,axs = plt.subplots(2,1, figsize=(6, 6), sharex=True)
 #Plot scatter points
-sns.scatterplot(data=bias_melt, x='RMSE(PRECIP)', y='value', hue='variable', alpha=0.6, ax=axs[0])
+sns.scatterplot(data=bias_melt, x='RMSE(PRECIP)', y='value', hue='variable', alpha=0.5, ax=axs[0])
 # Compute and plot LOWESS lines
 for variable in bias_melt['variable'].unique():
     subset = bias_melt[bias_melt['variable'] == variable]
-    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.8)  # Adjust frac as needed
-    axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=4)
+    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.5)  # Adjust frac as needed
+    axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
 # Customize the plot
 axs[0].set_xlabel('Precipitation RMSE (mm/day)')
 axs[0].set_ylabel('Streamflow Bias (%)')
@@ -100,8 +99,8 @@ sns.scatterplot(data=hfb_melt, x='RMSE(PRECIP)', y='value', hue='variable', alph
 # Compute and plot LOWESS lines
 for variable in hfb_melt['variable'].unique():
     subset = hfb_melt[hfb_melt['variable'] == variable]
-    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.8)  # Adjust frac as needed
-    axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=4)
+    lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.5)  # Adjust frac as needed
+    axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
 # Customize the plot
 axs[1].set_xlabel('Precipitation RMSE (mm/day)')
 axs[1].set_ylabel('Streamflow HFB (%)')

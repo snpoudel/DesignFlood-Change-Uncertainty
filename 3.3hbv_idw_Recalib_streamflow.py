@@ -57,7 +57,7 @@ def calibNSE(station_id, grid, combination):
                         [1,10]]) #maxbas
 
     algorithm_param = {
-        'max_num_iteration': 100,              # Generations, higher is better, but requires more computational time
+        'max_num_iteration': 100,              #100 Generations, higher is better, but requires more computational time
         'max_iteration_without_improv': None,   # Stopping criterion for lack of improvement
         'population_size': 200,                 # Number of parameter-sets in a single iteration/generation(to start with population 10 times the number of parameters should be fine!)
         'parents_portion': 0.3,                 # Portion of new generation population filled by previous population
@@ -119,6 +119,10 @@ lat_in = lat_in_df['LAT_CENT'].iloc[0]
 
 #Read calibrated hbv parameters
 params_in = calibNSE(id, grid, combination)
+
+#save parameters as a csv file
+params_in.to_csv(f'output/parameters/hbv_recalib/params{id}_grid{grid}_comb{combination}.csv')
+
 params_in = params_in.iloc[0,:-2] #remove basin ID column
 params_in = np.array(params_in)
 

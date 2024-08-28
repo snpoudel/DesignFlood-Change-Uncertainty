@@ -120,6 +120,9 @@ lat_in = lat_in_df['LAT_CENT'].iloc[0]
 
 #Read calibrated hbv parameters
 params_in = calibNSE(id, grid, combination)
+
+#save parameters
+params_in.to_csv(f'output/parameters/hymod/params{id}_grid{grid}_comb{combination}.csv')
 params_in = params_in.iloc[0,:-2] #remove basin ID column
 params_in = np.array(params_in)
 
