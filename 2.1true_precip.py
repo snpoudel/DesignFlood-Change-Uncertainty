@@ -1,17 +1,27 @@
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+from mpi4py import MPI
 
+#set up MPI communicator
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+
+#rad filtered basin with at least 2 gauges
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
+basin_id = basin_list['basin_id'][rank] #run 32 processess
 #basid id
-basin_id = '01108000'
+#basin_id = '01108000'
 #read basin shapefile
+
 basin_shapefile = gpd.read_file(f'data/prms_drainage_area_shapes/model_{basin_id}_nhru.shp')
 #convert the basin shapefile to the same coordinate system as the stations
 basin_shapefile = basin_shapefile.to_crs(epsg=4326)
 
 ##Divide the basin into meshgrid of size 0.125 degree
 #find the bounding box of the basin
-grid_size = 0.03125
+grid_size = 0.03125 #0.03125
 minx, miny, maxx, maxy = basin_shapefile.total_bounds
 #create meshgrid
 x = np.arange(minx, maxx, grid_size)
