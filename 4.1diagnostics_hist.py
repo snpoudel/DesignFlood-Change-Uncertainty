@@ -34,8 +34,9 @@ def kge(q_obs, q_sim):
 def high_flow_bias(q_obs, q_sim):
     q_obs = np.array(q_obs)
     q_sim = np.array(q_sim)
-    q_obs_995 = np.percentile(q_obs, 99.9)
-    indices_q995 = np.where(q_obs > q_obs_995)
+    q_obs_995_value = np.percentile(q_obs, 99.9)
+    indices_q995 = np.where(q_obs > q_obs_995_value)
+    q_obs_995 = q_obs[indices_q995]
     q_sim_995 = q_sim[indices_q995]
     hfb = (np.sum(q_obs_995 - q_sim_995) / np.sum(q_obs_995)) * 100
     return hfb
@@ -43,7 +44,7 @@ def high_flow_bias(q_obs, q_sim):
 
 ###---step 02---###
 id = '01108000'
-grid_coverage = np.array([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+grid_coverage = np.arange(15)
 
 #Loop through each basin
 df_total = pd.DataFrame() #create an empty dataframe to store the results
@@ -55,7 +56,7 @@ for grid in grid_coverage: #1
     #read true precipitation
     true_precip = pd.read_csv(f'data/true_precip/true_precip{id}.csv')
 
-    for combination in range(10): #2
+    for combination in range(5): #2
         #Read real streamflow from interpolated precipitation
         file_path = f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv'
         if os.path.exists(file_path):
