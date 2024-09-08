@@ -11,8 +11,8 @@ id = '01108000'
 true_precip = pd.read_csv(f'data/true_precip/true_precip{id}.csv')
 true_precip['time'] = pd.to_datetime(true_precip['DATE'])
 #read corresponding interpolated precip
-interpol_precip2 = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage0.05_comb0.csv')
-interpol_precip8 = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage0.8_comb0.csv')
+interpol_precip2 = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage1_comb0.csv')
+interpol_precip8 = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage10_comb0.csv')
 
 #plot window
 plot_start = 2165 #start at least from second year to match with LSTM streamflow
@@ -33,8 +33,8 @@ axes[0].set_ylabel("Precipitation(mm/day)")
 true_streamflow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
 true_streamflow['date'] = pd.to_datetime(true_streamflow['date'])
 #read corresponding interpolated hbv streamflow
-interpol_streamflow2 = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage0.05_comb0.csv')
-interpol_streamflow8 = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage0.8_comb0.csv')
+interpol_streamflow2 = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage1_comb0.csv')
+interpol_streamflow8 = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage10_comb0.csv')
 
 #plot the true and interpolated streamflow
 axes[1].plot(true_streamflow['date'][plot_start:plot_end], true_streamflow['streamflow'][plot_start:plot_end])
@@ -46,8 +46,8 @@ axes[1].set_ylabel("HBV flow(mm/day)")
 
 #########--TEST FOR HYMOD STREAMFLOW--#########
 #read corresponding interpolated hymod streamflow
-interpol_streamflow2 = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage0.05_comb0.csv')
-interpol_streamflow8 = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage0.8_comb0.csv')
+interpol_streamflow2 = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage1_comb0.csv')
+interpol_streamflow8 = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage10_comb0.csv')
 
 #plot the true and interpolated streamflow
 axes[2].plot(true_streamflow['date'][plot_start:plot_end], true_streamflow['streamflow'][plot_start:plot_end])
@@ -59,8 +59,8 @@ axes[2].set_ylabel("HYMOD flow(mm/day)")
 
 #########--TEST FOR LSTM STREAMFLOW--#########
 #read corresponding interpolated lstm streamflow
-interpol_streamflow2 = pd.read_csv(f'output/lstm_idw_streamflow/lstm_idw_{id}_coverage0.05_comb0.csv')
-interpol_streamflow8 = pd.read_csv(f'output/lstm_idw_streamflow/lstm_idw_{id}_coverage0.8_comb0.csv')
+interpol_streamflow2 = pd.read_csv(f'output/lstm_idw_streamflow/lstm_idw_{id}_coverage1_comb0.csv')
+interpol_streamflow8 = pd.read_csv(f'output/lstm_idw_streamflow/lstm_idw_{id}_coverage10_comb0.csv')
 
 #plot the true and interpolated streamflow
 axes[3].plot(true_streamflow['date'][plot_start:plot_end], true_streamflow['streamflow'][plot_start:plot_end])
