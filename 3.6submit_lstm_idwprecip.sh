@@ -4,7 +4,7 @@
 #SBATCH --error=idw-lstm%j.log        # Error file name (%j expands to jobID)
 #SBATCH --time=06:00:00                 # Time limit (HH:MM:SS)
 #SBATCH --nodes=1                       #5 Number of nodes
-#SBATCH --ntasks=10                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
+#SBATCH --ntasks=15                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
 #SBATCH --cpus-per-task=1               # Number of CPU cores per task
 #SBATCH --mem=16G                        # Memory per CPU core (adjust as needed)
 #SBATCH --exclusive                     # Exclusive node allocation
