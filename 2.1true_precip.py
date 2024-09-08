@@ -21,7 +21,7 @@ basin_shapefile = basin_shapefile.to_crs(epsg=4326)
 
 ##Divide the basin into meshgrid of size 0.125 degree
 #find the bounding box of the basin
-grid_size = 0.03125 #0.03125
+grid_size = 0.0625 #0.03125
 minx, miny, maxx, maxy = basin_shapefile.total_bounds
 #create meshgrid
 x = np.arange(minx, maxx, grid_size)
@@ -47,8 +47,12 @@ precip_keep = precip_all_stations[precip_all_stations['STATION'].isin(stn['id'])
 
 #loop through each day, calculate inverse distance weighted precipitation for each grid point in the basin
 precip_df = pd.DataFrame() 
-for date in precip_keep['DATE'].unique():
+unique_dates = precip_keep['DATE'].unique()
+unique_dates = np.array([np.datetime64(date) for date in unique_dates])
+unique_dates = np.sort(unique_dates)
+for date in unique_dates:
     #get the precipitation data for that day
+    date = str(date)
     precip_day = precip_keep[precip_keep['DATE'] == date].reset_index(drop=True)
     precip_grid = [] #store the precipitation data for each grid point
     #loop through each grid point in the basin
