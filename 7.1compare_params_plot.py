@@ -7,7 +7,7 @@ true_param = pd.read_csv('data/true_hbv_calibrated_parameters.csv', dtype={'stat
 true_param = true_param[true_param['station_id']=='01108000']
 true_param['tag'] = 'HBV True'
 
-grid = 0.9
+grid = 10
 #read hbv recalibrated parameters
 hbv_params = pd.DataFrame()
 for comb in np.arange(10):
