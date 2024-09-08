@@ -1,21 +1,23 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 #write a function to calculate percentage high flow bias
 def hfb(q_obs, q_sim):
     q_obs = np.array(q_obs)
     q_sim = np.array(q_sim)
-    q_obs_995 = np.percentile(q_obs, 99.9)
-    indices_q995 = np.where(q_obs > q_obs_995)
+    q_obs_995_value = np.percentile(q_obs, 99.9)
+    indices_q995 = np.where(q_obs > q_obs_995_value)
+    q_obs_995 = q_obs[indices_q995]
     q_sim_995 = q_sim[indices_q995]
     hfb = (np.sum(q_obs_995 - q_sim_995) / np.sum(q_obs_995)) * 100
     return hfb
 
 #read data
 basin_id = '01108000'
-grid = 0.4
-comb = 2
+grid = 10
+comb = 1
 true_precip = pd.read_csv(f'data/true_precip/true_precip{basin_id}.csv')
 idw_precip = pd.read_csv(f'data/idw_precip/idw_precip{basin_id}_coverage{grid}_comb{comb}.csv')
 precip_rmse = np.sqrt(np.mean((true_precip['PRECIP'] - idw_precip['PRECIP'])**2)) #calculate the rmse
@@ -52,16 +54,18 @@ plt.legend()
 plt.ylabel('Annual maximum streamflow')
 plt.xlabel('Year')
 plt.title(f'Precip RMSE: {precip_rmse}')
-plt.grid(True, linestyle='--', alpha=0.8)
+plt.grid(True, linestyle='--', alpha=0.5)
 plt.show()
 
-plt.plot(hbv_truth['streamflow'][1000:1200], label='truth')
-plt.plot(hbv_real['streamflow'][1000:1200], label = f'HBV, hfb={hbvreal_hfb}')
-plt.plot(hbv_recalibrated['streamflow'][1000:1200], label=f'HBV Recal, hfb={hbvrecal_hfb}')
-plt.plot(hymod['streamflow'][1000:1200], label=f'HYMOD, hfb={hymod_hfb}')
+plt.plot(hbv_truth['streamflow'][3500:3800], label='truth')
+plt.plot(hbv_real['streamflow'][3500:3800], label = f'HBV, hfb={hbvreal_hfb}')
+plt.plot(hbv_recalibrated['streamflow'][3500:3800], label=f'HBV Recal, hfb={hbvrecal_hfb}')
+plt.plot(hymod['streamflow'][3500:3800], label=f'HYMOD, hfb={hymod_hfb}')
 plt.legend()
 plt.ylabel('streamflow')
 plt.xlabel('Time')
 plt.title(f'Precip RMSE: {precip_rmse}')
-plt.grid(True, linestyle='--', alpha=0.8)
+plt.grid(True, linestyle='--', alpha=0.5)
 plt.show()
+
+
