@@ -32,8 +32,7 @@ seaplot = sns.catplot(
             sharey=False,  legend_out=True,
             height = 2, aspect = 5, #aspect times height gives width of each facet
             ) 
-seaplot.set_axis_labels('Percentage of gauging stations used', "") #set x and y labels
-seaplot.set_xticklabels(['5%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%']) #set xtick labels
+seaplot.set_axis_labels('Number gauging stations used', "") #set x and y labels
 seaplot.legend.set_title("Model") #set legend title
 seaplot.set_titles("") #remove default titles
 for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of all axes in facetgrid/catplot
