@@ -2,18 +2,26 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
-def run_lstm_model(lstm_dataset, new_data):
+
+
+def run_lstm_model(lstm_dataset, lstm_train_dataset, lstm_test_dataset, lstm_future_dataset, chunk_size):
+    '''
+    lstm_dataset: complete dataset to train the model
+    lstm_train_dataset: dataset to train the model
+    lstm_test_dataset: dataset to test the model
+    lstm_future_dataset: future/climate data on which trained model will be applied
+    chunk_size: size/nrows of training dataset for single basin
+    '''
     #Hyperparameters
-    input_size = 55 #number of features in input at a time step
-    hidden_size = 256 #64 #number of features in the hidden state
+    input_size = lstm_train_dataset.shape[1] -1 #53number of features in input at a time step
+    hidden_size = 256 #256 #number of features in the hidden state
     num_layers = 1 #number of lstm blocks (having more layers isn't doing much improvements)
     output_size = 1 #size of prediction/output
     sequence_length = 365 #length of each sequence
-    num_epochs = 30 # 100#number of iterations of complete dataset
+    num_epochs = 30 # 30#number of iterations of complete dataset
     batch_size = 128 #128 #number of samples in one batch
     learning_rate = 0.005 # #learning rate
     dropout_prob = 0.4 #dropout probability
@@ -51,11 +59,10 @@ def run_lstm_model(lstm_dataset, new_data):
 
 
     #Load and preprocess data
-    data = lstm_dataset #loop through and merge the datasets here!!!
-    chunk_size = 10
+    data = lstm_train_dataset #loop through and merge the datasets here!!!
 
     features = data.iloc[:, :-1].values # 2d array of features, everything is features exccept last column
-    labels = data.iloc[:, 3].values # 1d array of labels, last column is label
+    labels = data.iloc[:, -1].values # 1d array of labels, last column is label
 
     #normalize features
     scaler = StandardScaler() #standardize features by removing the mean and scaling to unit variance
@@ -77,8 +84,7 @@ def run_lstm_model(lstm_dataset, new_data):
     targets = torch.tensor(targets, dtype=torch.float32).view(-1,1) #convert targets to tensor and reshape it to 2d tensor 
 
     #create train and test sets and data loaders
-    dataset = torch.utils.data.TensorDataset(sequences, targets) #create a dataset from sequences and targets 
-    train_dataset,_ = train_test_split(dataset, test_size=0.35) #split the dataset into train and test sets
+    train_dataset = torch.utils.data.TensorDataset(sequences, targets) #create a dataset from sequences and targets 
 
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True) #create a data loader for training data
     #test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False) #create a data loader for test data
@@ -108,16 +114,11 @@ def run_lstm_model(lstm_dataset, new_data):
                 #print(f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item()}')
 
 
-    #Make predictions using lstm model
-    with torch.no_grad(): #no need to calculate gradients
-        model_output = model(sequences) #make predictions using lstm model
-        model_output = model_output.cpu() #convert model output to cpu
-        model_output = model_output.numpy() #convert model output to numpy array
-          
 
-    #Make predictions for new data using lstm model
-    data = new_data
+    #Make predictions for for the complete lstm dataset using trained model
+    data = lstm_dataset
     features = data.iloc[:, :-1].values # 2d array of features, everything is features exccept last column
+    labels = data.iloc[:, -1].values
     #normalize features
     scaler = StandardScaler() #standardize features by removing the mean and scaling to unit variance
     features = scaler.fit_transform(features) #fit to data, then transform it
@@ -126,8 +127,24 @@ def run_lstm_model(lstm_dataset, new_data):
     #convert data to pytorch tensors 
     sequences = torch.tensor(sequences, dtype=torch.float32) #convert sequences to tensor
     with torch.no_grad():
-        new_model_output = model(sequences)
-        new_model_output = new_model_output.cpu()
-        new_model_output = new_model_output.numpy()
+        total_model_output = model(sequences)
+        total_model_output = total_model_output.cpu()
+        total_model_output = total_model_output.numpy()      
 
-    return model_output, new_model_output #return output of lstm model function
+    #Make predictions for new data using lstm model
+    data = lstm_future_dataset
+    features = data.iloc[:, :-1].values # 2d array of features, everything is features exccept last column
+    labels = data.iloc[:, -1].values
+    #normalize features
+    scaler = StandardScaler() #standardize features by removing the mean and scaling to unit variance
+    features = scaler.fit_transform(features) #fit to data, then transform it
+    #create sequences
+    sequences,_ = create_sequences(features, labels, sequence_length) #create sequences and targets from features and labels
+    #convert data to pytorch tensors 
+    sequences = torch.tensor(sequences, dtype=torch.float32) #convert sequences to tensor
+    with torch.no_grad():
+        future_model_output = model(sequences)
+        future_model_output = future_model_output.cpu()
+        future_model_output = future_model_output.numpy()
+
+    return total_model_output, future_model_output #return output of lstm model function
