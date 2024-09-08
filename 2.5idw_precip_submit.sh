@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=idw-prcp            # Job name
+#SBATCH --job-name=idwprcp            # Job name
 #SBATCH --output=idw-prcp%j.log       # Output file name (%j expands to jobID)
 #SBATCH --error=idw-prcp%j.log        # Error file name (%j expands to jobID)
-#SBATCH --time=06:00:00                 # Time limit (HH:MM:SS)
+#SBATCH --time=24:00:00                 # Time limit (HH:MM:SS)
 #SBATCH --nodes=2                       #5 Number of nodes
-#SBATCH --ntasks=100                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
+#SBATCH --ntasks=81                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
 #SBATCH --cpus-per-task=1               # Number of CPU cores per task
 #SBATCH --mem=2G                        # Memory per CPU core (adjust as needed)
 #SBATCH --exclusive                     # Exclusive node allocation
