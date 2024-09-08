@@ -1,6 +1,7 @@
 #load libraries
 import numpy as np
 import pandas as pd
+import os
 from geneticalgorithm import geneticalgorithm as ga
 from hbv_model import hbv
 from mpi4py import MPI
@@ -59,7 +60,7 @@ def calibNSE(station_id, grid, combination):
     algorithm_param = {
         'max_num_iteration': 100,              #100 Generations, higher is better, but requires more computational time
         'max_iteration_without_improv': None,   # Stopping criterion for lack of improvement
-        'population_size': 200,                 # Number of parameter-sets in a single iteration/generation(to start with population 10 times the number of parameters should be fine!)
+        'population_size': 200,                 #200 Number of parameter-sets in a single iteration/generation(to start with population 10 times the number of parameters should be fine!)
         'parents_portion': 0.3,                 # Portion of new generation population filled by previous population
         'elit_ratio': 0.01,                     # Portion of the best individuals preserved unchanged
         'crossover_probability': 0.3,           # Chance of existing solution passing its characteristics to new trial solution
@@ -94,68 +95,70 @@ def calibNSE(station_id, grid, combination):
 
 
 #basin id
-id = '01108000'
-#read the list of basin ID with centriod latitude
+#id = '01108000'
 lat_basin = pd.read_csv('data/basinID_withLatLon.csv', dtype={'STAID':str})
+
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
+id = basin_list['basin_id'][rank//15] #15 is number of combination we're sampling
+
 #generate sets of precipitation dataset with different gridded data coverage and different combinatoin of grids coverage
-station_coverage = np.array([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-combination_sets = np.arange(10)
-combination_sets = np.tile(combination_sets, 10)
+station_coverage = np.arange(15)
+station_coverage_tile = np.tile(station_coverage, 32) #32 is total basins were using
+grid = station_coverage_tile[rank] #select grid coverage based on rank
+for combination in np.arange(15):
+    file_path = f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv'
+    if os.path.exists(file_path):
+        #---HISTORICAL OBSERVATION---#
+        precip_in = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv')
+        #Read temperature era5
+        temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
+        #filter temperature for the year 2000-2020
+        temp_in = temp_in[temp_in['time'] >= '2000-01-01']
+        temp_in = temp_in[temp_in['time'] <= '2020-12-31']
+        temp_in = temp_in.reset_index(drop=True)
+        #Read latitude
+        lat_in_df = lat_basin[lat_basin['STAID'] == id]
+        lat_in = lat_in_df['LAT_CENT'].iloc[0]
 
-grid = station_coverage[rank//10] #select grid coverage based on rank
-combination = combination_sets[rank]
+        #Read calibrated hbv parameters
+        params_in = calibNSE(id, grid, combination)
 
-#---HISTORICAL OBSERVATION---#
-precip_in = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv')
-#Read temperature era5
-temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
-#filter temperature for the year 2000-2020
-temp_in = temp_in[temp_in['time'] >= '2000-01-01']
-temp_in = temp_in[temp_in['time'] <= '2020-12-31']
-temp_in = temp_in.reset_index(drop=True)
-#Read latitude
-lat_in_df = lat_basin[lat_basin['STAID'] == id]
-lat_in = lat_in_df['LAT_CENT'].iloc[0]
+        #save parameters as a csv file
+        params_in.to_csv(f'output/parameters/hbv_recalib/params{id}_grid{grid}_comb{combination}.csv')
 
-#Read calibrated hbv parameters
-params_in = calibNSE(id, grid, combination)
+        params_in = params_in.iloc[0,:-2] #remove basin ID column
+        params_in = np.array(params_in)
 
-#save parameters as a csv file
-params_in.to_csv(f'output/parameters/hbv_recalib/params{id}_grid{grid}_comb{combination}.csv')
+        #run hbv model
+        q_sim = hbv(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
+        q_sim = np.round(q_sim, 4)
 
-params_in = params_in.iloc[0,:-2] #remove basin ID column
-params_in = np.array(params_in)
-
-#run hbv model
-q_sim = hbv(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
-q_sim = np.round(q_sim, 4)
-
-#keep result in a dataframe
-output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
-#save output dataframe
-output_df.to_csv(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv')
-
+        #keep result in a dataframe
+        output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
+        #save output dataframe
+        output_df.to_csv(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv')
 
 
-#---FUTURE OBSERVATION---#
-precip_in = pd.read_csv(f'data/future/future_idw_precip/future_idw_precip{id}_coverage{grid}_comb{combination}.csv')
-#Read temperature era5
-temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
-#filter temperature for the year 2000-2020
-temp_in = temp_in[temp_in['time'] >= '2000-01-01']
-temp_in = temp_in[temp_in['time'] <= '2020-12-31']
-temp_in = temp_in.reset_index(drop=True)
-#Read latitude
-lat_in_df = lat_basin[lat_basin['STAID'] == id]
-lat_in = lat_in_df['LAT_CENT'].iloc[0]
 
-#Calibrated parameters are same as historical
+        #---FUTURE OBSERVATION---#
+        precip_in = pd.read_csv(f'data/future/future_idw_precip/future_idw_precip{id}_coverage{grid}_comb{combination}.csv')
+        #Read temperature era5
+        temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
+        #filter temperature for the year 2000-2020
+        temp_in = temp_in[temp_in['time'] >= '2000-01-01']
+        temp_in = temp_in[temp_in['time'] <= '2020-12-31']
+        temp_in = temp_in.reset_index(drop=True)
+        #Read latitude
+        lat_in_df = lat_basin[lat_basin['STAID'] == id]
+        lat_in = lat_in_df['LAT_CENT'].iloc[0]
 
-#run hbv model
-q_sim = hbv(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
-q_sim = np.round(q_sim, 4)
+        #Calibrated parameters are same as historical
 
-#keep result in a dataframe
-output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
-#save output dataframe
-output_df.to_csv(f'output/future/hbv_idw_recalib_future_streamflow/hbv_idw_recalib_future_streamflow{id}_coverage{grid}_comb{combination}.csv')
+        #run hbv model
+        q_sim = hbv(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
+        q_sim = np.round(q_sim, 4)
+
+        #keep result in a dataframe
+        output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
+        #save output dataframe
+        output_df.to_csv(f'output/future/hbv_idw_recalib_future_streamflow/hbv_idw_recalib_future_streamflow{id}_coverage{grid}_comb{combination}.csv')

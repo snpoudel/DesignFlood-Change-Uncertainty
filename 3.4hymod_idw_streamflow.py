@@ -1,6 +1,7 @@
 #load libraries
 import numpy as np
 import pandas as pd
+import os
 from geneticalgorithm import geneticalgorithm as ga
 from hymod_model import hymod
 from mpi4py import MPI
@@ -93,72 +94,72 @@ def calibNSE(station_id, grid, combination):
 
 
 #basin id
-id = '01108000'
-#read the list of basin ID with centriod latitude
+#id = '01108000'
 lat_basin = pd.read_csv('data/basinID_withLatLon.csv', dtype={'STAID':str})
+
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
+id = basin_list['basin_id'][rank//15] #15 is number of combination we're sampling
+
 #generate sets of precipitation dataset with different gridded data coverage and different combinatoin of grids coverage
-station_coverage = np.array([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-combination_sets = np.arange(10)
-combination_sets = np.tile(combination_sets, 10)
+station_coverage = np.arange(15)
+station_coverage_tile = np.tile(station_coverage, 32) #32 is total basins were using
+grid = station_coverage_tile[rank] #select grid coverage based on rank
 
-grid = station_coverage[rank//10] #select grid coverage based on rank
-combination = combination_sets[rank]
+for combination in np.arange(15):
+    file_path = f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv'
+    if os.path.exists(file_path):
+        #--HISTORICAL OBSERVATION--#
+        #Read interpolated precipitation
+        precip_in = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv')
+        #Read temperature era5
+        temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
+        #filter temperature for the year 2000-2020
+        temp_in = temp_in[temp_in['time'] >= '2000-01-01']
+        temp_in = temp_in[temp_in['time'] <= '2020-12-31']
+        temp_in = temp_in.reset_index(drop=True)
+        #Read latitude
+        lat_in_df = lat_basin[lat_basin['STAID'] == id]
+        lat_in = lat_in_df['LAT_CENT'].iloc[0]
 
+        #Read calibrated hbv parameters
+        params_in = calibNSE(id, grid, combination)
 
-#--HISTORICAL OBSERVATION--#
-#Read interpolated precipitation
-precip_in = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv')
-#Read temperature era5
-temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
-#filter temperature for the year 2000-2020
-temp_in = temp_in[temp_in['time'] >= '2000-01-01']
-temp_in = temp_in[temp_in['time'] <= '2020-12-31']
-temp_in = temp_in.reset_index(drop=True)
-#Read latitude
-lat_in_df = lat_basin[lat_basin['STAID'] == id]
-lat_in = lat_in_df['LAT_CENT'].iloc[0]
+        #save parameters
+        params_in.to_csv(f'output/parameters/hymod/params{id}_grid{grid}_comb{combination}.csv')
+        params_in = params_in.iloc[0,:-2] #remove basin ID column
+        params_in = np.array(params_in)
 
-#Read calibrated hbv parameters
-params_in = calibNSE(id, grid, combination)
+        #run hbv model
+        q_sim = hymod(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
+        q_sim = np.round(q_sim, 4)
 
-#save parameters
-params_in.to_csv(f'output/parameters/hymod/params{id}_grid{grid}_comb{combination}.csv')
-params_in = params_in.iloc[0,:-2] #remove basin ID column
-params_in = np.array(params_in)
-
-#run hbv model
-q_sim = hymod(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
-q_sim = np.round(q_sim, 4)
-
-#keep result in a dataframe
-output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
-#save output dataframe
-output_df.to_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{grid}_comb{combination}.csv')
-
+        #keep result in a dataframe
+        output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
+        #save output dataframe
+        output_df.to_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{grid}_comb{combination}.csv')
 
 
+        #--FUTURE OBSERVATION--#
+        #Read interpolated precipitation
+        precip_in = pd.read_csv(f'data/future/future_idw_precip/future_idw_precip{id}_coverage{grid}_comb{combination}.csv')
+        #Read temperature era5
+        temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
+        #filter temperature for the year 2000-2020
+        temp_in = temp_in[temp_in['time'] >= '2000-01-01']
+        temp_in = temp_in[temp_in['time'] <= '2020-12-31']
+        temp_in = temp_in.reset_index(drop=True)
+        #Read latitude
+        lat_in_df = lat_basin[lat_basin['STAID'] == id]
+        lat_in = lat_in_df['LAT_CENT'].iloc[0]
 
-#--FUTURE OBSERVATION--#
-#Read interpolated precipitation
-precip_in = pd.read_csv(f'data/future/future_idw_precip/future_idw_precip{id}_coverage{grid}_comb{combination}.csv')
-#Read temperature era5
-temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
-#filter temperature for the year 2000-2020
-temp_in = temp_in[temp_in['time'] >= '2000-01-01']
-temp_in = temp_in[temp_in['time'] <= '2020-12-31']
-temp_in = temp_in.reset_index(drop=True)
-#Read latitude
-lat_in_df = lat_basin[lat_basin['STAID'] == id]
-lat_in = lat_in_df['LAT_CENT'].iloc[0]
+        #Parameters are same as historical
 
-#Parameters are same as historical
+        #run hymod model
+        q_sim = hymod(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
+        q_sim = np.round(q_sim, 4)
 
-#run hymod model
-q_sim = hymod(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
-q_sim = np.round(q_sim, 4)
-
-#keep result in a dataframe
-output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
-#save output dataframe
-output_df.to_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage{grid}_comb{combination}.csv')
+        #keep result in a dataframe
+        output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
+        #save output dataframe
+        output_df.to_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage{grid}_comb{combination}.csv')
 
