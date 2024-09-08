@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 def make_nep_plot(data_hist, data_future):
     sorted_data = np.sort(data_hist)
     sorted_probability = np.arange(1,len(sorted_data)+1)/len(sorted_data)
-    plt.figure(figsize=(3,2))
+    plt.figure(figsize=(6,4))
     plt.plot(sorted_probability, sorted_data, marker='o', linestyle='-.',
              color='blue', markersize=0, linewidth=2, label='Historical', alpha=0.8)
     sorted_data = np.sort(data_future)
