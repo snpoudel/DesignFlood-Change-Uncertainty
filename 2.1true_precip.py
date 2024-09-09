@@ -77,3 +77,5 @@ for date in unique_dates:
 
 #save the basin wise precipitation data to a csv file
 precip_df.to_csv(f'data/true_precip/true_precip{basin_id}.csv', index=False)
+#also save the result in interpolated precip folder #99 is true 
+precip_df.to_csv(f'data/idw_precip/idw_precip{basin_id}_coverage99_comb99.csv', index=False)
