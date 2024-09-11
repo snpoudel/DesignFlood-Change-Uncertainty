@@ -23,7 +23,7 @@ fig, axes = plt.subplots(4,1, figsize = (8,8), sharex=True)
 axes[0].plot(true_precip['time'][plot_start:plot_end], true_precip['PRECIP'][plot_start:plot_end])
 axes[0].plot(true_precip['time'][plot_start:plot_end], interpol_precip2['PRECIP'][plot_start:plot_end], linestyle = ':')
 axes[0].plot(true_precip['time'][plot_start:plot_end], interpol_precip8['PRECIP'][plot_start:plot_end], linestyle = '--')
-#axes[0].legend(['true precip', 'interpolated precip (0.05 grids)', 'interpolated precip (0.8 grids)'])
+#axes[0].legend(['true precip', 'interpolated precip (1 gauge)', 'interpolated precip (n-1 gauge)'])
 #axes[0].set_xlabel("Date")
 axes[0].set_ylabel("Precipitation(mm/day)")
 
@@ -66,7 +66,7 @@ interpol_streamflow8 = pd.read_csv(f'output/lstm_idw_streamflow/lstm_idw_{id}_co
 axes[3].plot(true_streamflow['date'][plot_start:plot_end], true_streamflow['streamflow'][plot_start:plot_end])
 axes[3].plot(true_streamflow['date'][plot_start:plot_end], interpol_streamflow2['streamflow'][plot_start-365:plot_end-365], linestyle = ':')
 axes[3].plot(true_streamflow['date'][plot_start:plot_end], interpol_streamflow8['streamflow'][plot_start-365:plot_end-365], linestyle = '--')
-axes[3].legend(['true', f'interpolated with 5% grids', f'interpolated with 80% grids'],
+axes[3].legend(['true', f'interpolated with 1 gauge', f'interpolated with (total-1) gauge'],
                loc='upper left', bbox_to_anchor=(0.35, -0.3))
 axes[3].set_xlabel("Date")
 axes[3].set_ylabel("LSTM flow(mm/day)")
