@@ -8,12 +8,18 @@ import geopandas as gpd
 station_MA = pd.read_csv('data/MA_stations_2000-2020.csv')
 #read basin id
 df_basin_id = pd.read_csv('data/basin_id_withshapefile_new.csv',dtype={'station_id':str})
+#read basin drainage area
+drainage_area = pd.read_csv('data/station_with_elev_and_area.csv',dtype={'STAID':str})
 #empty dataframe to store the number of stations in each basin
 df_num_stations = pd.DataFrame()
 #read a basin shapefile
 
 for basin_id in df_basin_id['station_id']:
-    # basin_id = '01108000'
+    # basin_id = '01177000'
+    # basin_drainage_area = drainage_area[drainage_area['STAID']==basin_id]
+    # basin_drainage_area = basin_drainage_area['DRAIN_SQKM'].values[0]
+
+
     basin_shapefile = gpd.read_file(f'data/prms_drainage_area_shapes/model_{basin_id}_nhru.shp')
     #create another shapefile name basin_shapefile_buffer with 10km buffer
     basin_shapefile_buffer = basin_shapefile.copy()
@@ -30,15 +36,16 @@ for basin_id in df_basin_id['station_id']:
     stn_MA = stn_MA.reset_index(drop=True)
 
     # ###plot the stations and the basin
-    # fig, ax = plt.subplots(figsize=(5,5))
+    # fig, ax = plt.subplots(figsize=(6,6))
     # basin_shapefile.plot(ax=ax)
-    # stn_MA.plot(ax=ax,color='red', markersize=50, label='Gauging Station', marker='x')
+    # stn_MA.plot(ax=ax,color='red', markersize=50, marker='x',
+    #              label=f'Gauging Station (n={len(stn_MA)})\nDrainage Area: {basin_drainage_area} SQKM')
     # # plt.xlim([-71.6,-71.1])
-    # #plt.ylim([41.9,42.5])
+    # # plt.ylim([41.9,42.5])
     # plt.xlabel('Longitude')
     # plt.ylabel('Latitude')
-    # plt.legend(loc = 'lower left')
-    # plt.title(f'Precip Gauging Stations for Basin: {basin_id}')
+    # plt.legend(loc = 'lower right')
+    # plt.title(f'Basin ID:{basin_id}')
     # plt.tight_layout()
     # plt.show()
     # #save figure
@@ -52,3 +59,11 @@ for basin_id in df_basin_id['station_id']:
     stn_MA.to_csv(f'data/num_gauge_precip_basinwise_2000-2020/basin_{basin_id}.csv',index=False)
 
 df_num_stations.to_csv('data/MA_gauges_per_basin_2000-2020.csv',index=False)
+
+
+#save basins that has at least two gauges in it
+filtered_basins = df_num_stations[df_num_stations['num_stations']>= 2]
+filtered_basins = filtered_basins.sort_values('num_stations', ascending=False)
+filtered_basins = filtered_basins.reset_index(drop=True)
+
+filtered_basins.to_csv('data/MA_basins_gauges_2000-2020_filtered.csv',index=False)

@@ -17,8 +17,8 @@ stn['lat'] = stn['lat'].astype(float)
 stn['lon'] = stn['lon'].astype(float)
 
 #filter stations in MA
-stn_MA = stn[(stn['lat']>=41.2) & (stn['lat']<=42.9) & (stn['lon']>=-73.5) & (stn['lon']<=-69.9)]
-#stn_MA = stn[(stn['lat']>=38) & (stn['lat']<=44) & (stn['lon']>=-75) & (stn['lon']<=-67)]
+#stn_MA = stn[(stn['lat']>=41.2) & (stn['lat']<=42.9) & (stn['lon']>=-73.5) & (stn['lon']<=-69.9)]
+stn_MA = stn[(stn['lat']>=39) & (stn['lat']<=45.5) & (stn['lon']>=-74) & (stn['lon']<=-68)]
 
 stn_MA=stn_MA.drop_duplicates(subset=['lat', 'lon', 'elev'])
 
