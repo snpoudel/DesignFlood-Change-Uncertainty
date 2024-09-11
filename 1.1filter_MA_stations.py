@@ -18,6 +18,10 @@ stn['lon'] = stn['lon'].astype(float)
 
 #filter stations in MA
 stn_MA = stn[(stn['lat']>=41.2) & (stn['lat']<=42.9) & (stn['lon']>=-73.5) & (stn['lon']<=-69.9)]
+#stn_MA = stn[(stn['lat']>=38) & (stn['lat']<=44) & (stn['lon']>=-75) & (stn['lon']<=-67)]
+
+stn_MA=stn_MA.drop_duplicates(subset=['lat', 'lon', 'elev'])
+
 #save the stations in MA as a csv file
 stn_MA.to_csv('data/MA_stations.csv',index=False)
 #read a basin shapefile
@@ -42,6 +46,6 @@ stn_MA = stn_MA[stn_MA.within(basin_shapefile.unary_union)]
 # plt.show()
 
 #save the basin with stations as a csv file
-stn_MA.to_csv('data/basin-num_stations/basin_01104500_stations.csv',index=False)
+#stn_MA.to_csv('data/basin-num_stations/basin_01104500_stations.csv',index=False)
 
 

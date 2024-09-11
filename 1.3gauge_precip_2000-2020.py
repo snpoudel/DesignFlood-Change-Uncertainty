@@ -6,7 +6,7 @@ import os
 
 stn = pd.read_csv('data/MA_stations.csv')
 #remove rows containing these stations, as they have some problem
-remove_stn = ['USR0000RNIN']
+remove_stn = ['USR0000RNIN','US1CTHR0085','US1RIKN0034']
 stn = stn[~stn['id'].isin(remove_stn)] # ~ is a logical not operator
 
 stn_2000_2020 = [] #list to store stations that have precipitation data starting from 2000 to 2020
