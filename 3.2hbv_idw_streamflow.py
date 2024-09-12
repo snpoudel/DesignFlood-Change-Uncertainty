@@ -7,7 +7,7 @@ import multiprocessing
 
 #basin id
 #id = '01108000'
-basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv',  dtype={'basin_id':str})
 
 def func_multiprocess(id):
     #read the list of basin ID with centriod latitude
