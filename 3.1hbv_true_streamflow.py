@@ -6,7 +6,7 @@ from hbv_model import hbv
 
 #read the list of basin ID
 #id = '01108000'
-basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', dtype={'basin_id':str})
 for id in basin_list['basin_id']:
     #read the list of basin ID with centriod latitude
     lat_basin = pd.read_csv('data/basinID_withLatLon.csv', dtype={'STAID':str})
