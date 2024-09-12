@@ -9,7 +9,7 @@ rank = comm.Get_rank()
 
 #basid id
 #basin_id = '01108000'
-basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', dtype={'basin_id':str})
 basin_id = basin_list['basin_id'][rank]
 #read basin shapefile
 basin_shapefile = gpd.read_file(f'data/prms_drainage_area_shapes/model_{basin_id}_nhru.shp')

@@ -12,7 +12,7 @@ rank = comm.Get_rank() #Get the rank of the current process
 size = comm.Get_size() #Get the total number of processes
 
 #read basin lists with at least 2 stations
-basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t',dtype={'basin_id':str})
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv',dtype={'basin_id':str})
 
 basin_list['total_num_stn_used'] = basin_list['num_stations']-1 #use total of n-1 station for a basin
 basin_list['stn_array'] = basin_list['total_num_stn_used'].apply(lambda x:np.arange(1,x+1))
@@ -21,7 +21,7 @@ basin_list = basin_list.reset_index(drop=True)
 
 #extract necessary input for each MPI jobs
 basin_id = basin_list['basin_id'][rank]
-total_comb = basin_list['num_stations'][rank]
+total_comb = min(10, basin_list['num_stations'][rank])
 num_station = basin_list['stn_array'][rank]
 
 #basid id
