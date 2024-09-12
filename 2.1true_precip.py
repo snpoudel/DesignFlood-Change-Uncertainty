@@ -9,8 +9,8 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 #rad filtered basin with at least 2 gauges
-basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
-basin_id = basin_list['basin_id'][rank] #run 32 processess
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', dtype={'basin_id':str})
+basin_id = basin_list['basin_id'][rank] #run 31 processess
 #basid id
 #basin_id = '01108000'
 #read basin shapefile
@@ -21,7 +21,7 @@ basin_shapefile = basin_shapefile.to_crs(epsg=4326)
 
 ##Divide the basin into meshgrid of size 0.125 degree
 #find the bounding box of the basin
-grid_size = 0.0625 #0.03125
+grid_size = 0.0625 #0.0625
 minx, miny, maxx, maxy = basin_shapefile.total_bounds
 #create meshgrid
 x = np.arange(minx, maxx, grid_size)
