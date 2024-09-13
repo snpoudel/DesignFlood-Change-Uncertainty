@@ -15,14 +15,14 @@ def return_tyr_flood(data):
     #create a eva model
     eva_model = EVA(data) #input data must be a pandas series with datetime index
     #find the extreme values
-    eva_model.get_extremes(method='BM', extremes_type='high', block_size='365D') #Finds 1 extreme value per year
+    eva_model.get_extremes(method='BM', extremes_type='high') #Finds 1 extreme value per year
     #visualize the extreme values
     #eva_model.extremes.plot()
     #fit the model
     eva_model.fit_model() # By default, the best fitting distribution is selected using the AIC
     #calculate the return period
     eva_summary = eva_model.get_summary(
-        return_period=[20, 50, 100],
+        return_period=[5, 10, 20],
         alpha=0.95, #Confidence interval
         n_samples=2,) #1000#Number of samples for bootstrap confidence intervals
     #convert this into a dataframe
@@ -34,8 +34,8 @@ def return_tyr_flood(data):
 
 
 
-df_tyr_flood =pd.DataFrame(columns=['model', 'grid', 'comb', '20yr_flood', '50yr_flood', '100yr_flood', 'precip_rmse'])
-df_change_flood = pd.DataFrame(columns=['model', 'change_20yr_flood', 'change_50yr_flood', 'change_100yr_flood', 'precip_rmse'])
+df_tyr_flood =pd.DataFrame(columns=['model', 'grid', 'comb', '5yr_flood', '10yr_flood', '20yr_flood', 'precip_rmse'])
+df_change_flood = pd.DataFrame(columns=['model', 'change_5yr_flood', 'change_10yr_flood', 'change_20yr_flood', 'precip_rmse'])
 
 basin_id = '01108000'
 
@@ -51,8 +51,8 @@ hbv_truth.index = pd.to_datetime(hbv_truth.index, format='%Y-%m-%d')
 hbv_truth_flow = hbv_truth['streamflow'] #select the streamflow data
 hbv_truth_flow = pd.Series(hbv_truth_flow) #convert to pandas series
 #calculate the 20, 50 and 100 years flood
-flood_20, flood_50, flood_100 = return_tyr_flood(hbv_truth_flow)
-true_tyr_flood =pd.DataFrame({'model':'HBV True', 'grid':'NA', 'comb':'NA', '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100, 'precip_rmse':0}, index=[0])
+flood_5, flood_10, flood_20 = return_tyr_flood(hbv_truth_flow)
+true_tyr_flood =pd.DataFrame({'model':'HBV True', 'grid':'NA', 'comb':'NA', '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':0}, index=[0])
 df_tyr_flood = pd.concat([df_tyr_flood, true_tyr_flood], ignore_index=True)
 #read the future streamflow data
 hbv_true_future = pd.read_csv(f'output/future/hbv_true_future_streamflow/hbv_true_future_output_{basin_id}.csv', index_col=0)
@@ -60,12 +60,12 @@ hbv_true_future.index = pd.to_datetime(hbv_true_future.index, format='%Y-%m-%d')
 hbv_true_future_flow = hbv_true_future['streamflow'] #select the streamflow data
 hbv_true_future_flow = pd.Series(hbv_true_future_flow) #convert to pandas series
 #calculate the 20, 50 and 100 years flood
-flood_20, flood_50, flood_100 = return_tyr_flood(hbv_true_future_flow)
-true_tyr_flood_future =pd.DataFrame({'model':'HBV True Future', '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100}, index=[0])
+flood_5, flood_10, flood_20 = return_tyr_flood(hbv_true_future_flow)
+true_tyr_flood_future =pd.DataFrame({'model':'HBV True Future', 'grid':'NA', 'comb':'NA', '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':0}, index=[0])
 #calculate the change in flood for true model
-change_hbv_true = pd.DataFrame({'model':'HBV True', 'change_20yr_flood':(true_tyr_flood_future['20yr_flood'] - true_tyr_flood['20yr_flood']),
-                    'change_50yr_flood':(true_tyr_flood_future['50yr_flood'] - true_tyr_flood['50yr_flood']),
-                    'change_100yr_flood':(true_tyr_flood_future['100yr_flood'] - true_tyr_flood['100yr_flood']), 'precip_rmse':0}, index=[0])
+change_hbv_true = pd.DataFrame({'model':'HBV True', 'change_5yr_flood':(true_tyr_flood_future['5yr_flood'] - true_tyr_flood['5yr_flood']),
+                    'change_10yr_flood':(true_tyr_flood_future['10yr_flood'] - true_tyr_flood['10yr_flood']),
+                    'change_20yr_flood':(true_tyr_flood_future['20yr_flood'] - true_tyr_flood['20yr_flood']), 'precip_rmse':0}, index=[0])
 df_change_flood = pd.concat([df_change_flood, change_hbv_true], ignore_index=True)
 
 #grid = 0.4 and comb = 2 to test why hbv true isnt dipping down!?
@@ -89,8 +89,8 @@ for grid in grid_list:
             hbv_true_flow = hbv_true['streamflow'] #select the streamflow data
             hbv_true_flow = pd.Series(hbv_true_flow) #convert to pandas series
             #calculate the 20, 50 and 100 years flood
-            flood_20, flood_50, flood_100 = return_tyr_flood(hbv_true_flow)
-            temp_df_hbv =pd.DataFrame({'model':'HBV True', 'grid':grid, 'comb':comb, '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100, 'precip_rmse':precip_rmse}, index=[0])
+            flood_5, flood_10, flood_20 = return_tyr_flood(hbv_true_flow)
+            temp_df_hbv =pd.DataFrame({'model':'HBV True', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
             df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hbv], ignore_index=True)
 
             #HBV recalibrated model
@@ -100,8 +100,8 @@ for grid in grid_list:
             hbv_recalibrated_flow = hbv_recalibrated['streamflow']
             hbv_recalibrated_flow = pd.Series(hbv_recalibrated_flow)
             #calculate the 20, 50 and 100 years flood
-            flood_20, flood_50, flood_100 = return_tyr_flood(hbv_recalibrated_flow)
-            temp_df_hbvr = pd.DataFrame({'model':'HBV Recalib', 'grid':grid, 'comb':comb, '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100, 'precip_rmse':precip_rmse}, index=[0])
+            flood_5, flood_10, flood_20 = return_tyr_flood(hbv_recalibrated_flow)
+            temp_df_hbvr = pd.DataFrame({'model':'HBV Recalib', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
             df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hbvr], ignore_index=True)
 
             #Hymod model
@@ -111,8 +111,8 @@ for grid in grid_list:
             hymod_flow = hymod['streamflow']
             hymod_flow = pd.Series(hymod_flow)
             #calculate the 20, 50 and 100 years flood
-            flood_20, flood_50, flood_100 = return_tyr_flood(hymod_flow)
-            temp_df_hy = pd.DataFrame({'model':'Hymod', 'grid':grid, 'comb':comb, '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100, 'precip_rmse':precip_rmse}, index=[0])
+            flood_5, flood_10, flood_20 = return_tyr_flood(hymod_flow)
+            temp_df_hy = pd.DataFrame({'model':'Hymod', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
             df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hy], ignore_index=True)
 
             #LSTM model
@@ -122,8 +122,8 @@ for grid in grid_list:
             lstm_flow = lstm['streamflow']
             lstm_flow = pd.Series(lstm_flow)
             #calculate the 20, 50 and 100 years flood
-            flood_20, flood_50, flood_100 = return_tyr_flood(lstm_flow)
-            temp_df_lstm = pd.DataFrame({'model':'LSTM', 'grid':grid, 'comb':comb, '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100, 'precip_rmse':precip_rmse}, index=[0])
+            flood_5, flood_10, flood_20 = return_tyr_flood(lstm_flow)
+            temp_df_lstm = pd.DataFrame({'model':'LSTM', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
             df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstm], ignore_index=True)
 
             #--FUTURE DATA--#
@@ -134,8 +134,8 @@ for grid in grid_list:
             hbv_true_future_flow = hbv_true_future['streamflow'] #select the streamflow data
             hbv_true_future_flow = pd.Series(hbv_true_future_flow) #convert to pandas series
             #calculate the 20, 50 and 100 years flood
-            flood_20, flood_50, flood_100 = return_tyr_flood(hbv_true_future_flow)
-            temp_df_hbvf =pd.DataFrame({'model':'HBV True Future', 'grid':grid, 'comb':comb, '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100, 'precip_rmse':precip_rmse}, index=[0])
+            flood_5, flood_10, flood_20 = return_tyr_flood(hbv_true_future_flow)
+            temp_df_hbvf =pd.DataFrame({'model':'HBV True Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
             df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hbvf], ignore_index=True)
 
             #HBV recalibrated model future
@@ -145,8 +145,8 @@ for grid in grid_list:
             hbv_recalibrated_future_flow = hbv_recalibrated_future['streamflow']
             hbv_recalibrated_future_flow = pd.Series(hbv_recalibrated_future_flow)
             #calculate the 20, 50 and 100 years flood
-            flood_20, flood_50, flood_100 = return_tyr_flood(hbv_recalibrated_future_flow)
-            temp_df_hbvrf = pd.DataFrame({'model':'HBV Recalib Future', 'grid':grid, 'comb':comb, '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100, 'precip_rmse':precip_rmse}, index=[0])
+            flood_5, flood_10, flood_20 = return_tyr_flood(hbv_recalibrated_future_flow)
+            temp_df_hbvrf = pd.DataFrame({'model':'HBV Recalib Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
             df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hbvrf], ignore_index=True)
 
             #Hymod model future
@@ -156,8 +156,8 @@ for grid in grid_list:
             hymod_future_flow = hymod_future['streamflow']
             hymod_future_flow = pd.Series(hymod_future_flow)
             #calculate the 20, 50 and 100 years flood
-            flood_20, flood_50, flood_100 = return_tyr_flood(hymod_future_flow)
-            temp_df_hyf = pd.DataFrame({'model':'Hymod Future', 'grid':grid, 'comb':comb, '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100, 'precip_rmse':precip_rmse}, index=[0])
+            flood_5, flood_10, flood_20 = return_tyr_flood(hymod_future_flow)
+            temp_df_hyf = pd.DataFrame({'model':'Hymod Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
             df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hyf], ignore_index=True)
 
             #LSTM model future
@@ -167,30 +167,29 @@ for grid in grid_list:
             lstm_future_flow = lstm_future['streamflow']
             lstm_future_flow = pd.Series(lstm_future_flow)
             #calculate the 20, 50 and 100 years flood
-            flood_20, flood_50, flood_100 = return_tyr_flood(lstm_future_flow)
-            temp_df_lstmf = pd.DataFrame({'model':'LSTM Future', 'grid':grid, 'comb':comb, '20yr_flood':flood_20, '50yr_flood':flood_50, '100yr_flood':flood_100, 'precip_rmse':precip_rmse}, index=[0])
+            flood_5, flood_10, flood_20 = return_tyr_flood(lstm_future_flow)
+            temp_df_lstmf = pd.DataFrame({'model':'LSTM Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
             df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstmf], ignore_index=True)
 
             #--CHANGE IN FLOOD (FUTURE - HISTORICAL)--#
-            change_hbv_true = pd.DataFrame({'model':'HBV True', 'change_20yr_flood':(temp_df_hbvf['20yr_flood'] - temp_df_hbv['20yr_flood']),
-                            'change_50yr_flood':(temp_df_hbvf['50yr_flood'] - temp_df_hbv['50yr_flood']),
-                            'change_100yr_flood':(temp_df_hbvf['100yr_flood'] - temp_df_hbv['100yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
+            change_hbv_true = pd.DataFrame({'model':'HBV True', 'change_5yr_flood':(temp_df_hbvf['5yr_flood'] - temp_df_hbv['5yr_flood']),
+                            'change_10yr_flood':(temp_df_hbvf['10yr_flood'] - temp_df_hbv['10yr_flood']),
+                            'change_20yr_flood':(temp_df_hbvf['20yr_flood'] - temp_df_hbv['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
 
-            change_hbv_recalib = pd.DataFrame({'model':'HBV Recalib', 'change_20yr_flood':(temp_df_hbvrf['20yr_flood'] - temp_df_hbvr['20yr_flood']),
-                            'change_50yr_flood':(temp_df_hbvrf['50yr_flood'] - temp_df_hbvr['50yr_flood']),
-                            'change_100yr_flood':(temp_df_hbvrf['100yr_flood'] - temp_df_hbvr['100yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
+            change_hbv_recalib = pd.DataFrame({'model':'HBV Recalib', 'change_5yr_flood':(temp_df_hbvrf['5yr_flood'] - temp_df_hbvr['5yr_flood']),
+                            'change_10yr_flood':(temp_df_hbvrf['10yr_flood'] - temp_df_hbvr['10yr_flood']),
+                            'change_20yr_flood':(temp_df_hbvrf['20yr_flood'] - temp_df_hbvr['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
             
-            change_hymod = pd.DataFrame({'model':'Hymod', 'change_20yr_flood':(temp_df_hyf['20yr_flood'] - temp_df_hy['20yr_flood']),
-                            'change_50yr_flood':(temp_df_hyf['50yr_flood'] - temp_df_hy['50yr_flood']),
-                            'change_100yr_flood':(temp_df_hyf['100yr_flood'] - temp_df_hy['100yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
+            change_hymod = pd.DataFrame({'model':'Hymod', 'change_5yr_flood':(temp_df_hyf['5yr_flood'] - temp_df_hy['5yr_flood']),
+                            'change_10yr_flood':(temp_df_hyf['10yr_flood'] - temp_df_hy['10yr_flood']),
+                            'change_20yr_flood':(temp_df_hyf['20yr_flood'] - temp_df_hy['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
             
-            change_lstm = pd.DataFrame({'model':'LSTM', 'change_20yr_flood':(temp_df_lstmf['20yr_flood'] - temp_df_lstm['20yr_flood']),
-                            'change_50yr_flood':(temp_df_lstmf['50yr_flood'] - temp_df_lstm['50yr_flood']),
-                            'change_100yr_flood':(temp_df_lstmf['100yr_flood'] - temp_df_lstm['100yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
+            change_lstm = pd.DataFrame({'model':'LSTM', 'change_5yr_flood':(temp_df_lstmf['5yr_flood'] - temp_df_lstm['5yr_flood']),
+                            'change_10yr_flood':(temp_df_lstmf['10yr_flood'] - temp_df_lstm['10yr_flood']),
+                            'change_20yr_flood':(temp_df_lstmf['20yr_flood'] - temp_df_lstm['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
             
             df_change_flood = pd.concat([df_change_flood, change_hbv_true, change_hbv_recalib, change_hymod, change_lstm], ignore_index=True)
 
 #save the dataframes
 df_tyr_flood.to_csv(f'output/tyr_flood.csv', index=False)
 df_change_flood.to_csv(f'output/change_tyr_flood.csv', index=False)
-
