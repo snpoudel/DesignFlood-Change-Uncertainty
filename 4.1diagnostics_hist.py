@@ -43,7 +43,7 @@ def high_flow_bias(q_obs, q_sim):
 
 
 ###---step 02---###
-id = '01108000'
+id = '01104500'
 grid_coverage = np.arange(15)
 
 #Loop through each basin
@@ -122,5 +122,5 @@ for grid in grid_coverage: #1
             df_total = pd.concat([df_total, df_result], axis=0)
     #End of loop 23
     
-df_total.to_csv('output/diagnostics_validperiod.csv', index=False)    
+df_total.to_csv(f'output/diagnostics_validperiod_{id}.csv', index=False)    
 #End of loop 1

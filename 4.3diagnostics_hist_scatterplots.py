@@ -30,7 +30,7 @@ rmse_melt = pd.melt(df, id_vars=['RMSE(PRECIP)'],
              value_vars=['RMSE(HBV)', 'RMSE(RECAL_HBV)', 'RMSE(HYMOD)', 'RMSE(LSTM)'])
 
 # Plot scatter points
-fig,axs = plt.subplots(3,1,figsize=(5, 6),sharex=True)
+fig,axs = plt.subplots(3,1,figsize=(6, 7),sharex=True)
 sns.scatterplot(data=nse_melt, x='RMSE(PRECIP)', y='value', hue='variable', alpha=0.6, ax=axs[0])
 # Compute and plot LOWESS lines
 for variable in nse_melt['variable'].unique():
@@ -80,7 +80,7 @@ bias_melt = pd.melt(df, id_vars=['RMSE(PRECIP)'],
 hfb_melt = pd.melt(df, id_vars=['RMSE(PRECIP)'],
              value_vars=['HFB(HBV)', 'HFB(RECAL_HBV)', 'HFB(HYMOD)', 'HFB(LSTM)'])
 
-fig,axs = plt.subplots(2,1, figsize=(6, 6), sharex=True)
+fig,axs = plt.subplots(2,1, figsize=(6, 7), sharex=True)
 #Plot scatter points
 sns.scatterplot(data=bias_melt, x='RMSE(PRECIP)', y='value', hue='variable', alpha=0.5, ax=axs[0])
 # Compute and plot LOWESS lines
@@ -104,7 +104,6 @@ for variable in hfb_melt['variable'].unique():
 axs[1].set_xlabel('Precipitation RMSE (mm/day)')
 axs[1].set_ylabel('Streamflow HFB (%)')
 axs[1].grid(True, linestyle ='--', alpha = 0.5)
-axs[1].legend(title='', loc='best')
 axs[1].get_legend().remove()
 #save the plot
 plt.savefig('output/scatterplot_bias_hfb.png', dpi=300)
