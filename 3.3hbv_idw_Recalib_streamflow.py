@@ -98,13 +98,15 @@ def calibNSE(station_id, grid, combination):
 #id = '01108000'
 lat_basin = pd.read_csv('data/basinID_withLatLon.csv', dtype={'STAID':str})
 
-basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
-id = basin_list['basin_id'][rank//15] #15 is number of combination we're sampling
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', dtype={'basin_id':str})
+used_basin_list = ['01170500', '01108000', '01104500', '01109060', '01177000']
+used_basin_list_grid = [used_basin_list[0]]*30 + [used_basin_list[1]]*11 + [used_basin_list[2]]*7 + [used_basin_list[3]]*7+ [used_basin_list[4]]*6
+#length of used basin list grid is 61
+id = used_basin_list_grid[rank]
 
 #generate sets of precipitation dataset with different gridded data coverage and different combinatoin of grids coverage
-station_coverage = np.arange(15)
-station_coverage_tile = np.tile(station_coverage, 32) #32 is total basins were using
-grid = station_coverage_tile[rank] #select grid coverage based on rank
+station_coverage = list(range(1,30)) + [99] + list(range(1,11)) + [99] + list(range(1,7)) + [99] + list(range(1,7)) + [99] + list(range(1,6)) + [99]
+grid = station_coverage[rank] #select grid coverage based on rank
 for combination in np.arange(15):
     file_path = f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv'
     if os.path.exists(file_path):

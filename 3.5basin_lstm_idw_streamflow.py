@@ -14,11 +14,15 @@ size = comm.Get_size() #Get the total number of processes
 
 #read the list of basin ID with centriod latitude
 lat_basin = pd.read_csv('data/basinID_withLatLon.csv', dtype={'STAID':str})
-# Select one basin from the list/ need to do a for loop if not running parallely in cluster
-id = '01108000'
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', dtype={'basin_id':str})
+used_basin_list = ['01170500', '01108000', '01104500', '01109060', '01177000']
+used_basin_list_grid = [used_basin_list[0]]*30 + [used_basin_list[1]]*11 + [used_basin_list[2]]*7 + [used_basin_list[3]]*7+ [used_basin_list[4]]*6
+#length of used basin list grid is 61
+id = used_basin_list_grid[rank]
 #generate sets of precipitation dataset with different gridded data coverage and different combinatoin of grids coverage
-station_coverage = np.arange(15)
+station_coverage = list(range(1,30)) + [99] + list(range(1,11)) + [99] + list(range(1,7)) + [99] + list(range(1,7)) + [99] + list(range(1,6)) + [99]
 grid = station_coverage[rank] #select grid coverage based on rank
+
 ########### Simulate streamflow for a calibrated hymod model ###########
 for combination in range(15):
     file_path = f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv'

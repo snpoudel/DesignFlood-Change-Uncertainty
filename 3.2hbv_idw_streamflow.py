@@ -15,7 +15,7 @@ def func_multiprocess(id):
     #read calibrated hbv parameters
     hbv_params = pd.read_csv('data/true_hbv_calibrated_parameters.csv', dtype = {'station_id':str})
     hbv_params = hbv_params.iloc[:,:-2] #remove undesired columns
-    for coverage in range(15):
+    for coverage in range(30):
         for combination in range(15):
             file_path =f'data/idw_precip/idw_precip{id}_coverage{coverage}_comb{combination}.csv'
             if os.path.exists(file_path):

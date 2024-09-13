@@ -2,10 +2,10 @@
 #SBATCH --job-name=basin-lstm            # Job name
 #SBATCH --output=idw-lstm%j.log       # Output file name (%j expands to jobID)
 #SBATCH --error=idw-lstm%j.log        # Error file name (%j expands to jobID)
-#SBATCH --time=06:00:00                 # Time limit (HH:MM:SS)
-#SBATCH --nodes=1                       #5 Number of nodes
-#SBATCH --ntasks=16                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
-#SBATCH --cpus-per-task=4               # Number of CPU cores per task
+#SBATCH --time=12:00:00                 # Time limit (HH:MM:SS)
+#SBATCH --nodes=2                       #5 Number of nodes
+#SBATCH --ntasks=61                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
+#SBATCH --cpus-per-task=2               # Number of CPU cores per task
 #SBATCH --mem=16G                        # Memory per CPU core (adjust as needed)
 #SBATCH --exclusive                     # Exclusive node allocation
 #SBATCH --mail-type=END
