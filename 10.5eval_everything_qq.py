@@ -13,7 +13,7 @@ def rmse(q_obs, q_sim):
 #read list of basins
 basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv',dtype={'basin_id':str})
 #basin grid and combination of interest
-id = '01108000'
+id = '01109060'
 
 #precip
 true_precip = pd.read_csv(f'data/true_precip/true_precip{id}.csv')
@@ -89,17 +89,19 @@ for coverage in np.arange(30):
             lstm = pd.read_csv(f'output/lstm_idw_streamflow/lstm_idw_{id}_coverage{coverage}_comb{comb}.csv')
             future_lstm = pd.read_csv(f'output/future/lstm_idw_future_streamflow/lstm_idw_future_streamflow{id}_coverage{coverage}_comb{comb}.csv')
             lstm['tag'] = pb
-            lstm['truth'] = true_flow['streamflow']
+            true_flow_forlstm = true_flow[365:].reset_index(drop=True)
+            lstm['truth'] = true_flow_forlstm['streamflow']
             lstm['model'] = 'LSTM'
             future_lstm['tag'] =pb
-            future_lstm['truth'] = future_true_flow['streamflow']
+            future_true_flow_forlstm = future_true_flow[365:].reset_index(drop=True)
+            future_lstm['truth'] = future_true_flow_forlstm['streamflow']
             future_lstm['model'] = 'LSTM'
             fd = pd.concat([fd, lstm])
             ffd  = pd.concat([ffd, future_lstm])
 
 
 #save the plots
-df.to_csv('output/hist_precip_by_buckets.csv', index=False)
-dff.to_csv('output/future_precip_by_buckets.csv', index=False)
-fd.to_csv('output/hist_flow_by_buckets.csv', index=False)
-ffd.to_csv('output/future_flow_by_buckets.csv', index=False)
+df.to_csv(f'output/hist_precip_by_buckets_{id}.csv', index=False)
+dff.to_csv(f'output/future_precip_by_buckets_{id}.csv', index=False)
+fd.to_csv(f'output/hist_flow_by_buckets_{id}.csv', index=False)
+ffd.to_csv(f'output/future_flow_by_buckets_{id}.csv', index=False)

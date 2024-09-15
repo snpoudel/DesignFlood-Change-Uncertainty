@@ -4,9 +4,10 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+id = '01109060'
 # Load the data
-flood = pd.read_csv('output/tyr_flood.csv')
-change_flood = pd.read_csv('output/change_tyr_flood.csv')
+flood = pd.read_csv(f'output/tyr_flood_{id}.csv')
+change_flood = pd.read_csv(f'output/change_tyr_flood_{id}.csv')
 
 ###---01 plot for t-yr flood---###
 ##--Historical flood--##
@@ -48,7 +49,7 @@ axs[2].grid(True, linestyle ='--', alpha = 0.5)
 axs[2].legend(title='', loc='best')
 #save the plot
 plt.tight_layout()
-plt.savefig('output/tyr_flood_historical.png', dpi=300)
+plt.savefig(f'output/{id}/tyr_flood_historical.png', dpi=300)
 #clear the plot
 plt.clf()
 
@@ -90,7 +91,7 @@ axs[2].grid(True, linestyle ='--', alpha = 0.5)
 axs[2].legend(title='', loc='best')
 #save the plot
 plt.tight_layout()
-plt.savefig('output/tyr_flood_future.png', dpi=300)
+plt.savefig(f'output/{id}/tyr_flood_future.png', dpi=300)
 #clear the plot
 plt.clf()
 
@@ -132,6 +133,6 @@ axs[2].grid(True, linestyle ='--', alpha = 0.5)
 axs[2].legend(title='', loc='best')
 #save the plot
 plt.tight_layout()
-plt.savefig('output/change_tyr_flood.png', dpi=300)
+plt.savefig(f'output/{id}/change_tyr_flood.png', dpi=300)
 #clear the plot
 plt.clf()

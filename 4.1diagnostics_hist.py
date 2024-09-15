@@ -43,8 +43,9 @@ def high_flow_bias(q_obs, q_sim):
 
 
 ###---step 02---###
-id = '01104500'
-grid_coverage = np.arange(15)
+id = '01109060'
+grid_coverage = np.arange(30)
+grid_coverage = np.append(grid_coverage, [99])
 
 #Loop through each basin
 df_total = pd.DataFrame() #create an empty dataframe to store the results
@@ -58,12 +59,13 @@ for grid in grid_coverage: #1
 
     for combination in range(5): #2
         #Read real streamflow from interpolated precipitation
-        file_path = f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv'
+        file_path = f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv'
         if os.path.exists(file_path):
             #read real hbv flow
-            real_hbv_flow = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv')
-            real_hbv_flow = real_hbv_flow[365:] #remove the first 365 days
-            real_hbv_flow = real_hbv_flow.reset_index(drop=True)
+            if os.path.exists(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv'):             
+                real_hbv_flow = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv')
+                real_hbv_flow = real_hbv_flow[365:] #remove the first 365 days
+                real_hbv_flow = real_hbv_flow.reset_index(drop=True)
             #read recalibrated hbv flow
             recal_hbv_flow = pd.read_csv(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv')
             recal_hbv_flow = recal_hbv_flow[365:] #remove the first 365 days
@@ -108,6 +110,8 @@ for grid in grid_coverage: #1
             #for precipitation
             nse_precip = nse(true_precip['PRECIP'], real_precip['PRECIP'])
             rmse_precip = rmse(true_precip['PRECIP'], real_precip['PRECIP'])
+            if np.array_equal(true_precip['PRECIP'], real_precip['PRECIP']):
+                rmse_precip = 0
             pbias_precip = pbias(true_precip['PRECIP'], real_precip['PRECIP'])
             kge_precip = kge(true_precip['PRECIP'], real_precip['PRECIP'])
 

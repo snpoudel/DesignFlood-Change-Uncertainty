@@ -4,17 +4,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import seaborn as sns
+
+#basin id
+id = '01109060'
 #read dignostic csv file
-df = pd.read_csv('output/diagnostics_validperiod.csv')
+df = pd.read_csv(f'output/diagnostics_validperiod_{id}.csv')
 
 #make a scatter plot of grid vs RMSE(PRECIP)
+df_without99 = df[~(df['grid']==99)]
 plt.figure(figsize=(6,4))
-plt.scatter(df['grid'], df['RMSE(PRECIP)'], color='blue', alpha=0.6)
+plt.scatter(df_without99['grid'], df_without99['RMSE(PRECIP)'], color='blue', alpha=0.6)
 plt.xlabel('Number of gauging stations used')
 plt.ylabel('Precipitation RMSE (mm/day)')
 #change x ticks labels
 plt.grid(True, linestyle ='--', alpha = 0.5)
-plt.savefig('output/precip rmse vs num of stations used.png', dpi=300)
+plt.tight_layout()
+plt.savefig(f'output/{id}/precip rmse vs num of stations used.png', dpi=300)
 # Clear the plot
 plt.clf()  # Clear the current figure
 plt.close() # Close the current figure window
@@ -68,7 +73,7 @@ axs[2].grid(True, linestyle ='--', alpha = 0.5)
 axs[2].get_legend().remove()
 #save the plot
 plt.tight_layout()
-plt.savefig('output/scatterplot_nse_kge_rmse.png', dpi=300)
+plt.savefig(f'output/{id}/scatterplot_nse_kge_rmse.png', dpi=300)
 # Clear the plot
 plt.clf()  # Clear the current figure
 
@@ -105,8 +110,9 @@ axs[1].set_xlabel('Precipitation RMSE (mm/day)')
 axs[1].set_ylabel('Streamflow HFB (%)')
 axs[1].grid(True, linestyle ='--', alpha = 0.5)
 axs[1].get_legend().remove()
+plt.tight_layout()
 #save the plot
-plt.savefig('output/scatterplot_bias_hfb.png', dpi=300)
+plt.savefig(f'output/{id}/scatterplot_bias_hfb.png', dpi=300)
 # Clear the plot
 plt.clf()  # Clear the current figure
 plt.close() # Close the current figure window
