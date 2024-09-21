@@ -4,16 +4,18 @@ import pandas as pd
 import os
 from geneticalgorithm import geneticalgorithm as ga
 from hbv_model import hbv
-from mpi4py import MPI
-
-#Set up communicator to parallelize job in cluster using MPI
-comm = MPI.COMM_WORLD #Get the default communicator object
-rank = comm.Get_rank() #Get the rank of the current process
-size = comm.Get_size() #Get the total number of processes
+import multiprocessing
+# from mpi4py import MPI
 
 ########### Calibrate hbv model ###########
 #Write a function that calibrates hymod model
-def calibNSE(station_id, grid, combination):
+def calibNSE(index):
+    total_df = pd.DataFrame()
+    used_basin_list = ['01170500', '01108000', '01104500', '01109060', '01177000']
+    #length of used basin list grid is 61
+    station_id = used_basin_list[0]
+    grid = 99
+    combination = 0
     #read input csv file
     #read interpolated precipitation
     df = pd.read_csv(f'data/idw_precip/idw_precip{station_id}_coverage{grid}_comb{combination}.csv')
@@ -58,7 +60,7 @@ def calibNSE(station_id, grid, combination):
                         [1,10]]) #maxbas
 
     algorithm_param = {
-        'max_num_iteration': 100,              #100 Generations, higher is better, but requires more computational time
+        'max_num_iteration': 200,              #100 Generations, higher is better, but requires more computational time
         'max_iteration_without_improv': None,   # Stopping criterion for lack of improvement
         'population_size': 2000,                 #200 Number of parameter-sets in a single iteration/generation(to start with population 10 times the number of parameters should be fine!)
         'parents_portion': 0.3,                 # Portion of new generation population filled by previous population
@@ -89,78 +91,32 @@ def calibNSE(station_id, grid, combination):
                              12:"tm", 13:"tti", 14:"whc", 15:"crf", 16:"maxbas"})
     df_param["station_id"] = str(station_id)
     df_param["nse"] = nse_value
-    #save as a csv file
-    return df_param #returns calibrated parameters and nse value
+    df_param.to_csv(f'output/param_test_plots/pop2000_gen200_{index}.csv', index=False)
+    return df_param
 ##End of function
 
-
-#basin id
-#id = '01108000'
-lat_basin = pd.read_csv('data/basinID_withLatLon.csv', dtype={'STAID':str})
-
-basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', dtype={'basin_id':str})
-used_basin_list = ['01170500', '01108000', '01104500', '01109060', '01177000']
-used_basin_list_grid = [used_basin_list[0]]*30 + [used_basin_list[1]]*11 + [used_basin_list[2]]*7 + [used_basin_list[3]]*7+ [used_basin_list[4]]*6
-#length of used basin list grid is 61
-id = used_basin_list_grid[rank]
-
-#generate sets of precipitation dataset with different gridded data coverage and different combinatoin of grids coverage
-station_coverage = list(range(1,30)) + [99] + list(range(1,11)) + [99] + list(range(1,7)) + [99] + list(range(1,7)) + [99] + list(range(1,6)) + [99]
-grid = station_coverage[rank] #select grid coverage based on rank
-for combination in np.arange(15):
-    file_path = f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv'
-    if os.path.exists(file_path):
-        #---HISTORICAL OBSERVATION---#
-        precip_in = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv')
-        #Read temperature era5
-        temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
-        #filter temperature for the year 2000-2020
-        temp_in = temp_in[temp_in['time'] >= '2000-01-01']
-        temp_in = temp_in[temp_in['time'] <= '2020-12-31']
-        temp_in = temp_in.reset_index(drop=True)
-        #Read latitude
-        lat_in_df = lat_basin[lat_basin['STAID'] == id]
-        lat_in = lat_in_df['LAT_CENT'].iloc[0]
-
-        #Read calibrated hbv parameters
-        params_in = calibNSE(id, grid, combination)
-
-        #save parameters as a csv file
-        params_in.to_csv(f'output/parameters/hbv_recalib/params{id}_grid{grid}_comb{combination}.csv')
-
-        params_in = params_in.iloc[0,:-2] #remove basin ID column
-        params_in = np.array(params_in)
-
-        #run hbv model
-        q_sim = hbv(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
-        q_sim = np.round(q_sim, 4)
-
-        #keep result in a dataframe
-        output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
-        #save output dataframe
-        output_df.to_csv(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv')
+# Create multiprocessing pool
+if __name__ == '__main__': #this ensures that the code is being run in the main module and this block is not run to avoid creating new processes recursively
+    pool = multiprocessing.Pool(processes=5)
+    pool.map(calibNSE, range(5))
+    pool.close()
+    pool.join()
 
 
-
-        #---FUTURE OBSERVATION---#
-        precip_in = pd.read_csv(f'data/future/future_idw_precip/future_idw_precip{id}_coverage{grid}_comb{combination}.csv')
-        #Read temperature era5
-        temp_in = pd.read_csv(f'data/processed-era5-temp/temp_{id}.csv')
-        #filter temperature for the year 2000-2020
-        temp_in = temp_in[temp_in['time'] >= '2000-01-01']
-        temp_in = temp_in[temp_in['time'] <= '2020-12-31']
-        temp_in = temp_in.reset_index(drop=True)
-        #Read latitude
-        lat_in_df = lat_basin[lat_basin['STAID'] == id]
-        lat_in = lat_in_df['LAT_CENT'].iloc[0]
-
-        #Calibrated parameters are same as historical
-
-        #run hbv model
-        q_sim = hbv(params_in, precip_in['PRECIP'], temp_in['t2m'], precip_in['DATE'], lat_in, routing=1)
-        q_sim = np.round(q_sim, 4)
-
-        #keep result in a dataframe
-        output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
-        #save output dataframe
-        output_df.to_csv(f'output/future/hbv_idw_recalib_future_streamflow/hbv_idw_recalib_future_streamflow{id}_coverage{grid}_comb{combination}.csv')
+# #read true parameters
+# used_basin_list = ['01170500', '01108000', '01104500', '01109060', '01177000']
+# #length of used basin list grid is 61
+# id = used_basin_list[0]
+# total_df = pd.DataFrame()
+# true_params = pd.read_csv('data/true_hbv_calibrated_parameters.csv', dtype={'station_id':str})
+# true_params = true_params[true_params['station_id']==id]
+# true_params = true_params.iloc[:, :-3]
+# file1 = pd.read_csv('output/param_test_plots/pop2000_gen200_0.csv')
+# file2 = pd.read_csv('output/param_test_plots/pop2000_gen200_1.csv')
+# file3 = pd.read_csv('output/param_test_plots/pop2000_gen200_2.csv')
+# file4 = pd.read_csv('output/param_test_plots/pop2000_gen200_3.csv')
+# file5 = pd.read_csv('output/param_test_plots/pop2000_gen200_4.csv')
+# #merge
+# total_df = pd.concat([total_df, true_params, file1, file2, file3, file4, file5], ignore_index=True)
+# total_df.to_csv('output/param_test_plots/pop2000_gen200.csv', index=False)
+# print(total_df)

@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 def rmse(q_obs, q_sim):
     rmse_value = np.sqrt(np.mean((q_obs - q_sim)**2))
     return rmse_value
+    
 #read all basin lists
 basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
 df_precip_rmse = pd.DataFrame() #empty dataframe to store values

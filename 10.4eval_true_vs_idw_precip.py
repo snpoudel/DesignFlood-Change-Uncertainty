@@ -99,3 +99,5 @@ axs[2].set_xlabel('Mean Areal Precipitation(MAP) RMSE')
 axs[2].grid(True, linestyle='--',alpha=0.5)
 plt.tight_layout()
 plt.show()
+
+fig.savefig('output/precip99.png', dpi=300)
