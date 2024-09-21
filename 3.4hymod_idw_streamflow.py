@@ -59,7 +59,7 @@ def calibNSE(station_id, grid, combination):
     algorithm_param = {
         'max_num_iteration': 100, #100              # Generations, higher is better, but requires more computational time
         'max_iteration_without_improv': None,   # Stopping criterion for lack of improvement
-        'population_size': 200, #150                # Number of parameter-sets in a single iteration/generation(to start with population 10 times the number of parameters should be fine!)
+        'population_size': 2000, #150                # Number of parameter-sets in a single iteration/generation(to start with population 10 times the number of parameters should be fine!)
         'parents_portion': 0.3,                 # Portion of new generation population filled by previous population
         'elit_ratio': 0.01,                     # Portion of the best individuals preserved unchanged
         'crossover_probability': 0.3,           # Chance of existing solution passing its characteristics to new trial solution
