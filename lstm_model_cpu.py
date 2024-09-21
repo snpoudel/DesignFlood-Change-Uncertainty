@@ -92,8 +92,8 @@ def run_lstm_model(lstm_dataset, new_data):
             loss.backward() #calculate gradient
             optimizer.step() #update weights
 
-            #if (i+1) % 50 == 0: #print loss every 20 steps
-                #print(f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item()}')
+            if (i+1) % 50 == 0: #print loss every 20 steps
+                print(f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item()}')
 
 
     #Make predictions using lstm model

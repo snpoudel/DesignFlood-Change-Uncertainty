@@ -11,7 +11,7 @@ def nse(q_obs, q_sim):
     nse_value = 1 - (numerator/denominator)
     return nse_value
 
-val_pd = 5120
+val_pd = 5115
 val_pd_future = 365
 df = pd.DataFrame()
 for id in basin_list['basin_id']:
@@ -23,10 +23,11 @@ for id in basin_list['basin_id']:
 
     lstm_flow = pd.read_csv(f'output/regional_lstm/historical/lstm_input{id}.csv')
 
-    nse_lstm_hist = nse(true_hbv_flow['streamflow'][val_pd:], lstm_flow['streamflow'][val_pd:])
+    nse_lstm_hist_train = nse(true_hbv_flow['streamflow'][0:val_pd], lstm_flow['streamflow'][0:val_pd])
+    nse_lstm_hist_valid = nse(true_hbv_flow['streamflow'][val_pd:], lstm_flow['streamflow'][val_pd:])
 
     #future
-    future_hbv_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
+    future_hbv_flow = pd.read_csv(f'Z:/MA-Precip-Uncertainty-GaugeData/output/hbv_true_streamflow/hbv_true_output_{id}.csv')
     future_hbv_flow = future_hbv_flow[365:] #remove the first 365 days
     future_hbv_flow = future_hbv_flow.reset_index(drop=True)
 
@@ -35,14 +36,16 @@ for id in basin_list['basin_id']:
     nse_lstm_future = nse(future_hbv_flow['streamflow'][val_pd_future:], future_lstm_flow['streamflow'][val_pd_future:])
 
     #save into a dataframe
-    temp_df = pd.DataFrame({'station':id, 'nse_hist':nse_lstm_hist, 'nse_future':nse_lstm_future}, index=[0])
+    temp_df = pd.DataFrame({'station':id, 'nse_hist_train':nse_lstm_hist_train, 'nse_hist_valid':nse_lstm_hist_valid, 'nse_future':nse_lstm_future}, index=[0])
     df = pd.concat([df,temp_df], ignore_index=True)
 #df.to_csv('output/true_lstm_diagnostics.csv', index=False)
-df = df.dropna()
+# df = df.dropna()
+print(df)
 
 #Make CDF plot of NSE for calibration period
 #NSE
-sns.kdeplot(data = df['nse_hist'], cumulative=True, bw_method = 0.05, label='NSE Hist')
+sns.kdeplot(data = df['nse_hist_train'], cumulative=True, bw_method = 0.05, label='NSE Hist Train')
+sns.kdeplot(data = df['nse_hist_valid'], cumulative=True, bw_method = 0.05, label='NSE Hist Valid')
 sns.kdeplot(data = df['nse_future'], cumulative=True,bw_method = 0.05, label='NSE Future')
 plt.legend()
 plt.show()

@@ -8,14 +8,14 @@ import multiprocessing
 #basin id
 #id = '01108000'
 # basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv',  dtype={'basin_id':str})
-used_basin_list = ['01170500', '01108000', '01104500', '01109060', '01177000']
+used_basin_list = ['01108000', '01104500', '01109060', '01177000']
 def func_multiprocess(id):
     #read the list of basin ID with centriod latitude
     lat_basin = pd.read_csv('data/basinID_withLatLon.csv', dtype={'STAID':str})
     #read calibrated hbv parameters
     hbv_params = pd.read_csv('data/true_hbv_calibrated_parameters.csv', dtype = {'station_id':str})
     hbv_params = hbv_params.iloc[:,:-2] #remove undesired columns
-    for coverage in range(30):
+    for coverage in range(100):
         for combination in range(15):
             file_path =f'data/idw_precip/idw_precip{id}_coverage{coverage}_comb{combination}.csv'
             if os.path.exists(file_path):
@@ -68,7 +68,7 @@ def func_multiprocess(id):
 
 # Create multiprocessing pool
 if __name__ == '__main__': #this ensures that the code is being run in the main module and this block is not run to avoid creating new processes recursively
-    pool = multiprocessing.Pool(processes=5)
+    pool = multiprocessing.Pool(processes=4)
     grid_list = used_basin_list
     pool.map(func_multiprocess, grid_list)
     pool.close()
