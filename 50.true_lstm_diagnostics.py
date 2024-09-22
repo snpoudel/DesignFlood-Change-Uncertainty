@@ -40,7 +40,8 @@ for id in basin_list['basin_id']:
     df = pd.concat([df,temp_df], ignore_index=True)
 #df.to_csv('output/true_lstm_diagnostics.csv', index=False)
 # df = df.dropna()
-print(df)
+df_sort = df.sort_values('nse_hist_train', ascending=False).reset_index(drop=True)
+print(df_sort)
 
 #Make CDF plot of NSE for calibration period
 #NSE
