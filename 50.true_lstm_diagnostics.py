@@ -45,8 +45,8 @@ print(df_sort)
 
 #Make CDF plot of NSE for calibration period
 #NSE
-sns.kdeplot(data = df['nse_hist_train'], cumulative=True, bw_method = 0.05, label='NSE Hist Train')
-sns.kdeplot(data = df['nse_hist_valid'], cumulative=True, bw_method = 0.05, label='NSE Hist Valid')
-sns.kdeplot(data = df['nse_future'], cumulative=True,bw_method = 0.05, label='NSE Future')
+sns.kdeplot(data = df['nse_hist_train'], cumulative=True, bw_method = 0.1, label='NSE Hist Train')
+sns.kdeplot(data = df['nse_hist_valid'], cumulative=True, bw_method = 0.1, label='NSE Hist Valid')
+sns.kdeplot(data = df['nse_future'], cumulative=True,bw_method = 0.1, label='NSE Future')
 plt.legend()
 plt.show()

@@ -5,7 +5,7 @@ from pyextremes import EVA
 
 #read the list of basin ID
 id = '01108000'
-coverage = 10
+coverage = 9
 comb = 9 #3
 
 #plot window
