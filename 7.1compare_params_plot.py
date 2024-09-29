@@ -24,6 +24,9 @@ for id in basin_list['basin_id']:
     hbv_params['tag'] = f'HBV Recalib with 90% gauge'
     vars=['fc','beta','pwp','l','ks','ki','kb','kperc','coeff_pet','ddf',
                                 'scf','ts','tm','tti','whc','crf','maxbas']
+    vars_label=['fc [1-1000]','beta [1-7]','pwp [0.01-0.99]','l [1-999]','ks[0.01-0.99]','ki\n[0.01-0.99]',
+                                'kb\n[0.0001-0.99]','kperc\n[0.001-0.99]','coeff_pet\n[0.5-2]','ddf\n[0.01-10]',
+                                'scf [0.5-1.5]','ts [-1-4]','tm [-1-4]','tti [-1-4]','whc [0-0.2]','crf [0.1-1]','maxbas [1-10]']
     #merge
     df = pd.concat([hbv_params, true_param], ignore_index=True)
 
@@ -34,7 +37,7 @@ for id in basin_list['basin_id']:
     # Create a box plot for each variable
     for i, var in enumerate(vars):
         sns.swarmplot(data=df, y=var, ax=axs[i], hue='tag')
-        axs[i].set_title(f'{var}')
+        axs[i].set_title(f'{vars_label[i]}')
         axs[i].set_xlabel('')
         axs[i].set_ylabel('')
         axs[i].get_legend().remove()
