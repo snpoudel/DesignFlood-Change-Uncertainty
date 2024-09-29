@@ -9,7 +9,7 @@ def rmse(q_obs, q_sim):
     return rmse_value
     
 #read all basin lists
-basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', sep='\t', dtype={'basin_id':str})
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', dtype={'basin_id':str})
 df_precip_rmse = pd.DataFrame() #empty dataframe to store values
 #loop through each basin, read in true and interpol precip and find precip rmse
 for id in basin_list['basin_id']:
@@ -32,10 +32,10 @@ df_precip_rmse['precip_bucket'] = pd.cut(df_precip_rmse['precip_rmse'], bins=[0,
                                           labels=['0-2', '2-4', '4-6', '6-8', '8-10'])
 
 #make a histogram plot of precip_rmse
-plt.hist(df_precip_rmse['precip_rmse'], bins=15, edgecolor = 'black')
+plt.hist(df_precip_rmse['precip_rmse'], bins=20, edgecolor = 'black')
 plt.xlabel('Precipitation RMSE (mm/day)')
 plt.ylabel('Number of basins')
-
+plt.savefig('output/figures/precip_error_hist_allbasins.png', dpi=300)
 
 #--HISTORICAL--##
 #save precipitation datasets into respective precip buckets
