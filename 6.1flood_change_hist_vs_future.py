@@ -90,15 +90,15 @@ for basin_id in used_basin_list:
         
                 #HBV true model
                 #read the streamflow data
-                if os.path.exists(f'output/hbv_idw_streamflow/hbv_idw_streamflow{basin_id}_coverage{grid}_comb{comb}.csv'):
-                    hbv_true = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{basin_id}_coverage{grid}_comb{comb}.csv', index_col=1)
-                    hbv_true.index = pd.to_datetime(hbv_true.index, format='%Y-%m-%d')
-                    hbv_true_flow = hbv_true['streamflow'] #select the streamflow data
-                    hbv_true_flow = pd.Series(hbv_true_flow) #convert to pandas series
-                    #calculate the 20, 50 and 100 years flood
-                    flood_5, flood_10, flood_20 = return_tyr_flood(hbv_true_flow)
-                    temp_df_hbv =pd.DataFrame({'model':'HBV True', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
-                    df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hbv], ignore_index=True)
+                # if os.path.exists(f'output/hbv_idw_streamflow/hbv_idw_streamflow{basin_id}_coverage{grid}_comb{comb}.csv'):
+                hbv_true = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{basin_id}_coverage{grid}_comb{comb}.csv', index_col=1)
+                hbv_true.index = pd.to_datetime(hbv_true.index, format='%Y-%m-%d')
+                hbv_true_flow = hbv_true['streamflow'] #select the streamflow data
+                hbv_true_flow = pd.Series(hbv_true_flow) #convert to pandas series
+                #calculate the 20, 50 and 100 years flood
+                flood_5, flood_10, flood_20 = return_tyr_flood(hbv_true_flow)
+                temp_df_hbv =pd.DataFrame({'model':'HBV True', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
+                df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hbv], ignore_index=True)
 
                 #HBV recalibrated model
                 #read the streamflow data
@@ -136,15 +136,15 @@ for basin_id in used_basin_list:
                 #--FUTURE DATA--#
                 #HBV true model future
                 #read the streamflow data
-                if os.path.exists(f'output/future/hbv_idw_future_streamflow/hbv_idw_future_streamflow{basin_id}_coverage{grid}_comb{comb}.csv'):
-                    hbv_true_future = pd.read_csv(f'output/future/hbv_idw_future_streamflow/hbv_idw_future_streamflow{basin_id}_coverage{grid}_comb{comb}.csv', index_col=1)
-                    hbv_true_future.index = pd.to_datetime(hbv_true_future.index, format='%Y-%m-%d')
-                    hbv_true_future_flow = hbv_true_future['streamflow'] #select the streamflow data
-                    hbv_true_future_flow = pd.Series(hbv_true_future_flow) #convert to pandas series
-                    #calculate the 20, 50 and 100 years flood
-                    flood_5, flood_10, flood_20 = return_tyr_flood(hbv_true_future_flow)
-                    temp_df_hbvf =pd.DataFrame({'model':'HBV True Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
-                    df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hbvf], ignore_index=True)
+                # if os.path.exists(f'output/future/hbv_idw_future_streamflow/hbv_idw_future_streamflow{basin_id}_coverage{grid}_comb{comb}.csv'):
+                hbv_true_future = pd.read_csv(f'output/future/hbv_idw_future_streamflow/hbv_idw_future_streamflow{basin_id}_coverage{grid}_comb{comb}.csv', index_col=1)
+                hbv_true_future.index = pd.to_datetime(hbv_true_future.index, format='%Y-%m-%d')
+                hbv_true_future_flow = hbv_true_future['streamflow'] #select the streamflow data
+                hbv_true_future_flow = pd.Series(hbv_true_future_flow) #convert to pandas series
+                #calculate the 20, 50 and 100 years flood
+                flood_5, flood_10, flood_20 = return_tyr_flood(hbv_true_future_flow)
+                temp_df_hbvf =pd.DataFrame({'model':'HBV True Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
+                df_tyr_flood = pd.concat([df_tyr_flood, temp_df_hbvf], ignore_index=True)
 
                 #HBV recalibrated model future
                 #read the streamflow data
