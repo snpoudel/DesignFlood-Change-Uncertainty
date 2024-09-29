@@ -15,11 +15,6 @@ df_num_stations = pd.DataFrame()
 #read a basin shapefile
 
 for basin_id in df_basin_id['station_id']:
-    # basin_id = '01177000'
-    # basin_drainage_area = drainage_area[drainage_area['STAID']==basin_id]
-    # basin_drainage_area = basin_drainage_area['DRAIN_SQKM'].values[0]
-
-
     basin_shapefile = gpd.read_file(f'data/prms_drainage_area_shapes/model_{basin_id}_nhru.shp')
     #create another shapefile name basin_shapefile_buffer with 10km buffer
     basin_shapefile_buffer = basin_shapefile.copy()
@@ -34,23 +29,6 @@ for basin_id in df_basin_id['station_id']:
     #make a list of stations that overlap with the basin
     stn_MA = stn_MA[stn_MA.within(basin_shapefile_buffer.unary_union)]
     stn_MA = stn_MA.reset_index(drop=True)
-
-    # ###plot the stations and the basin
-    # fig, ax = plt.subplots(figsize=(6,6))
-    # basin_shapefile.plot(ax=ax)
-    # stn_MA.plot(ax=ax,color='red', markersize=50, marker='x',
-    #              label=f'Gauging Station (n={len(stn_MA)})\nDrainage Area: {basin_drainage_area} SQKM')
-    # # plt.xlim([-71.6,-71.1])
-    # # plt.ylim([41.9,42.5])
-    # plt.xlabel('Longitude')
-    # plt.ylabel('Latitude')
-    # plt.legend(loc = 'lower right')
-    # plt.title(f'Basin ID:{basin_id}')
-    # plt.tight_layout()
-    # plt.show()
-    # #save figure
-    # fig.savefig(f'output/basin_{basin_id}.png', dpi=300)
-
     #save a csv file that contains the station id and the number of stations
     num_stations = len(stn_MA)
     temp_df = pd.DataFrame({'basin_id':[basin_id],'num_stations':[num_stations]})
