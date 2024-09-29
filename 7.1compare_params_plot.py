@@ -52,4 +52,4 @@ for id in basin_list['basin_id']:
     plt.show()
 
     #save plot
-    fig.savefig(f'output/figures/{id}/param_comparision.png', dpi=300)
+    fig.savefig(f'output/figures/{id}/10param_comparision.png', dpi=300)

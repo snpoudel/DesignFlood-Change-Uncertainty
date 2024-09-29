@@ -142,7 +142,7 @@ for id in used_basin_list:
 
     plt.tight_layout()
     plt.show()
-    fig.savefig(f'output/figures/{id}/historical_everything_qqplot.png', dpi=300)
+    fig.savefig(f'output/figures/{id}/2historical_everything_qqplot.png', dpi=300)
 
 
 
@@ -252,4 +252,4 @@ for id in used_basin_list:
 
     plt.tight_layout()
     plt.show()
-    fig.savefig(f'output/figures/{id}/future_everything_qqplot.png', dpi=300)
+    fig.savefig(f'output/figures/{id}/3future_everything_qqplot.png', dpi=300)

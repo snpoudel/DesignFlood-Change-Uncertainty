@@ -51,7 +51,7 @@ for id in used_basin_list:
     axs[2].legend(title='', loc='best')
     #save the plot
     plt.tight_layout()
-    plt.savefig(f'output/figures/{id}/tyr_flood_historical.png', dpi=300)
+    plt.savefig(f'output/figures/{id}/7tyr_flood_historical.png', dpi=300)
     #clear the plot
     plt.clf()
 
@@ -93,7 +93,7 @@ for id in used_basin_list:
     axs[2].legend(title='', loc='best')
     #save the plot
     plt.tight_layout()
-    plt.savefig(f'output/figures/{id}/tyr_flood_future.png', dpi=300)
+    plt.savefig(f'output/figures/{id}/8tyr_flood_future.png', dpi=300)
     #clear the plot
     plt.clf()
 
@@ -135,6 +135,6 @@ for id in used_basin_list:
     axs[2].legend(title='', loc='best')
     #save the plot
     plt.tight_layout()
-    plt.savefig(f'output/figures/{id}/change_tyr_flood.png', dpi=300)
+    plt.savefig(f'output/figures/{id}/9change_tyr_flood.png', dpi=300)
     #clear the plot
     plt.clf()
