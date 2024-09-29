@@ -42,8 +42,8 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in nse_melt['variable'].unique():
         subset = nse_melt[nse_melt['variable'] == variable]
-        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.8)  # Adjust frac as needed
-        axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.5)  # Adjust frac as needed
+        axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[0].set_xlabel('Precipitation RMSE (mm/day)')
     axs[0].set_ylabel('Streamflow NSE')
     axs[0].grid(True, linestyle ='--', alpha = 0.5)
@@ -54,8 +54,8 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in kge_melt['variable'].unique():
         subset = kge_melt[kge_melt['variable'] == variable]
-        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.7)  # Adjust frac as needed
-        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.5)  # Adjust frac as needed
+        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     # Customize the plot
     axs[1].set_xlabel('Precipitation RMSE (mm/day)')
     axs[1].set_ylabel('Streamflow KGE')
@@ -66,8 +66,8 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in rmse_melt['variable'].unique():
         subset = rmse_melt[rmse_melt['variable'] == variable]
-        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.7)  # Adjust frac as needed
-        axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.5)  # Adjust frac as needed
+        axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     # Customize the plot
     axs[2].set_xlabel('Precipitation RMSE (mm/day)')
     axs[2].set_ylabel('Streamflow RMSE')
@@ -93,11 +93,11 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in bias_melt['variable'].unique():
         subset = bias_melt[bias_melt['variable'] == variable]
-        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.7)  # Adjust frac as needed
-        axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.5)  # Adjust frac as needed
+        axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     # Customize the plot
     axs[0].set_xlabel('Precipitation RMSE (mm/day)')
-    axs[0].set_ylabel('Streamflow Bias (%)')
+    axs[0].set_ylabel('Streamflow Bias (%)\n(obs - sim) / obs')
     axs[0].grid(True, linestyle ='--', alpha = 0.5)
     new_labels = ['HBV', 'RECALIBRATED HBV', 'HYMOD', 'LSTM']
     for t, l in zip(axs[0].get_legend().texts, new_labels):t.set_text(l)
@@ -105,11 +105,11 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in hfb_melt['variable'].unique():
         subset = hfb_melt[hfb_melt['variable'] == variable]
-        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.7)  # Adjust frac as needed
-        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['value'], subset['RMSE(PRECIP)'], frac=0.5)  # Adjust frac as needed
+        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     # Customize the plot
     axs[1].set_xlabel('Precipitation RMSE (mm/day)')
-    axs[1].set_ylabel('Streamflow HFB (%)')
+    axs[1].set_ylabel('99.9th Streamflow HFB (%)')
     axs[1].grid(True, linestyle ='--', alpha = 0.5)
     axs[1].get_legend().remove()
     plt.tight_layout()

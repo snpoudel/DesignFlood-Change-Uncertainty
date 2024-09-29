@@ -22,7 +22,7 @@ for id in used_basin_list:
     for variable in flood_historical['model'].unique():
         subset = flood_historical[flood_historical['model'] == variable]
         lowess = sm.nonparametric.lowess(subset['5yr_flood'], subset['precip_rmse'], frac=0.5)  # Adjust frac as needed
-        axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[0].set_xlabel('Precipitation RMSE (mm/day)')
     axs[0].set_ylabel('5-year flood (mm/day)')
     axs[0].grid(True, linestyle ='--', alpha = 0.5)
@@ -33,7 +33,7 @@ for id in used_basin_list:
     for variable in flood_historical['model'].unique():
         subset = flood_historical[flood_historical['model'] == variable]
         lowess = sm.nonparametric.lowess(subset['10yr_flood'], subset['precip_rmse'], frac=0.5)  # Adjust frac as needed
-        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[1].set_xlabel('Precipitation RMSE (mm/day)')
     axs[1].set_ylabel('10-year flood (mm/day)')
     axs[1].grid(True, linestyle ='--', alpha = 0.5)
@@ -44,7 +44,7 @@ for id in used_basin_list:
     for variable in flood_historical['model'].unique():
         subset = flood_historical[flood_historical['model'] == variable]
         lowess = sm.nonparametric.lowess(subset['20yr_flood'], subset['precip_rmse'], frac=0.5)  # Adjust frac as needed
-        axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[2].set_xlabel('Precipitation RMSE (mm/day)')
     axs[2].set_ylabel('20-year flood (mm/day)')
     axs[2].grid(True, linestyle ='--', alpha = 0.5)
@@ -62,8 +62,8 @@ for id in used_basin_list:
     sns.scatterplot(data=flood_future, x='precip_rmse', y='5yr_flood', hue='model', alpha=0.6, ax =axs[0])
     for variable in flood_future['model'].unique():
         subset = flood_future[flood_future['model'] == variable]
-        lowess =sm.nonparametric.lowess(subset['5yr_flood'], subset['precip_rmse'], frac=0.8)
-        axs[0].plot(lowess[:,0], lowess[:,1], label=None, linewidth=3)
+        lowess =sm.nonparametric.lowess(subset['5yr_flood'], subset['precip_rmse'], frac=0.5)
+        axs[0].plot(lowess[:,0], lowess[:,1], label=None, linewidth=1.5)
     axs[0].set_xlabel('Precipitation RMSE (mm/day)')
     axs[0].set_ylabel('5-year flood (mm/day)')
     axs[0].grid(True, linestyle ='--', alpha = 0.5)
@@ -74,8 +74,8 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in flood_future['model'].unique():
         subset = flood_future[flood_future['model'] == variable]
-        lowess = sm.nonparametric.lowess(subset['10yr_flood'], subset['precip_rmse'], frac=0.8)  # Adjust frac as needed
-        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['10yr_flood'], subset['precip_rmse'], frac=0.5)  # Adjust frac as needed
+        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[1].set_xlabel('Precipitation RMSE (mm/day)')
     axs[1].set_ylabel('10-year flood (mm/day)')
     axs[1].grid(True, linestyle ='--', alpha = 0.5)
@@ -85,8 +85,8 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in flood_future['model'].unique():
         subset = flood_future[flood_future['model'] == variable]
-        lowess = sm.nonparametric.lowess(subset['20yr_flood'], subset['precip_rmse'], frac=0.8)  # Adjust frac as needed
-        axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['20yr_flood'], subset['precip_rmse'], frac=0.5)  # Adjust frac as needed
+        axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[2].set_xlabel('Precipitation RMSE (mm/day)')
     axs[2].set_ylabel('20-year flood (mm/day)')
     axs[2].grid(True, linestyle ='--', alpha = 0.5)
@@ -104,8 +104,8 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in change_flood['model'].unique():
         subset = change_flood[change_flood['model'] == variable]
-        lowess = sm.nonparametric.lowess(subset['change_5yr_flood'], subset['precip_rmse'], frac=0.8)  # Adjust frac as needed
-        axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['change_5yr_flood'], subset['precip_rmse'], frac=0.5)  # Adjust frac as needed
+        axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[0].set_xlabel('Precipitation RMSE (mm/day)')
     axs[0].set_ylabel('∆5-year flood (mm/day)')
     axs[0].grid(True, linestyle ='--', alpha = 0.5)
@@ -116,8 +116,8 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in change_flood['model'].unique():
         subset = change_flood[change_flood['model'] == variable]
-        lowess = sm.nonparametric.lowess(subset['change_10yr_flood'], subset['precip_rmse'], frac=0.8)  # Adjust frac as needed
-        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['change_10yr_flood'], subset['precip_rmse'], frac=0.5)  # Adjust frac as needed
+        axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[1].set_xlabel('Precipitation RMSE (mm/day)')
     axs[1].set_ylabel('∆10-year flood (mm/day)')
     axs[1].grid(True, linestyle ='--', alpha = 0.5)
@@ -127,8 +127,8 @@ for id in used_basin_list:
     # Compute and plot LOWESS lines
     for variable in change_flood['model'].unique():
         subset = change_flood[change_flood['model'] == variable]
-        lowess = sm.nonparametric.lowess(subset['change_20yr_flood'], subset['precip_rmse'], frac=0.8)  # Adjust frac as needed
-        axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=3)
+        lowess = sm.nonparametric.lowess(subset['change_20yr_flood'], subset['precip_rmse'], frac=0.5)  # Adjust frac as needed
+        axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[2].set_xlabel('Precipitation RMSE (mm/day)')
     axs[2].set_ylabel('∆20-year flood (mm/day)')
     axs[2].grid(True, linestyle ='--', alpha = 0.5)
