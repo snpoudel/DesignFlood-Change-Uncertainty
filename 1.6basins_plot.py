@@ -37,17 +37,15 @@ for basin_id in used_basin_list:
 
     ###plot the stations and the basin
     fig, ax = plt.subplots(figsize=(6,6))
-    basin_shapefile.plot(ax=ax, alpha =0.6, edgecolor='grey')
-    stn_MA.plot(ax=ax,color='brown', markersize=50, marker='d', linewidth=5,
+    basin_shapefile.plot(ax=ax, edgecolor='none', facecolor = 'purple', alpha =0.3)
+    stn_MA.plot(ax=ax,color='brown', markersize=50, marker='d', linewidth=3,
                  label=f'Gauging Station (n={len(stn_MA)})\nDrainage Area: {basin_drainage_area} SQKM')
 
     ctx.add_basemap(ax, crs=basin_shapefile.crs.to_string(), source=ctx.providers.OpenStreetMap.Mapnik)
 
-    # plt.xlim([-71.6,-71.1])
-    # plt.ylim([41.9,42.5])
     plt.xlabel('Longitude')
     plt.ylabel('Latitude')
-    plt.legend(loc = 'lower right')
+    plt.legend(loc = 'best')
     plt.title(f'Basin ID:{basin_id}')
     plt.tight_layout()
     plt.show()
