@@ -34,7 +34,7 @@ for id in used_basin_list:
     #Make boxplots using seaborn
     seaplot = sns.catplot(
                 data=df_all, x='grid', y='value', row='objective',
-                hue='model', kind='box', showfliers = False,
+                hue='model', kind='box', showfliers = True,
                 sharey=False,  legend_out=True,
                 height = 2, aspect = 4, #aspect times height gives width of each facet
                 ) 
@@ -47,5 +47,5 @@ for id in used_basin_list:
     plt.show()
 
     #save the plot
-    seaplot.savefig(f'output/figures/{id}/diagnostics_boxplot.png', dpi=300)
+    seaplot.savefig(f'output/figures/{id}/4diagnostics_boxplot.png', dpi=300)
 
