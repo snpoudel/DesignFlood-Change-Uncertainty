@@ -21,7 +21,7 @@ for id in used_basin_list:
     #change x ticks labels
     plt.grid(True, linestyle ='--', alpha = 0.5)
     plt.tight_layout()
-    plt.savefig(f'output/figures/{id}/precip rmse vs num of stations used.png', dpi=300)
+    plt.savefig(f'output/figures/{id}/1precip rmse vs num of stations used.png', dpi=300)
     # Clear the plot
     plt.clf()  # Clear the current figure
     plt.close() # Close the current figure window
@@ -75,7 +75,7 @@ for id in used_basin_list:
     axs[2].get_legend().remove()
     #save the plot
     plt.tight_layout()
-    plt.savefig(f'output/figures/{id}/scatterplot_nse_kge_rmse.png', dpi=300)
+    plt.savefig(f'output/figures/{id}/5scatterplot_nse_kge_rmse.png', dpi=300)
     # Clear the plot
     plt.clf()  # Clear the current figure
 
@@ -114,7 +114,7 @@ for id in used_basin_list:
     axs[1].get_legend().remove()
     plt.tight_layout()
     #save the plot
-    plt.savefig(f'output/figures/{id}/scatterplot_bias_hfb.png', dpi=300)
+    plt.savefig(f'output/figures/{id}/6scatterplot_bias_hfb.png', dpi=300)
     # Clear the plot
     plt.clf()  # Clear the current figure
     plt.close() # Close the current figure window

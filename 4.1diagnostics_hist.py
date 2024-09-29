@@ -64,10 +64,10 @@ for id in used_basin_list:
             file_path = f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv'
             if os.path.exists(file_path):
                 #read real hbv flow
-                if os.path.exists(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv'):             
-                    real_hbv_flow = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv')
-                    real_hbv_flow = real_hbv_flow[365:] #remove the first 365 days
-                    real_hbv_flow = real_hbv_flow.reset_index(drop=True)
+                # if os.path.exists(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv'):             
+                real_hbv_flow = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv')
+                real_hbv_flow = real_hbv_flow[365:] #remove the first 365 days
+                real_hbv_flow = real_hbv_flow.reset_index(drop=True)
                 #read recalibrated hbv flow
                 recal_hbv_flow = pd.read_csv(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv')
                 recal_hbv_flow = recal_hbv_flow[365:] #remove the first 365 days
