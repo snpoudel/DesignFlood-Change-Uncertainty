@@ -51,6 +51,3 @@ for basin_id in used_basin_list:
     plt.show()
     #save figure
     fig.savefig(f'output/figures/basin_{basin_id}.png', dpi=300)
-
-
-    
