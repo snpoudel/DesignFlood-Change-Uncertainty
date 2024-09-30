@@ -50,4 +50,4 @@ for basin_id in used_basin_list:
     plt.tight_layout()
     plt.show()
     #save figure
-    fig.savefig(f'output/figures/0basin_{basin_id}.png', dpi=300)
+    fig.savefig(f'output/figures/{basin_id}/0basin_{basin_id}.png', dpi=300)
