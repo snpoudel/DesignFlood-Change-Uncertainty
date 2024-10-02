@@ -101,4 +101,4 @@ for id in used_basin_list:
     plt.tight_layout()
     plt.show()
 
-    fig.savefig(f'output/figures/{id}/true_vs_idw_precip99_999th.png', dpi=300)
+    # fig.savefig(f'output/figures/{id}/true_vs_idw_precip99_999th.png', dpi=300)
