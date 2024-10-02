@@ -7,8 +7,9 @@ import multiprocessing
 
 #basin id
 #id = '01108000'
-# basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv',  dtype={'basin_id':str})
-used_basin_list = ['01108000', '01104500', '01109060', '01177000']
+basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv',  dtype={'basin_id':str})
+# used_basin_list = ['01108000', '01104500', '01109060', '01177000']
+used_basin_list = basin_list['basin_id']
 def func_multiprocess(id):
     #read the list of basin ID with centriod latitude
     lat_basin = pd.read_csv('data/basinID_withLatLon.csv', dtype={'STAID':str})
@@ -68,7 +69,7 @@ def func_multiprocess(id):
 
 # Create multiprocessing pool
 if __name__ == '__main__': #this ensures that the code is being run in the main module and this block is not run to avoid creating new processes recursively
-    pool = multiprocessing.Pool(processes=4)
+    pool = multiprocessing.Pool(processes=10)
     grid_list = used_basin_list
     pool.map(func_multiprocess, grid_list)
     pool.close()
