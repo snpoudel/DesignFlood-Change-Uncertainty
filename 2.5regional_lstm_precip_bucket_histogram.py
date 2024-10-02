@@ -28,8 +28,8 @@ for id in basin_list['basin_id']:
                 df_precip_rmse = pd.concat([df_precip_rmse,temp_df], ignore_index=True)
 
 #convert basin into precip category group
-df_precip_rmse['precip_bucket'] = pd.cut(df_precip_rmse['precip_rmse'], bins=[0,2,4,6,8,10],
-                                          labels=['0-2', '2-4', '4-6', '6-8', '8-10'])
+df_precip_rmse['precip_bucket'] = pd.cut(df_precip_rmse['precip_rmse'], bins=[0,1,2,3,4,6,8,10],
+                                          labels=['0-1', '1-2', '2-3', '3-4' , '4-6', '6-8', '8-10'])
 
 #make a histogram plot of precip_rmse
 plt.hist(df_precip_rmse['precip_rmse'], bins=20, edgecolor = 'black')
