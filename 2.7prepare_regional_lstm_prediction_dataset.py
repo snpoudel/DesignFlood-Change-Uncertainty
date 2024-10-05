@@ -10,32 +10,35 @@ def rmse(q_obs, q_sim):
     rmse_value = np.sqrt(np.mean((q_obs - q_sim)**2))
     return rmse_value
 
-# #--FOR TRUE PRECIP--#
-# for id in basin_list['basin_id']:
-#     for case in ['', 'future_']: #iterate over historical and future case
-#         precip_true = pd.read_csv(f'data/regional_lstm/{case}idw_precip_buckets/pb0/{case}true_precip{id}.csv')
-#         #extract static features from previous input datasets
-#         previous_file = pd.read_csv(f'data/regional_lstm/lstm_input/lstm_input_{id}.csv').iloc[[0]]
-#         previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
-#                                               'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
-#                                               'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
-#         previous_file = round(previous_file, 4)
-#         previous_file = pd.concat([previous_file]*len(precip_true))
-#         previous_file = previous_file.reset_index(drop=True)
+#--FOR TRUE PRECIP--#
+for id in basin_list['basin_id']:
+    for case in ['', 'future_']: #iterate over historical and future case
+        precip_true = pd.read_csv(f'data/regional_lstm/{case}idw_precip_buckets/pb0/{case}true_precip{id}.csv')
+        #extract static features from previous input datasets
+        previous_file = pd.read_csv(f'data/regional_lstm/lstm_input/lstm_input_{id}.csv').iloc[[0]]
+        previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
+                                              'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
+                                              'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
+        previous_file = round(previous_file, 4)
+        previous_file = pd.concat([previous_file]*len(precip_true))
+        previous_file = previous_file.reset_index(drop=True)
         
-#         #read true discharge for this basin
-#         true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
+        #read true discharge for this basin
+        true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
 
-#         #merge data,temp,flow from true file to previous file
-#         previous_file['idw_precip'] = precip_true['PRECIP']
-#         previous_file['era5temp'] = true_flow['era5temp']
-#         previous_file['date'] = true_flow['date']
-#         previous_file['qobs'] = true_flow['streamflow']
-#         previous_file = previous_file.reset_index(drop=True)
+        #merge data,temp,flow from true file to previous file
+        previous_file['idw_precip'] = precip_true['PRECIP']
+        previous_file['era5temp'] = true_flow['era5temp']
+        previous_file['date'] = true_flow['date']
+        previous_file['qobs'] = true_flow['streamflow']
+        previous_file = previous_file.reset_index(drop=True)
 
-#         #save the final lstm input file
-#         previous_file.to_csv(f'data/regional_lstm/{case}processed_lstm_input/pb0/lstm_input{id}.csv', index=False)
-
+        #save the final lstm input file
+        if case == '':
+            tag = 'historical'
+        else:
+            tag = 'future'
+        previous_file.to_csv(f'data/regional_lstm/prediction_datasets/{tag}/pb0/lstm_input{id}_coverage99_comb0.csv', index=False)
 
 
 
