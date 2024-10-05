@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=regional-lstm            # Job name
-#SBATCH --output=regional-lstm%j.log       # Output file name (%j expands to jobID)
-#SBATCH --error=regional-lstm%j.log        # Error file name (%j expands to jobID)
-#SBATCH --time=32:00:00                 # Time limit (HH:MM:SS)
-#SBATCH --nodes=5                       #5 Number of nodes
-#SBATCH --ntasks=5                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
-#SBATCH --cpus-per-task=16               # Number of CPU cores per task
-#SBATCH --mem=164G                        # Memory per CPU core (adjust as needed)
+#SBATCH --job-name=reg-lstm            # Job name
+#SBATCH --output=reg-lstm%j.log       # Output file name (%j expands to jobID)
+#SBATCH --error=reg-lstm%j.log        # Error file name (%j expands to jobID)
+#SBATCH --time=12:00:00                 # Time limit (HH:MM:SS)
+#SBATCH --nodes=3                       #5 Number of nodes
+#SBATCH --ntasks=3                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
+#SBATCH --cpus-per-task=8               # Number of CPU cores per task
+#SBATCH --mem=32G                        # Memory per CPU core (adjust as needed)
 #SBATCH --exclusive                     # Exclusive node allocation
 #SBATCH --mail-type=END
 #SBATCH --mail-user=sp2596@cornell.edu
@@ -18,4 +18,4 @@ module load python/3.11.5
 source ~/pyenv-pytorch/bin/activate
 
 # Run your Python script with mpi
-mpirun python3 3.7regional_lstm_idw_streamflow.py
+mpirun python3 3.6regional_lstm_train.py
