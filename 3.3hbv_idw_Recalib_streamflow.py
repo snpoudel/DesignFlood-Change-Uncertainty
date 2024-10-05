@@ -60,7 +60,7 @@ def calibNSE(station_id, grid, combination):
     algorithm_param = {
         'max_num_iteration': 100,              #100 Generations, higher is better, but requires more computational time
         'max_iteration_without_improv': None,   # Stopping criterion for lack of improvement
-        'population_size': 2000,                 #200 Number of parameter-sets in a single iteration/generation(to start with population 10 times the number of parameters should be fine!)
+        'population_size': 2000,                 #2000 Number of parameter-sets in a single iteration/generation(to start with population 10 times the number of parameters should be fine!)
         'parents_portion': 0.3,                 # Portion of new generation population filled by previous population
         'elit_ratio': 0.01,                     # Portion of the best individuals preserved unchanged
         'crossover_probability': 0.3,           # Chance of existing solution passing its characteristics to new trial solution
@@ -105,9 +105,8 @@ basin_list = basin_list.explode('station_array').reset_index(drop=True)
 
 id = basin_list['basin_id'][rank]
 grid = basin_list['station_array'][rank] 
-total_combination = basin_list['num_stations'][rank]
 
-for combination in np.arange(total_combination):
+for combination in np.arange(12):
     file_path = f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv'
     if os.path.exists(file_path):
         #---HISTORICAL OBSERVATION---#

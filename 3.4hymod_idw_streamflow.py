@@ -104,9 +104,8 @@ basin_list = basin_list.explode('station_array').reset_index(drop=True)
 
 id = basin_list['basin_id'][rank]
 grid = basin_list['station_array'][rank] 
-total_combination = basin_list['num_stations'][rank]
 
-for combination in np.arange(total_combination):
+for combination in np.arange(12):
     file_path = f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv'
     if os.path.exists(file_path):
         #--HISTORICAL OBSERVATION--#
