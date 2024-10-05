@@ -42,7 +42,7 @@ def rmse(q_obs, q_sim):
 #--HISTORICAL--#
 for id in basin_list['basin_id']:
     #read interpolate precip for this basin
-    for precip_bucket in ['1-2', '3-4', '4-6']:
+    for precip_bucket in ['0-1','1-2','2-3', '3-4', '4-6', '6-8','8-10']:
         random_precip_rmse = 1000
         for coverage in range(15):
             for comb in range(15):
@@ -83,7 +83,7 @@ for id in basin_list['basin_id']:
 #--FUTURE--#
 for id in basin_list['basin_id']:
     #read interpolate precip for this basin
-    for precip_bucket in ['1-2', '3-4', '4-6']:
+    for precip_bucket in ['0-1','1-2','2-3', '3-4', '4-6', '6-8','8-10']:
         random_precip_rmse = 1000
         for coverage in range(15):
             for comb in range(15):
