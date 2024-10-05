@@ -124,12 +124,16 @@ for basin_id in used_basin_list:
 
                 #LSTM model
                 #read the streamflow data
-                lstm = pd.read_csv(f'output/lstm_idw_streamflow/lstm_idw_{basin_id}_coverage{grid}_comb{comb}.csv', index_col=1)
-                lstm.index = pd.to_datetime(lstm.index, format='%Y-%m-%d')
-                lstm_flow = lstm['streamflow']
-                lstm_flow = pd.Series(lstm_flow)
-                #calculate the 20, 50 and 100 years flood
-                flood_5, flood_10, flood_20 = return_tyr_flood(lstm_flow)
+                if os.path.exists(f'output/regional_lstm/historical/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv'):
+                    lstm = pd.read_csv(f'output/regional_lstm/historical/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv', index_col=0)
+                    lstm.index = pd.to_datetime(lstm.index, format='%Y-%m-%d')
+                    lstm_flow = lstm['streamflow']
+                    lstm_flow = pd.Series(lstm_flow)
+                    #calculate the 20, 50 and 100 years flood
+                    flood_5, flood_10, flood_20 = return_tyr_flood(lstm_flow)
+                else:
+                    flood_5, flood_10, flood_20 = np.NAN, np.NAN, np.NAN
+
                 temp_df_lstm = pd.DataFrame({'model':'LSTM', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
                 df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstm], ignore_index=True)
 
@@ -170,12 +174,15 @@ for basin_id in used_basin_list:
 
                 #LSTM model future
                 #read the streamflow data
-                lstm_future = pd.read_csv(f'output/future/lstm_idw_future_streamflow/lstm_idw_future_streamflow{basin_id}_coverage{grid}_comb{comb}.csv', index_col=1)
-                lstm_future.index = pd.to_datetime(lstm_future.index, format='%Y-%m-%d')
-                lstm_future_flow = lstm_future['streamflow']
-                lstm_future_flow = pd.Series(lstm_future_flow)
-                #calculate the 20, 50 and 100 years flood
-                flood_5, flood_10, flood_20 = return_tyr_flood(lstm_future_flow)
+                if os.path.exists(f'output/regional_lstm/future/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv'):
+                    lstm_future = pd.read_csv(f'output/regional_lstm/future/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv', index_col=0)
+                    lstm_future.index = pd.to_datetime(lstm_future.index, format='%Y-%m-%d')
+                    lstm_future_flow = lstm_future['streamflow']
+                    lstm_future_flow = pd.Series(lstm_future_flow)
+                    #calculate the 20, 50 and 100 years flood
+                    flood_5, flood_10, flood_20 = return_tyr_flood(lstm_future_flow)
+                else:
+                    flood_5, flood_10, flood_20 = np.NaN, np.NaN, np.NaN
                 temp_df_lstmf = pd.DataFrame({'model':'LSTM Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
                 df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstmf], ignore_index=True)
 
