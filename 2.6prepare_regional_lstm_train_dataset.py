@@ -19,8 +19,6 @@ def rmse(q_obs, q_sim):
 #         previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
 #                                               'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
 #                                               'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
-#         #previous_file = previous_file.iloc[:,8:] #extract only static features
-#         # previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN']]
 #         previous_file = round(previous_file, 4)
 #         previous_file = pd.concat([previous_file]*len(precip_true))
 #         previous_file = previous_file.reset_index(drop=True)
@@ -60,7 +58,9 @@ for id in basin_list['basin_id']:
                         random_precip_rmse = precip_rmse
                         #extract static features from previous input datasets
                         previous_file = pd.read_csv(f'data/regional_lstm/lstm_input/lstm_input_{id}.csv').iloc[[0]]
-                        previous_file = previous_file.iloc[:,8:] #extract only static features
+                        previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
+                                              'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
+                                              'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
                         previous_file = round(previous_file, 2)
                         previous_file = pd.concat([previous_file]*len(idw_precip))
                         previous_file = previous_file.reset_index(drop=True)
@@ -100,7 +100,9 @@ for id in basin_list['basin_id']:
                         random_precip_rmse = precip_rmse
                         #extract static features from previous input datasets
                         previous_file = pd.read_csv(f'data/regional_lstm/lstm_input/lstm_input_{id}.csv').iloc[[0]]
-                        previous_file = previous_file.iloc[:,8:] #extract only static features
+                        previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
+                                              'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
+                                              'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
                         previous_file = round(previous_file, 2)
                         previous_file = pd.concat([previous_file]*len(idw_precip))
                         previous_file = previous_file.reset_index(drop=True)
