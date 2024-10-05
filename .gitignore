@@ -3,4 +3,4 @@
 /.git
 /__pycache__
 /*.log
-/.pth
+/*.pth
