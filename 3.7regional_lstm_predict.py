@@ -37,7 +37,7 @@ features = scaler.fit_transform(features) #fit to data, then transform it
 #Historical
 #read basin for which prediction is to be made, and normalize features using scaler fitted to training data 
 for id in basin_list['basin_id']:
-    for coverage in np.arange(12):
+    for coverage in np.append(np.arange(12), [99]):
         for comb in np.arange(12):
             file_path = f'data/regional_lstm/prediction_datasets/historical/{pb}/lstm_input{id}_coverage{coverage}_comb{comb}.csv'
             if os.path.exists(file_path):
