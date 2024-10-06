@@ -14,7 +14,8 @@ size = comm.Get_size() #Get the total number of processes
 
 basin_list = pd.read_csv("data/regional_lstm/MA_basins_gauges_2000-2020_filtered.csv", dtype={'basin_id':str})
 #precip buckets
-precip_buckets = ['1-2', '3-4', '4-6']
+precip_buckets = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
+# precip_buckets = ['0', '0-1']
 pb = 'pb' + precip_buckets[rank]
 
 
@@ -36,14 +37,14 @@ features = scaler.fit_transform(features) #fit to data, then transform it
 #Historical
 #read basin for which prediction is to be made, and normalize features using scaler fitted to training data 
 for id in basin_list['basin_id']:
-    for coverage in np.arange(10):
-        for comb in np.arange(10):
+    for coverage in np.arange(12):
+        for comb in np.arange(12):
             file_path = f'data/regional_lstm/prediction_datasets/historical/{pb}/lstm_input{id}_coverage{coverage}_comb{comb}.csv'
             if os.path.exists(file_path):
                 temp_dataset = pd.read_csv(file_path)
                 temp_date = temp_dataset['date'][365:]
                 temp_dataset = temp_dataset.drop(columns=['date'])
-                temp_features = df_predict.iloc[:, :-1].values
+                temp_features = temp_dataset.iloc[:, :-1].values
                 #scale
                 temp_features = scaler.transform(temp_features)
                 q_sim = predict_lstm_model(temp_features, precip_bucket = pb)
@@ -55,14 +56,14 @@ for id in basin_list['basin_id']:
 #Future
 #read basin for which prediction is to be made, and normalize features using scaler fitted to training data 
 for id in basin_list['basin_id']:
-    for coverage in np.arange(10):
-        for comb in np.arange(10):
+    for coverage in np.arange(12):
+        for comb in np.arange(12):
             file_path = f'data/regional_lstm/prediction_datasets/future/{pb}/lstm_input{id}_coverage{coverage}_comb{comb}.csv'
             if os.path.exists(file_path):
                 temp_dataset = pd.read_csv(file_path)
                 temp_date = temp_dataset['date'][365:]
                 temp_dataset = temp_dataset.drop(columns=['date'])
-                temp_features = df_predict.iloc[:, :-1].values
+                temp_features = temp_dataset.iloc[:, :-1].values
                 #scale
                 temp_features = scaler.transform(temp_features)
                 q_sim = predict_lstm_model(temp_features, precip_bucket = pb)

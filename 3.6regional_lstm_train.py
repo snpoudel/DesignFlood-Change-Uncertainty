@@ -13,7 +13,8 @@ size = comm.Get_size() #Get the total number of processes
 
 basin_list = pd.read_csv("data/regional_lstm/MA_basins_gauges_2000-2020_filtered.csv", dtype={'basin_id':str})
 #precip buckets
-precip_buckets = ['0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
+precip_buckets = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
+# precip_buckets = ['0', '0-1']
 pb = 'pb' + precip_buckets[rank]
 
 #merge lstm training datasets
