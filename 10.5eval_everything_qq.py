@@ -62,42 +62,45 @@ for id in used_basin_list:
                 dff = pd.concat([dff, future_idw_precip])
 
                 #Read corresponding streamflow for HBV recalibrated model
-                hbvre = pd.read_csv(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{coverage}_comb{comb}.csv')
-                future_hbvre = pd.read_csv(f'output/future/hbv_idw_recalib_future_streamflow/hbv_idw_recalib_future_streamflow{id}_coverage{coverage}_comb{comb}.csv')
-                hbvre['tag'] = pb
-                hbvre['truth'] = true_flow['streamflow']
-                hbvre['model'] = 'HBV Re'
-                future_hbvre['tag'] =pb
-                future_hbvre['truth'] = future_true_flow['streamflow']
-                future_hbvre['model'] = 'HBV Re'
-                fd = pd.concat([fd, hbvre])
-                ffd  = pd.concat([ffd, future_hbvre])
+                if os.path.exists(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{coverage}_comb{comb}.csv'):
+                    hbvre = pd.read_csv(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{coverage}_comb{comb}.csv')
+                    future_hbvre = pd.read_csv(f'output/future/hbv_idw_recalib_future_streamflow/hbv_idw_recalib_future_streamflow{id}_coverage{coverage}_comb{comb}.csv')
+                    hbvre['tag'] = pb
+                    hbvre['truth'] = true_flow['streamflow']
+                    hbvre['model'] = 'HBV Re'
+                    future_hbvre['tag'] =pb
+                    future_hbvre['truth'] = future_true_flow['streamflow']
+                    future_hbvre['model'] = 'HBV Re'
+                    fd = pd.concat([fd, hbvre])
+                    ffd  = pd.concat([ffd, future_hbvre])
 
-                #Read corresponding streamflow for hymod  model
-                hymod = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{coverage}_comb{comb}.csv')
-                future_hymod = pd.read_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage{coverage}_comb{comb}.csv')
-                hymod['tag'] = pb
-                hymod['truth'] = true_flow['streamflow']
-                hymod['model'] = 'HYMOD'
-                future_hymod['tag'] =pb
-                future_hymod['truth'] = future_true_flow['streamflow']
-                future_hymod['model'] = 'HYMOD'
-                fd = pd.concat([fd, hymod])
-                ffd  = pd.concat([ffd, future_hymod])
+                    #Read corresponding streamflow for hymod  model
+                    hymod = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{coverage}_comb{comb}.csv')
+                    future_hymod = pd.read_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage{coverage}_comb{comb}.csv')
+                    hymod['tag'] = pb
+                    hymod['truth'] = true_flow['streamflow']
+                    hymod['model'] = 'HYMOD'
+                    future_hymod['tag'] =pb
+                    future_hymod['truth'] = future_true_flow['streamflow']
+                    future_hymod['model'] = 'HYMOD'
+                    fd = pd.concat([fd, hymod])
+                    ffd  = pd.concat([ffd, future_hymod])
 
-                #Read corresponding streamflow for lstm  model
-                lstm = pd.read_csv(f'output/lstm_idw_streamflow/lstm_idw_{id}_coverage{coverage}_comb{comb}.csv')
-                future_lstm = pd.read_csv(f'output/future/lstm_idw_future_streamflow/lstm_idw_future_streamflow{id}_coverage{coverage}_comb{comb}.csv')
-                lstm['tag'] = pb
-                true_flow_forlstm = true_flow[365:].reset_index(drop=True)
-                lstm['truth'] = true_flow_forlstm['streamflow']
-                lstm['model'] = 'LSTM'
-                future_lstm['tag'] =pb
-                future_true_flow_forlstm = future_true_flow[365:].reset_index(drop=True)
-                future_lstm['truth'] = future_true_flow_forlstm['streamflow']
-                future_lstm['model'] = 'LSTM'
-                fd = pd.concat([fd, lstm])
-                ffd  = pd.concat([ffd, future_lstm])
+                    #Read corresponding streamflow for lstm  model
+                    #read real lstm flow
+                if os.path.exists(f'output/regional_lstm/historical/lstm_input{id}_coverage{coverage}_comb{comb}.csv'):
+                    lstm = pd.read_csv(f'output/regional_lstm/historical/lstm_input{id}_coverage{coverage}_comb{comb}.csv')
+                    future_lstm = pd.read_csv(f'output/regional_lstm/future/lstm_input{id}_coverage{coverage}_comb{comb}.csv')
+                    lstm['tag'] = pb
+                    true_flow_forlstm = true_flow[365:].reset_index(drop=True)
+                    lstm['truth'] = true_flow_forlstm['streamflow']
+                    lstm['model'] = 'LSTM'
+                    future_lstm['tag'] =pb
+                    future_true_flow_forlstm = future_true_flow[365:].reset_index(drop=True)
+                    future_lstm['truth'] = future_true_flow_forlstm['streamflow']
+                    future_lstm['model'] = 'LSTM'
+                    fd = pd.concat([fd, lstm])
+                    ffd  = pd.concat([ffd, future_lstm])
 
 
     #save the plots
