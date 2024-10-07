@@ -21,17 +21,17 @@ for id in basin_list['basin_id']:
     true_hbv_flow = true_hbv_flow[365:] #remove the first 365 days
     true_hbv_flow = true_hbv_flow.reset_index(drop=True)
 
-    lstm_flow = pd.read_csv(f'output/regional_lstm/historical/lstm_input{id}.csv')
+    lstm_flow = pd.read_csv(f'output/regional_lstm/historical/lstm_input{id}_coverage99_comb0.csv')
 
     nse_lstm_hist_train = nse(true_hbv_flow['streamflow'][0:val_pd], lstm_flow['streamflow'][0:val_pd])
     nse_lstm_hist_valid = nse(true_hbv_flow['streamflow'][val_pd:], lstm_flow['streamflow'][val_pd:])
 
     #future
-    future_hbv_flow = pd.read_csv(f'Z:/MA-Precip-Uncertainty-GaugeData/output/hbv_true_streamflow/hbv_true_output_{id}.csv')
+    future_hbv_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
     future_hbv_flow = future_hbv_flow[365:] #remove the first 365 days
     future_hbv_flow = future_hbv_flow.reset_index(drop=True)
 
-    future_lstm_flow = pd.read_csv(f'output/regional_lstm/future/lstm_input{id}.csv')
+    future_lstm_flow = pd.read_csv(f'output/regional_lstm/future/lstm_input{id}_coverage99_comb0.csv')
 
     nse_lstm_future = nse(future_hbv_flow['streamflow'][val_pd_future:], future_lstm_flow['streamflow'][val_pd_future:])
 
