@@ -80,7 +80,6 @@ seaplot = sns.catplot(
             sharey=False,  legend_out=True,
             height = 3, aspect = 3, #aspect times height gives width of each facet
             ) 
-plt.axhline()
 seaplot.set_axis_labels('Average Precipitation Uncertainty (mm/day)', "") #set x and y labels
 seaplot.legend.set_title("Model") #set legend title
 seaplot.set_titles("") #remove default titles

@@ -18,7 +18,8 @@ df['precip_cat']  = pd.cut(df['RMSE(PRECIP)'], bins=[0,1,2,3,4,6,8],
 df = pd.concat([df,df_zeroprecip], ignore_index=True)
 df = df.dropna(axis='rows')
 
-df = df[df['time']=='future']
+# df = df[df['time']=='future']
+
 #Filter basins that have all precip_error categories
 # Group by 'precip_cat' and count unique 'station_id' for each precip error category
 # station_counts = df.groupby('station_id')['precip_cat'].nunique()
@@ -52,7 +53,8 @@ seaplot.set_axis_labels('Average Precipitation Uncertainty (mm/day)', "") #set x
 seaplot.legend.set_title("Model") #set legend title
 seaplot.set_titles("") #remove default titles
 for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of all axes in facetgrid/catplot
-    ax.set_ylabel([ 'HFB(Future)'][index])
+    ax.set_ylabel(['HFB(Historical)', 'HFB(Future)'][index])
+    # ax.set_ylabel([ 'HFB(Future)'][index])
     ax.grid(True, linestyle ='--', alpha = 0.5)
 # plt.tight_layout()
 plt.show()

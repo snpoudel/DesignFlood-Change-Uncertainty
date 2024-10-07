@@ -101,7 +101,7 @@ for id in used_basin_list:
     #Loop through each basin
     for grid in grid_coverage: #1
         #read true streamflow
-        true_hbv_flow = pd.read_csv(f'output/future/hbv_true_future_streamflow/hbv_true_output_{id}.csv')
+        true_hbv_flow = pd.read_csv(f'output/future/hbv_true_future_streamflow/hbv_true_future_output_{id}.csv')
         true_hbv_flow = true_hbv_flow[365:] #remove the first 365 days
         true_hbv_flow = true_hbv_flow.reset_index(drop=True)
         #read true precipitation
