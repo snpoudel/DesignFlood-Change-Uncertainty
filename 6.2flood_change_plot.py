@@ -99,6 +99,15 @@ for id in used_basin_list:
 
 
     ###---02 plot for change in t-yr flood---###
+    #true change in flood
+    #first find true change in tyr floods
+    df_temp_true = change_flood[(change_flood['model'] == 'HBV True') & (change_flood['precip_rmse'] == 0)]
+    true_5yr = float(df_temp_true.loc[0,'change_5yr_flood'])
+    true_10yr = float(df_temp_true.loc[0,'change_10yr_flood'])
+    true_20yr = float(df_temp_true.loc[0,'change_20yr_flood'])
+    
+    #filter out hbv true from change dataframe
+    change_flood = change_flood[~(change_flood['model'] == 'HBV True')] #don't need to show result of truth across precip error!
     fig, axs = plt.subplots(3,1,figsize=(7, 8), sharex=True)
     sns.scatterplot(data=change_flood, x='precip_rmse', y='change_5yr_flood', hue='model', alpha=0.6, ax=axs[0])
     # Compute and plot LOWESS lines
@@ -108,6 +117,7 @@ for id in used_basin_list:
         axs[0].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[0].set_xlabel('Precipitation RMSE (mm/day)')
     axs[0].set_ylabel('∆5-year flood (mm/day)')
+    axs[0].axhline(y=true_5yr, linestyle='--', color='black', alpha=1, label='True Change', linewidth=2)
     axs[0].grid(True, linestyle ='--', alpha = 0.5)
     axs[0].get_legend().remove()
     axs[0].set_title('Change in flood return period')
@@ -120,6 +130,7 @@ for id in used_basin_list:
         axs[1].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[1].set_xlabel('Precipitation RMSE (mm/day)')
     axs[1].set_ylabel('∆10-year flood (mm/day)')
+    axs[1].axhline(y=true_10yr, linestyle='--', color='black', alpha=1, label='True Change', linewidth=2)
     axs[1].grid(True, linestyle ='--', alpha = 0.5)
     axs[1].get_legend().remove()
 
@@ -131,6 +142,7 @@ for id in used_basin_list:
         axs[2].plot(lowess[:, 0], lowess[:, 1], label=None, linewidth=1.5)
     axs[2].set_xlabel('Precipitation RMSE (mm/day)')
     axs[2].set_ylabel('∆20-year flood (mm/day)')
+    axs[2].axhline(y=true_20yr, linestyle='--', color='black', alpha=1, label='True Change', linewidth=2)
     axs[2].grid(True, linestyle ='--', alpha = 0.5)
     axs[2].legend(title='', loc='best')
     #save the plot
