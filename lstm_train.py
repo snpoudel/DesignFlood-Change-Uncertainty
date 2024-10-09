@@ -14,13 +14,13 @@ def train_lstm_model(lstm_train_dataset, chunk_size, precip_bucket):
     '''
     #Hyperparameters
     input_size = lstm_train_dataset.shape[1] -1 #53number of features in input at a time step
-    hidden_size = 212 #256 #number of features in the hidden state
+    hidden_size = 256 #256 #number of features in the hidden state
     num_layers = 1 #number of lstm blocks (having more layers isn't doing much improvements)
     output_size = 1 #size of prediction/output
     sequence_length = 365 #365length of each sequence
-    num_epochs = 30 # 30#number of iterations of complete dataset
-    batch_size = 64 #128 #number of samples in one batch
-    learning_rate = 0.001 #0.005learning rate
+    num_epochs = 60 # 30#number of iterations of complete dataset
+    batch_size = 128 #128 #number of samples in one batch
+    learning_rate = 0.0005 #0.005learning rate
     dropout_prob = 0.4 #dropout probability
 
     #define the lstm model
