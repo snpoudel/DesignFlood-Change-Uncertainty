@@ -49,16 +49,24 @@ for comb in np.arange(10):
 #merge truth
 df_error2out = hymod_params
 
+#only keep some interested parameters
+filtered_params =['kpwp','coeff_pet','ks','ddf','ts','crf', 'tag']
+df_error0 = df_error0.loc[:,filtered_params]
+df_error1out = df_error1out.loc[:,filtered_params]
+df_error2out = df_error2out.loc[:,filtered_params]
 
-vars=['kpwp','etexp','hmax','bexp','alpha','ks','lmax','coeff_pet','ddf',
-                            'scf','ts','tm','tti','whc','crf','maxbas']
-vars_limit=[[0.0001,0.999],[0.01,1.99],[5,1000],[0.01,1.99],[0.01,0.99],[0.0005,0.99],
-                            [1,2000], [0.5,2],[0.05,10],
-                            [0.5,2],[-1,4],[-1,4],[-1,4],[0,0.2],[0.1,1],[1,10]]
+
+# vars=['kpwp','etexp','hmax','bexp','alpha','ks','lmax','coeff_pet','ddf',
+#                             'scf','ts','tm','tti','whc','crf','maxbas']
+# vars_limit=[[0.0001,0.999],[0.01,1.99],[5,1000],[0.01,1.99],[0.01,0.99],[0.0005,0.99],
+#                             [1,2000], [0.5,2],[0.05,10],
+#                             [0.5,2],[-1,4],[-1,4],[-1,4],[0,0.2],[0.1,1],[1,10]]
+vars=['kpwp','coeff_pet','ks','ddf','ts','crf']
+vars_limit=[[0.001,0.999],[0.5,2],[0.0005,0.99],[0.05,10],[-1,4],[0.1,1]]
 
 # Set up the figure and axes
 total_cases = 3 #total precip error cases
-fig, axs = plt.subplots(nrows=2*total_cases, ncols=8, figsize=(10, 6))
+fig, axs = plt.subplots(nrows=1*total_cases, ncols=6, figsize=(9, 5))
 axs = axs.flatten()
 
 # Create a box plot for each variable
@@ -75,7 +83,7 @@ for i, var in enumerate(vars):
 
 # Create a box plot for each variable
 for i, var in enumerate(vars):
-    inew = i+16
+    inew = i+6
     sns.swarmplot(data=df_error1out, y=var, ax=axs[inew], hue='tag', palette=palette1 , size =5)
     # axs[i].set_title(f'{vars_label[i]}')
     axs[inew].set_title(vars[i])
@@ -87,7 +95,7 @@ for i, var in enumerate(vars):
 
 # Create a box plot for each variable
 for i, var in enumerate(vars):
-    inew = i+16+16
+    inew = i+6+6
     sns.swarmplot(data=df_error2out, y=var, ax=axs[inew], hue='tag', palette=palette2 , size =5)
     # axs[i].set_title(f'{vars_label[i]}')
     axs[inew].set_title(vars[i])
@@ -107,4 +115,4 @@ plt.show()
 
 #save plot
 # fig.savefig(f'output/figures/{id}/10param_comparision.png', dpi=300)
-# fig.savefig(f'output/figures/rehbv_true_vs_calib_parameters.png', dpi=300)
+fig.savefig(f'output/figures/HYMOD_calib_parameters.png', dpi=300)

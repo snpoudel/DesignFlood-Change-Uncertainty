@@ -12,6 +12,10 @@ id = '01108000'
 #read in hbv true parameters
 true_param = pd.read_csv('data/true_hbv_calibrated_parameters.csv', dtype={'station_id':str})
 true_param = true_param[true_param['station_id']==id]
+
+#only keep some interested parameters
+filtered_params =['fc','coeff_pet','ks','ddf','ts','crf']
+true_param = true_param.loc[:,filtered_params]
 true_param['tag'] = 'Truuth'
 
 #case 1, precip error =0, all stations used
@@ -54,17 +58,20 @@ for comb in np.arange(10):
 df_error2out = pd.concat([hbv_params, true_param], ignore_index=True)
 
 
-vars=['fc','beta','pwp','l','ks','ki','kb','kperc','coeff_pet','ddf',
-                            'scf','ts','tm','tti','whc','crf','maxbas']
-vars_limit=[[1,1000],[1,7],[0.01,0.99],[1,999],[0.01,0.99],[0.01,0.99],
-                            [0.0001,0.99],[0.001,0.99],[0.5,2],[0.01,10],
-                            [0.5,1.5],[-1,4],[-1,4],[-1,4],[0,0.2],[0.1,1],[1,10]]
+# vars=['fc','beta','pwp','l','ks','ki','kb','kperc','coeff_pet','ddf',
+#                             'scf','ts','tm','tti','whc','crf','maxbas']
+# vars_limit=[[1,1000],[1,7],[0.01,0.99],[1,999],[0.01,0.99],[0.01,0.99],
+#                             [0.0001,0.99],[0.001,0.99],[0.5,2],[0.01,10],
+#                             [0.5,1.5],[-1,4],[-1,4],[-1,4],[0,0.2],[0.1,1],[1,10]]
+
+vars=['fc','coeff_pet','ks','ddf','ts','crf']
+vars_limit=[[1,1000],[0.5,2],[0.01,0.99],[0.01,10],[-1,4],[0.1,1]]
 
 # Set up the figure and axes
 total_cases = 3 #total precip error cases
-fig, axs = plt.subplots(nrows=2*total_cases, ncols=9, figsize=(10, 6))
-axs = axs.flatten()
 
+fig, axs = plt.subplots(nrows=1*total_cases, ncols=6, figsize=(9, 5))
+axs = axs.flatten()
 # Create a box plot for each variable
 for i, var in enumerate(vars):
     plt.suptitle(f'Re-HBV calibrated vs true parameters for basin: {id} \na)true precip with n=10 gauges b) precip with n-2 gauges c) precip with n-4 gauges')
@@ -79,7 +86,7 @@ for i, var in enumerate(vars):
 
 # Create a box plot for each variable
 for i, var in enumerate(vars):
-    inew = i+18
+    inew = i+6
     sns.swarmplot(data=df_error1out, y=var, ax=axs[inew], hue='tag', palette=palette1 , size =5)
     # axs[i].set_title(f'{vars_label[i]}')
     axs[inew].set_title(vars[i])
@@ -91,7 +98,7 @@ for i, var in enumerate(vars):
 
 # Create a box plot for each variable
 for i, var in enumerate(vars):
-    inew = i+18+18
+    inew = i+6+6
     sns.swarmplot(data=df_error2out, y=var, ax=axs[inew], hue='tag', palette=palette2 , size =5)
     # axs[i].set_title(f'{vars_label[i]}')
     axs[inew].set_title(vars[i])
@@ -101,9 +108,9 @@ for i, var in enumerate(vars):
     axs[inew].grid(True, linestyle='--', alpha=0.3)
     axs[inew].get_legend().remove()
 # Turn off any unused subplots
-axs[17].remove()
-axs[35].remove()
-axs[53].remove()
+# axs[17].remove()
+# axs[35].remove()
+# axs[53].remove()
 
 #add subtitles
 # plt.text(-1,5,'this is titlessd')
@@ -113,4 +120,5 @@ plt.show()
 
 #save plot
 # fig.savefig(f'output/figures/{id}/10param_comparision.png', dpi=300)
-# fig.savefig(f'output/figures/rehbv_true_vs_calib_parameters.png', dpi=300)
+
+fig.savefig(f'output/figures/REHBV_true_vs_calib_parameters.png', dpi=300)
