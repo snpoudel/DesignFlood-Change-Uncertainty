@@ -45,7 +45,7 @@ df_all['model'] = df_all['variable'].apply(lambda x: x.split('(')[1].split(')')[
 
 #remove HBV model
 df_all = df_all[df_all['model'] != 'HBV']
-
+df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
 
 #make plot for nse, kge, rmse
 df_all_nkr = df_all[df_all['objective'].isin(['RMSE','NSE','KGE'])]
@@ -61,14 +61,15 @@ seaplot = sns.catplot(
 seaplot.set_axis_labels('Average Precipitation Uncertainty (mm/day)', "") #set x and y labels
 seaplot.legend.set_title("Model") #set legend title
 seaplot.set_titles("") #remove default titles
+plt.suptitle('Diagnostics plot during validation period for all basins')
 for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of all axes in facetgrid/catplot
     ax.set_ylabel(['RMSE(mm/day)', 'NSE', 'KGE'][index])
     ax.grid(True, linestyle ='--', alpha = 0.5)
 # plt.tight_layout()
 plt.show()
 #save the plot
-seaplot.savefig('output/figures/diagnosticsNSE_allbasin.png', dpi=300)
-
+# seaplot.savefig('output/figures/diagnosticsNSE_allbasin.png', dpi=300)
+seaplot.savefig('output/figures/NoLSTM_diagnosticsKGE_allbasin.png', dpi=300) #without lstm
 #make plot for nse, kge, rmse
 df_all_bias = df_all[df_all['objective'].isin(['BIAS','HFB'])]
 #Make boxplots using seaborn
@@ -83,6 +84,7 @@ seaplot = sns.catplot(
 seaplot.set_axis_labels('Average Precipitation Uncertainty (mm/day)', "") #set x and y labels
 seaplot.legend.set_title("Model") #set legend title
 seaplot.set_titles("") #remove default titles
+plt.suptitle('Diagnostics plot during validation period for all basins')
 for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of all axes in facetgrid/catplot
     ax.set_ylabel(['Bias(%)', '>99.9th Flow Bias(%)'][index])
     ax.grid(True, linestyle ='--', alpha = 0.5)
@@ -90,4 +92,5 @@ for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of a
 plt.show()
 
 #save the plot
-seaplot.savefig('output/figures/diagnosticsBIAS_allbasin.png', dpi=300)
+seaplot.savefig('output/figures/NoLSTM_diagnosticsBIAS_allbasin.png', dpi=300) #without lstm
+# seaplot.savefig('output/figures/diagnosticsBIAS_allbasin.png', dpi=300)

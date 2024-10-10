@@ -32,6 +32,8 @@ df_20yr['objective'] = 'change_20yr'
 df_all = pd.concat([df_5yr, df_10yr, df_20yr], axis=0)
 df_all = df_all.dropna(axis='rows')
 
+df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
+
 #Make boxplots using seaborn
 precip_cat_order = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
 seaplot = sns.catplot(
@@ -50,4 +52,5 @@ for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of a
     ax.grid(True, linestyle ='--', alpha = 0.5)
 plt.show()
 #save the plot
-seaplot.savefig('output/figures/tyr-flood_allbasin.png', dpi=300)
+# seaplot.savefig('output/figures/tyr-flood_allbasin.png', dpi=300)
+seaplot.savefig('output/figures/NoLSTM_tyr-flood_allbasin.png', dpi=300)
