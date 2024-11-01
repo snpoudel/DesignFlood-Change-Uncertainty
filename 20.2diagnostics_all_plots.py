@@ -45,7 +45,7 @@ df_all['model'] = df_all['variable'].apply(lambda x: x.split('(')[1].split(')')[
 
 #remove HBV model
 df_all = df_all[df_all['model'] != 'HBV']
-df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
+# df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
 
 #make plot for nse, kge, rmse
 df_all_nkr = df_all[df_all['objective'].isin(['RMSE','NSE','KGE'])]
@@ -68,8 +68,8 @@ for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of a
 # plt.tight_layout()
 plt.show()
 #save the plot
-# seaplot.savefig('output/figures/diagnosticsNSE_allbasin.png', dpi=300)
-seaplot.savefig('output/figures/NoLSTM_diagnosticsKGE_allbasin.png', dpi=300) #without lstm
+seaplot.savefig('output/figures/diagnosticsNSE_allbasin.png', dpi=300)
+# seaplot.savefig('output/figures/NoLSTM_diagnosticsKGE_allbasin.png', dpi=300) #without lstm
 #make plot for nse, kge, rmse
 df_all_bias = df_all[df_all['objective'].isin(['BIAS','HFB'])]
 #Make boxplots using seaborn
@@ -92,5 +92,5 @@ for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of a
 plt.show()
 
 #save the plot
-seaplot.savefig('output/figures/NoLSTM_diagnosticsBIAS_allbasin.png', dpi=300) #without lstm
-# seaplot.savefig('output/figures/diagnosticsBIAS_allbasin.png', dpi=300)
+# seaplot.savefig('output/figures/NoLSTM_diagnosticsBIAS_allbasin.png', dpi=300) #without lstm
+seaplot.savefig('output/figures/diagnosticsBIAS_allbasin.png', dpi=300)

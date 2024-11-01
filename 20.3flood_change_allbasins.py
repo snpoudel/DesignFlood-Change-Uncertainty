@@ -62,6 +62,7 @@ for basin_id in used_basin_list:
     true_tyr_flood =pd.DataFrame({'model':'HBV True', 'grid':'NA', 'comb':'NA', '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':0}, index=[0])
     df_tyr_flood = pd.concat([df_tyr_flood, true_tyr_flood], ignore_index=True)
 
+    flood_5t, flood_10t, flood_20t = flood_5, flood_10, flood_20 #save true floods
     #read the future streamflow data
     hbv_true_future = pd.read_csv(f'output/future/hbv_true_future_streamflow/hbv_true_future_output_{basin_id}.csv', index_col=0)
     hbv_true_future.index = pd.to_datetime(hbv_true_future.index, format='%Y-%m-%d')
@@ -77,7 +78,11 @@ for basin_id in used_basin_list:
     #                     'change_10yr_flood':percent_change(true_tyr_flood_future['10yr_flood'] , true_tyr_flood['10yr_flood']),
     #                     'change_20yr_flood':percent_change(true_tyr_flood_future['20yr_flood'] , true_tyr_flood['20yr_flood']), 'precip_rmse':0}, index=[0])
     # df_change_flood = pd.concat([df_change_flood, change_hbv_true], ignore_index=True)
-
+    
+    #true change in 5 10 20yr flood
+    true_change_5yr = flood_5 - flood_5t
+    true_change_10yr = flood_10 - flood_10t
+    true_change_20yr = flood_20 - flood_20t
 
     #loop through each grid coverage and combination
     grid_list = np.arange(30)
@@ -132,7 +137,8 @@ for basin_id in used_basin_list:
                 #LSTM model
                 #read the streamflow data
                 if os.path.exists(f'output/regional_lstm/historical/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv'):
-                    lstm = pd.read_csv(f'output/regional_lstm/historical/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv', index_col=0)
+                    lstm = pd.read_csv(f'output/regional_lstm/historical/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv')
+                    lstm.set_index('date', inplace=True)
                     lstm.index = pd.to_datetime(lstm.index, format='%Y-%m-%d')
                     lstm_flow = lstm['streamflow']
                     lstm_flow = pd.Series(lstm_flow)
@@ -182,7 +188,8 @@ for basin_id in used_basin_list:
                 #LSTM model future
                 #read the streamflow data
                 if os.path.exists(f'output/regional_lstm/future/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv'):
-                    lstm_future = pd.read_csv(f'output/regional_lstm/future/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv', index_col=0)
+                    lstm_future = pd.read_csv(f'output/regional_lstm/future/lstm_input{basin_id}_coverage{grid}_comb{comb}.csv')
+                    lstm_future.set_index('date', inplace=True)
                     lstm_future.index = pd.to_datetime(lstm_future.index, format='%Y-%m-%d')
                     lstm_future_flow = lstm_future['streamflow']
                     lstm_future_flow = pd.Series(lstm_future_flow)
@@ -198,10 +205,6 @@ for basin_id in used_basin_list:
                 #                 'change_10yr_flood':percent_change(temp_df_hbvf['10yr_flood'] , temp_df_hbv['10yr_flood']),
                 #                 'change_20yr_flood':percent_change(temp_df_hbvf['20yr_flood'] , temp_df_hbv['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
 
-                #true change in 5 10 20yr flood
-                true_change_5yr = temp_df_hbvf['5yr_flood'] - temp_df_hbv['5yr_flood']
-                true_change_10yr = temp_df_hbvf['10yr_flood'] - temp_df_hbv['10yr_flood']
-                true_change_20yr = temp_df_hbvf['20yr_flood'] - temp_df_hbv['20yr_flood']
 
                 change_hbv_recalib = pd.DataFrame({'station':basin_id,'model':'HBV Recalib',
                                 'change_5yr_flood':percent_change(temp_df_hbvrf['5yr_flood'] , temp_df_hbvr['5yr_flood'], true_change_5yr ),
@@ -222,4 +225,4 @@ for basin_id in used_basin_list:
 
 #save the dataframes
 # df_tyr_flood.to_csv(f'output/tyr_flood_{basin_id}.csv', index=False)
-df_change_flood.to_csv(f'output/allbasins_change_tyr_flood.csv', index=False)
+df_change_flood.to_csv(f'output/allbasins_change_tyr_flood_modified.csv', index=False)

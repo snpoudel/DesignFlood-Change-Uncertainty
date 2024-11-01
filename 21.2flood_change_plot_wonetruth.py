@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 #read input
-df = pd.read_csv('output/allbasins_change_tyr_flood_modified.csv')
+df = pd.read_csv('output/allbasins_change_tyr_flood.csv')
 df_zeroprecip = df[df['precip_rmse'] == 0] #filter precip zero
 df_zeroprecip['precip_cat'] = '0'
 
@@ -43,7 +43,7 @@ seaplot = sns.catplot(
             sharey=False,  legend_out=True,
             height = 3, aspect = 3, #aspect times height gives width of each facet
             ) 
-seaplot.set_axis_labels('Precipitation Uncertainty (RMSE mm/day)', "") #set x and y labels
+seaplot.set_axis_labels('Average Precipitation Uncertainty (mm/day)', "") #set x and y labels
 seaplot.legend.set_title("Model") #set legend title
 seaplot.set_titles("") #remove default titles
 for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of all axes in facetgrid/catplot
@@ -52,5 +52,5 @@ for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of a
     ax.grid(True, linestyle ='--', alpha = 0.5)
 plt.show()
 #save the plot
-seaplot.savefig('output/figures/tyr-flood_allbasin_modified.png', dpi=300)
+seaplot.savefig('output/figures/tyr-flood_allbasin.png', dpi=300)
 # seaplot.savefig('output/figures/NoLSTM_tyr-flood_allbasin.png', dpi=300)

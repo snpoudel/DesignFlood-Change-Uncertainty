@@ -54,7 +54,7 @@ for id in used_basin_list:
     for grid in grid_coverage: #1
         #read true streamflow
         true_hbv_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
-        true_hbv_flow = true_hbv_flow[365:] #remove the first 365 days
+        true_hbv_flow = true_hbv_flow[364:] #remove the first 364 days
         true_hbv_flow = true_hbv_flow.reset_index(drop=True)
         #read true precipitation
         true_precip = pd.read_csv(f'data/true_precip/true_precip{id}.csv')
@@ -66,15 +66,15 @@ for id in used_basin_list:
                 #read real hbv flow
                 # if os.path.exists(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv'):             
                 real_hbv_flow = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv')
-                real_hbv_flow = real_hbv_flow[365:] #remove the first 365 days
+                real_hbv_flow = real_hbv_flow[364:] #remove the first 364 days
                 real_hbv_flow = real_hbv_flow.reset_index(drop=True)
                 #read recalibrated hbv flow
                 recal_hbv_flow = pd.read_csv(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv')
-                recal_hbv_flow = recal_hbv_flow[365:] #remove the first 365 days
+                recal_hbv_flow = recal_hbv_flow[364:] #remove the first 364 days
                 recal_hbv_flow = recal_hbv_flow.reset_index(drop=True)
                 #rea real hymod flow
                 real_hymod_flow = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{grid}_comb{combination}.csv')
-                real_hymod_flow = real_hymod_flow[365:] #remove the first 365 days
+                real_hymod_flow = real_hymod_flow[364:] #remove the first 364 days
                 real_hymod_flow = real_hymod_flow.reset_index(drop=True)
                 #read real lstm flow
                 if os.path.exists(f'output/regional_lstm/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):

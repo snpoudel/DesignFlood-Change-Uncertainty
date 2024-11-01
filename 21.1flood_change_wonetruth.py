@@ -32,12 +32,19 @@ def return_tyr_flood(data):
     #return the value of the flood for 20, 50 and 100 years return period
     return eva_summary.iloc[0,0], eva_summary.iloc[1,0], eva_summary.iloc[2,0]
 
+#function to return change in design flood wrt true change in design flood 
+def percent_change(value_future, value_historical, true_change):
+    estimated_change = value_future - value_historical
+    return ((estimated_change - true_change)/true_change)*100
+
 
 # basin_id = '01109060'
-used_basin_list = ['01108000', '01109060', '01177000', '01104500']
+basin_list = pd.read_csv("data/regional_lstm/MA_basins_gauges_2000-2020_filtered.csv", dtype={'basin_id':str})
+used_basin_list = basin_list['basin_id']
+
+df_tyr_flood =pd.DataFrame(columns=['model', 'grid', 'comb', '5yr_flood', '10yr_flood', '20yr_flood', 'precip_rmse'])
+df_change_flood = pd.DataFrame(columns=['station', 'model', 'change_5yr_flood', 'change_10yr_flood', 'change_20yr_flood', 'precip_rmse'])
 for basin_id in used_basin_list:
-    df_tyr_flood =pd.DataFrame(columns=['model', 'grid', 'comb', '5yr_flood', '10yr_flood', '20yr_flood', 'precip_rmse'])
-    df_change_flood = pd.DataFrame(columns=['model', 'change_5yr_flood', 'change_10yr_flood', 'change_20yr_flood', 'precip_rmse'])
 
     #True precipitation
     #read true precipitation
@@ -65,11 +72,11 @@ for basin_id in used_basin_list:
     true_tyr_flood_future =pd.DataFrame({'model':'HBV True Future', 'grid':'NA', 'comb':'NA', '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':0}, index=[0])
     df_tyr_flood = pd.concat([df_tyr_flood, true_tyr_flood_future], ignore_index=True)
 
-    #calculate the change in flood for true model
-    change_hbv_true = pd.DataFrame({'model':'HBV True', 'change_5yr_flood':(true_tyr_flood_future['5yr_flood'] - true_tyr_flood['5yr_flood']),
-                        'change_10yr_flood':(true_tyr_flood_future['10yr_flood'] - true_tyr_flood['10yr_flood']),
-                        'change_20yr_flood':(true_tyr_flood_future['20yr_flood'] - true_tyr_flood['20yr_flood']), 'precip_rmse':0}, index=[0])
-    df_change_flood = pd.concat([df_change_flood, change_hbv_true], ignore_index=True)
+    # #calculate the change in flood for true model
+    # change_hbv_true = pd.DataFrame({'station':basin_id, 'model':'HBV True', 'change_5yr_flood':percent_change(true_tyr_flood_future['5yr_flood'] , true_tyr_flood['5yr_flood']),
+    #                     'change_10yr_flood':percent_change(true_tyr_flood_future['10yr_flood'] , true_tyr_flood['10yr_flood']),
+    #                     'change_20yr_flood':percent_change(true_tyr_flood_future['20yr_flood'] , true_tyr_flood['20yr_flood']), 'precip_rmse':0}, index=[0])
+    # df_change_flood = pd.concat([df_change_flood, change_hbv_true], ignore_index=True)
 
 
     #loop through each grid coverage and combination
@@ -189,24 +196,32 @@ for basin_id in used_basin_list:
                 df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstmf], ignore_index=True)
 
                 #--CHANGE IN FLOOD (FUTURE - HISTORICAL)--#
-                change_hbv_true = pd.DataFrame({'model':'HBV True', 'change_5yr_flood':(temp_df_hbvf['5yr_flood'] - temp_df_hbv['5yr_flood']),
-                                'change_10yr_flood':(temp_df_hbvf['10yr_flood'] - temp_df_hbv['10yr_flood']),
-                                'change_20yr_flood':(temp_df_hbvf['20yr_flood'] - temp_df_hbv['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
+                # change_hbv_true = pd.DataFrame({'station':basin_id,'model':'HBV True', 'change_5yr_flood':percent_change(temp_df_hbvf['5yr_flood'] , temp_df_hbv['5yr_flood']),
+                #                 'change_10yr_flood':percent_change(temp_df_hbvf['10yr_flood'] , temp_df_hbv['10yr_flood']),
+                #                 'change_20yr_flood':percent_change(temp_df_hbvf['20yr_flood'] , temp_df_hbv['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
 
-                change_hbv_recalib = pd.DataFrame({'model':'HBV Recalib', 'change_5yr_flood':(temp_df_hbvrf['5yr_flood'] - temp_df_hbvr['5yr_flood']),
-                                'change_10yr_flood':(temp_df_hbvrf['10yr_flood'] - temp_df_hbvr['10yr_flood']),
-                                'change_20yr_flood':(temp_df_hbvrf['20yr_flood'] - temp_df_hbvr['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
-                
-                change_hymod = pd.DataFrame({'model':'Hymod', 'change_5yr_flood':(temp_df_hyf['5yr_flood'] - temp_df_hy['5yr_flood']),
-                                'change_10yr_flood':(temp_df_hyf['10yr_flood'] - temp_df_hy['10yr_flood']),
-                                'change_20yr_flood':(temp_df_hyf['20yr_flood'] - temp_df_hy['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
-                
-                change_lstm = pd.DataFrame({'model':'LSTM', 'change_5yr_flood':(temp_df_lstmf['5yr_flood'] - temp_df_lstm['5yr_flood']),
-                                'change_10yr_flood':(temp_df_lstmf['10yr_flood'] - temp_df_lstm['10yr_flood']),
-                                'change_20yr_flood':(temp_df_lstmf['20yr_flood'] - temp_df_lstm['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
-                
-                df_change_flood = pd.concat([df_change_flood, change_hbv_true, change_hbv_recalib, change_hymod, change_lstm], ignore_index=True)
+                #true change in 5 10 20yr flood
+                true_change_5yr = temp_df_hbvf['5yr_flood'] - temp_df_hbv['5yr_flood']
+                true_change_10yr = temp_df_hbvf['10yr_flood'] - temp_df_hbv['10yr_flood']
+                true_change_20yr = temp_df_hbvf['20yr_flood'] - temp_df_hbv['20yr_flood']
 
-    #save the dataframes
-    df_tyr_flood.to_csv(f'output/tyr_flood_{basin_id}.csv', index=False)
-    df_change_flood.to_csv(f'output/change_tyr_flood_{basin_id}.csv', index=False)
+                change_hbv_recalib = pd.DataFrame({'station':basin_id,'model':'HBV Recalib',
+                                'change_5yr_flood':percent_change(temp_df_hbvrf['5yr_flood'] , temp_df_hbvr['5yr_flood'], true_change_5yr ),
+                                'change_10yr_flood':percent_change(temp_df_hbvrf['10yr_flood'] , temp_df_hbvr['10yr_flood'], true_change_10yr),
+                                'change_20yr_flood':percent_change(temp_df_hbvrf['20yr_flood'] , temp_df_hbvr['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                
+                change_hymod = pd.DataFrame({'station':basin_id,'model':'Hymod', 
+                                'change_5yr_flood':percent_change(temp_df_hyf['5yr_flood'] , temp_df_hy['5yr_flood'], true_change_5yr),
+                                'change_10yr_flood':percent_change(temp_df_hyf['10yr_flood'] , temp_df_hy['10yr_flood'], true_change_10yr),
+                                'change_20yr_flood':percent_change(temp_df_hyf['20yr_flood'] , temp_df_hy['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                
+                change_lstm = pd.DataFrame({'station':basin_id,'model':'LSTM', 
+                                'change_5yr_flood':percent_change(temp_df_lstmf['5yr_flood'] , temp_df_lstm['5yr_flood'], true_change_5yr),
+                                'change_10yr_flood':percent_change(temp_df_lstmf['10yr_flood'] , temp_df_lstm['10yr_flood'], true_change_10yr),
+                                'change_20yr_flood':percent_change(temp_df_lstmf['20yr_flood'] , temp_df_lstm['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                
+                df_change_flood = pd.concat([df_change_flood, change_hbv_recalib, change_hymod, change_lstm], ignore_index=True)
+
+#save the dataframes
+# df_tyr_flood.to_csv(f'output/tyr_flood_{basin_id}.csv', index=False)
+df_change_flood.to_csv(f'output/allbasins_change_tyr_flood.csv', index=False)

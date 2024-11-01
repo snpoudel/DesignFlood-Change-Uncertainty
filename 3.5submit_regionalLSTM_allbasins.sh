@@ -1,15 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name=reg-lstm            # Job name
+#SBATCH --job-name=creg-lstm            # Job name
 #SBATCH --output=reg-lstm%j.log       # Output file name (%j expands to jobID)
 #SBATCH --error=reg-lstm%j.log        # Error file name (%j expands to jobID)
-#SBATCH --time=24:00:00                 # Time limit (HH:MM:SS)
-#SBATCH --nodes=1                       #5 Number of nodes
-#SBATCH --ntasks=1                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
+#SBATCH --time=92:00:00                 # Time limit (HH:MM:SS)
+#SBATCH --nodes=7                       #5 Number of nodes
+#SBATCH --ntasks=7                   #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
 #SBATCH --cpus-per-task=4               # Number of CPU cores per task
 #SBATCH --mem=64G                        # Memory per CPU core (adjust as needed)
 #SBATCH --exclusive                     # Exclusive node allocation
-#SBATCH --mail-type=END
-#SBATCH --mail-user=sp2596@cornell.edu
 
 # Load necessary modules
 # All modules are loaded inside the virtual environment so don't need to load here (check: pip list modules when virtual environment is loaded) 
@@ -18,4 +16,4 @@ module load python/3.11.5
 source ~/pyenv-pytorch/bin/activate
 
 # Run your Python script with mpi
-mpirun python3 3.6regional_lstm_train.py
+mpirun python3 regionalLSTM_allbasins.py

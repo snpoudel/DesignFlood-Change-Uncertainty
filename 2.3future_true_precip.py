@@ -83,4 +83,8 @@ precip_df.to_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_cov
 precip_df.to_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_coverage99_comb2.csv', index=False)
 precip_df.to_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_coverage99_comb3.csv', index=False)
 precip_df.to_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_coverage99_comb4.csv', index=False)
-
+precip_df.to_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_coverage99_comb5.csv', index=False)
+precip_df.to_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_coverage99_comb6.csv', index=False)
+precip_df.to_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_coverage99_comb7.csv', index=False)
+precip_df.to_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_coverage99_comb8.csv', index=False)
+precip_df.to_csv(f'data/future/future_idw_precip/future_idw_precip{basin_id}_coverage99_comb9.csv', index=False)
