@@ -16,4 +16,4 @@ module load python/3.11.5
 source ~/pyenv-pytorch/bin/activate
 
 # Run your Python script with mpi
-mpirun python3 regionalLSTM_allbasins.py
+mpirun python3 regionalLSTM.py
