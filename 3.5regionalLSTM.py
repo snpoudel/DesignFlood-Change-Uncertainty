@@ -92,10 +92,12 @@ basin_list = pd.read_csv("data/regional_lstm/MA_basins_gauges_2000-2020_filtered
 start_date = date(2000, 1, 1)
 end_date = date(2013, 12, 31)
 n_days_train = (end_date - start_date).days + 1
-n_total_days = len(basin_list) * n_days_train
+#count number of basins
+basin_count = len([f for f in os.listdir(f'data/regional_lstm/processed_lstm_input/{pb}') if f.endswith('.csv')])
+n_total_days = basin_count * n_days_train
 
 #Get standard scaler from training data
-features = np.zeros((n_total_days*3, NUM_INPUT_FEATURES), dtype=np.float32)
+features = np.zeros((n_total_days, NUM_INPUT_FEATURES), dtype=np.float32)
 n = 0
 for basin_id in basin_list:
     file_path = f'data/regional_lstm/processed_lstm_input/{pb}/lstm_input{basin_id}.csv'
@@ -108,8 +110,8 @@ scaler = StandardScaler()
 scaler.fit(features)
 
 # Load and preprocess data
-features = np.zeros((n_total_days*3, NUM_INPUT_FEATURES), dtype=np.float32)
-targets = np.zeros((n_total_days*3, NUM_OUTPUT_FEATURES), dtype=np.float32)
+features = np.zeros((n_total_days, NUM_INPUT_FEATURES), dtype=np.float32)
+targets = np.zeros((n_total_days, NUM_OUTPUT_FEATURES), dtype=np.float32)
 
 n = 0
 for basin_id in basin_list:
@@ -163,10 +165,13 @@ torch.save(model.state_dict(), f'trained_lstm_model_{pb}.pth')
 start_date = date(2000, 1, 1)
 end_date = date(2020, 12, 31)
 n_days_test = (end_date - start_date).days + 1
+#count number of basins
+basin_count = len([f for f in os.listdir(f'data/regional_lstm/prediction_datasets/historical/{pb}') if f.endswith('.csv')])
+n_total_days = basin_count * n_days_train
 n_total_days = len(basin_list) * n_days_test
 
-features = np.zeros((n_total_days*3, NUM_INPUT_FEATURES), dtype=np.float32)
-targets = np.zeros((n_total_days*3, NUM_OUTPUT_FEATURES), dtype=np.float32)
+features = np.zeros((n_total_days, NUM_INPUT_FEATURES), dtype=np.float32)
+targets = np.zeros((n_total_days, NUM_OUTPUT_FEATURES), dtype=np.float32)
 
 n = 0
 for basin_id in basin_list:
@@ -245,10 +250,13 @@ print(f'Time taken for historical dataset: {end_time - start_time:.2f} seconds')
 start_date = date(2000, 1, 1)
 end_date = date(2020, 12, 31)
 n_days_test = (end_date - start_date).days + 1
+#count number of basins
+basin_count = len([f for f in os.listdir(f'data/regional_lstm/prediction_datasets/future/{pb}') if f.endswith('.csv')])
+n_total_days = basin_count * n_days_train
 n_total_days = len(basin_list) * n_days_test
 
-features = np.zeros((n_total_days*3, NUM_INPUT_FEATURES), dtype=np.float32)
-targets = np.zeros((n_total_days*3, NUM_OUTPUT_FEATURES), dtype=np.float32)
+features = np.zeros((n_total_days, NUM_INPUT_FEATURES), dtype=np.float32)
+targets = np.zeros((n_total_days, NUM_OUTPUT_FEATURES), dtype=np.float32)
 
 n = 0
 for basin_id in basin_list:
