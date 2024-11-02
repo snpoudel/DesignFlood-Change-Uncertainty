@@ -98,7 +98,7 @@ n_total_days = len(basin_list) * n_days_train
 features = np.zeros((n_total_days*3, NUM_INPUT_FEATURES), dtype=np.float32)
 n = 0
 for basin_id in basin_list:
-    file_path = f'data/regional_lstm/processed_lstm_input/{pb}/lstm_input{basin_id}.csv'
+    file_path = f'data/regional_lstm_hymod/processed_lstm_input/{pb}/lstm_input{basin_id}.csv'
     if os.path.exists(file_path):
         data = pd.read_csv(file_path)
         data = data.drop(columns=['date'])
@@ -113,7 +113,7 @@ targets = np.zeros((n_total_days*3, NUM_OUTPUT_FEATURES), dtype=np.float32)
 
 n = 0
 for basin_id in basin_list:
-    file_path = f'data/regional_lstm/processed_lstm_input/{pb}/lstm_input{basin_id}.csv'
+    file_path = f'data/regional_lstm_hymod/processed_lstm_input/{pb}/lstm_input{basin_id}.csv'
     if os.path.exists(file_path):
         data = pd.read_csv(file_path)
         data = data.drop(columns=['date'])
@@ -155,7 +155,7 @@ for epoch in range(NUM_EPOCHS):
             print(f'Epoch [{epoch+1}/{NUM_EPOCHS}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}, Time: {end_time - start_time:.2f} seconds')
 
 # Save the model
-torch.save(model.state_dict(), f'trained_lstm_model_{pb}.pth')
+torch.save(model.state_dict(), f'trained_hymod_lstm_model_{pb}.pth')
 
 
 #######---PREDICTION FOR HISTORICAL PERIOD---#######
@@ -172,7 +172,7 @@ n = 0
 for basin_id in basin_list:
     for coverage in np.append(np.arange(12), [99]):
         for comb in np.arange(12):
-            file_path = f'data/regional_lstm/prediction_datasets/historical/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+            file_path = f'data/regional_lstm_hymod/prediction_datasets/historical/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
             if os.path.exists(file_path):
                 data = pd.read_csv(file_path)
                 data = data.drop(columns=['date'])
@@ -190,7 +190,7 @@ test_dataset = SeqDataset(x_seq, y_seq)
 test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
-model.load_state_dict(torch.load(f'trained_lstm_model_{pb}.pth'))
+model.load_state_dict(torch.load(f'trained_hymod_lstm_model_{pb}.pth'))
 model.eval()
 
 all_outputs, all_targets = [], []
@@ -210,7 +210,7 @@ i = 0
 for basin_id in basin_list:
     for coverage in np.append(np.arange(12), [99]):
         for comb in np.arange(12):
-            file_path = f'data/regional_lstm/prediction_datasets/historical/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+            file_path = f'data/regional_lstm_hymod/prediction_datasets/historical/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
             if os.path.exists(file_path):
                 if i == 0: #first basin
                     first_n_days_test = n_days_test - SEQUENCE_LENGTH + 1
@@ -218,20 +218,20 @@ for basin_id in basin_list:
                     test_basin_outputs = all_outputs[i * first_n_days_test:(i + 1) * first_n_days_test]
                     test_basin_targets = all_targets[i * first_n_days_test:(i + 1) * first_n_days_test]
                     date_range = pd.date_range(prediction_start_date, end_date)[:len(test_basin_outputs)]
-                    temp_df = pd.DataFrame({'date': date_range, 'true_streamflow': test_basin_targets, 'streamflow': test_basin_outputs})
+                    temp_df = pd.DataFrame({'date': date_range, 'true_error': test_basin_targets, 'streamflow_error': test_basin_outputs})
 
                 else: #other basins
                     test_basin_outputs = all_outputs[i * n_days_test:(i + 1) * n_days_test]
                     test_basin_targets = all_targets[i * n_days_test:(i + 1) * n_days_test]
                     date_range = pd.date_range(prediction_start_date, end_date)
-                    temp_df = pd.DataFrame({'streamflow': test_basin_outputs,'true_streamflow': test_basin_targets})
+                    temp_df = pd.DataFrame({'streamflow_error': test_basin_outputs,'true_error': test_basin_targets})
                     #only keep upto date range
                     temp_df = temp_df[:len(date_range)]
                     #add date to the dataframe after sequence length
                     temp_df['date'] = pd.date_range(prediction_start_date, end_date)
                     
                 # Save the dataframe to CSV
-                output_file_path = f'output/regional_lstm/historical/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+                output_file_path = f'output/regional_lstm_hymod/historical/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
                 temp_df.to_csv(output_file_path, index=False)
                 i += 1
 
@@ -254,7 +254,7 @@ n = 0
 for basin_id in basin_list:
     for coverage in np.append(np.arange(12), [99]):
         for comb in np.arange(12):
-            file_path = f'data/regional_lstm/prediction_datasets/future/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+            file_path = f'data/regional_lstm_hymod/prediction_datasets/future/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
             if os.path.exists(file_path):
                 data = pd.read_csv(file_path)
                 data = data.drop(columns=['date'])
@@ -272,7 +272,7 @@ test_dataset = SeqDataset(x_seq, y_seq)
 test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
-model.load_state_dict(torch.load(f'trained_lstm_model_{pb}.pth'))
+model.load_state_dict(torch.load(f'trained_hymod_lstm_model_{pb}.pth'))
 model.eval()
 
 all_outputs, all_targets = [], []
@@ -292,7 +292,7 @@ i = 0
 for basin_id in basin_list:
     for coverage in np.append(np.arange(12), [99]):
         for comb in np.arange(12):
-            file_path = f'data/regional_lstm/prediction_datasets/future/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+            file_path = f'data/regional_lstm_hymod/prediction_datasets/future/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
             if os.path.exists(file_path):
                 if i == 0: #first basin
                     first_n_days_test = n_days_test - SEQUENCE_LENGTH + 1
@@ -300,20 +300,20 @@ for basin_id in basin_list:
                     test_basin_outputs = all_outputs[i * first_n_days_test:(i + 1) * first_n_days_test]
                     test_basin_targets = all_targets[i * first_n_days_test:(i + 1) * first_n_days_test]
                     date_range = pd.date_range(prediction_start_date, end_date)[:len(test_basin_outputs)]
-                    temp_df = pd.DataFrame({'date': date_range, 'true_streamflow': test_basin_targets, 'streamflow': test_basin_outputs})
+                    temp_df = pd.DataFrame({'date': date_range, 'true_error': test_basin_targets, 'streamflow_error': test_basin_outputs})
 
                 else: #other basins
                     test_basin_outputs = all_outputs[i * n_days_test:(i + 1) * n_days_test]
                     test_basin_targets = all_targets[i * n_days_test:(i + 1) * n_days_test]
                     date_range = pd.date_range(prediction_start_date, end_date)
-                    temp_df = pd.DataFrame({'streamflow': test_basin_outputs,'true_streamflow': test_basin_targets})
+                    temp_df = pd.DataFrame({'streamflow_error': test_basin_outputs,'true_error': test_basin_targets})
                     #only keep upto date range
                     temp_df = temp_df[:len(date_range)]
                     #add date to the dataframe after sequence length
                     temp_df['date'] = pd.date_range(prediction_start_date, end_date)
                     
                 # Save the dataframe to CSV
-                output_file_path = f'output/regional_lstm/future/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+                output_file_path = f'output/regional_lstm_hymod/future/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
                 temp_df.to_csv(output_file_path, index=False)
                 i += 1
 

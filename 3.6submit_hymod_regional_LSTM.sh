@@ -16,4 +16,4 @@ module load python/3.11.5
 source ~/pyenv-pytorch/bin/activate
 
 # Run your Python script with mpi
-mpirun python3 hymod_regional_LSTM.py
+mpirun python3 3.6hymod_regional_LSTM.py
