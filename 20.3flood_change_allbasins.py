@@ -150,6 +150,22 @@ for basin_id in used_basin_list:
                 temp_df_lstm = pd.DataFrame({'model':'LSTM', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
                 df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstm], ignore_index=True)
 
+                #HYMOD-LSTM model
+                #read the streamflow data
+                if os.path.exists(f'output/regional_lstm_hymod/final_output/historical/hymod_lstm{basin_id}_coverage{grid}_comb{comb}.csv'):
+                    lstm = pd.read_csv(f'output/regional_lstm_hymod/final_output/historical/hymod_lstm{basin_id}_coverage{grid}_comb{comb}.csv')
+                    lstm.set_index('date', inplace=True)
+                    lstm.index = pd.to_datetime(lstm.index, format='%Y-%m-%d')
+                    lstm_flow = lstm['hymod_lstm_streamflow']
+                    lstm_flow = pd.Series(lstm_flow)
+                    #calculate the 20, 50 and 100 years flood
+                    flood_5, flood_10, flood_20 = return_tyr_flood(lstm_flow)
+                else:
+                    flood_5, flood_10, flood_20 = np.NAN, np.NAN, np.NAN
+
+                temp_df_lstm_hymod = pd.DataFrame({'model':'HYMOD-LSTM', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
+                df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstm_hymod], ignore_index=True)
+
                 #--FUTURE DATA--#
                 #HBV true model future
                 #read the streamflow data
@@ -200,6 +216,21 @@ for basin_id in used_basin_list:
                 temp_df_lstmf = pd.DataFrame({'model':'LSTM Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
                 df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstmf], ignore_index=True)
 
+                #HYMOD-LSTM model future
+                #read the streamflow data
+                if os.path.exists(f'output/regional_lstm_hymod/final_output/future/hymod_lstm{basin_id}_coverage{grid}_comb{comb}.csv'):
+                    lstm_future = pd.read_csv(f'output/regional_lstm_hymod/final_output/future/hymod_lstm{basin_id}_coverage{grid}_comb{comb}.csv')
+                    lstm_future.set_index('date', inplace=True)
+                    lstm_future.index = pd.to_datetime(lstm_future.index, format='%Y-%m-%d')
+                    lstm_future_flow = lstm_future['hymod_lstm_streamflow']
+                    lstm_future_flow = pd.Series(lstm_future_flow)
+                    #calculate the 20, 50 and 100 years flood
+                    flood_5, flood_10, flood_20 = return_tyr_flood(lstm_future_flow)
+                else:
+                    flood_5, flood_10, flood_20 = np.NaN, np.NaN, np.NaN
+                temp_df_lstm_hymodf = pd.DataFrame({'model':'HYMOD-LSTM Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
+                df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstm_hymodf], ignore_index=True)
+
                 #--CHANGE IN FLOOD (FUTURE - HISTORICAL)--#
                 # change_hbv_true = pd.DataFrame({'station':basin_id,'model':'HBV True', 'change_5yr_flood':percent_change(temp_df_hbvf['5yr_flood'] , temp_df_hbv['5yr_flood']),
                 #                 'change_10yr_flood':percent_change(temp_df_hbvf['10yr_flood'] , temp_df_hbv['10yr_flood']),
@@ -221,7 +252,12 @@ for basin_id in used_basin_list:
                                 'change_10yr_flood':percent_change(temp_df_lstmf['10yr_flood'] , temp_df_lstm['10yr_flood'], true_change_10yr),
                                 'change_20yr_flood':percent_change(temp_df_lstmf['20yr_flood'] , temp_df_lstm['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
                 
-                df_change_flood = pd.concat([df_change_flood, change_hbv_recalib, change_hymod, change_lstm], ignore_index=True)
+                change_hymod_lstm = pd.DataFrame({'station':basin_id,'model':'HYMOD-LSTM', 
+                                'change_5yr_flood':percent_change(temp_df_lstm_hymodf['5yr_flood'] , temp_df_lstm_hymod['5yr_flood'], true_change_5yr),
+                                'change_10yr_flood':percent_change(temp_df_lstm_hymodf['10yr_flood'] , temp_df_lstm_hymod['10yr_flood'], true_change_10yr),
+                                'change_20yr_flood':percent_change(temp_df_lstm_hymodf['20yr_flood'] , temp_df_lstm_hymod['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                
+                df_change_flood = pd.concat([df_change_flood, change_hbv_recalib, change_hymod, change_lstm, change_hymod_lstm], ignore_index=True)
 
 #save the dataframes
 # df_tyr_flood.to_csv(f'output/tyr_flood_{basin_id}.csv', index=False)

@@ -81,6 +81,7 @@ for id in used_basin_list:
                 #read real lstm flow
                 if os.path.exists(f'output/regional_lstm/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):
                     real_lstm_flow = pd.read_csv(f'output/regional_lstm/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv')
+                    real_lstm_hymod_flow = pd.read_csv(f'output/regional_lstm_hymod/final_output/historical/hymod_lstm{id}_coverage{grid}_comb{combination}.csv')
             
                 #read real precipitation
                 real_precip = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv')
@@ -116,6 +117,16 @@ for id in used_basin_list:
                 else:
                     nse_lstm, rmse_lstm, pbias_lstm, kge_lstm, hfb_lstm = np.NAN, np.NAN, np.NAN, np.NAN, np.NAN
 
+                #for lstm-hymod model
+                if os.path.exists(f'output/regional_lstm_hymod/final_output/historical/hymod_lstm{id}_coverage{grid}_comb{combination}.csv'):
+                    nse_lstm_hymod = nse(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
+                    rmse_lstm_hymod = rmse(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
+                    pbias_lstm_hymod = pbias(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
+                    kge_lstm_hymod = kge(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
+                    hfb_lstm_hymod = high_flow_bias(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
+                else:
+                    nse_lstm_hymod, rmse_lstm_hymod, pbias_lstm_hymod, kge_lstm_hymod, hfb_lstm_hymod = np.NAN, np.NAN, np.NAN, np.NAN, np.NAN
+
                 #for precipitation
                 nse_precip = nse(true_precip['PRECIP'], real_precip['PRECIP'])
                 rmse_precip = rmse(true_precip['PRECIP'], real_precip['PRECIP'])
@@ -130,6 +141,7 @@ for id in used_basin_list:
                                             'NSE(RECAL_HBV)':[nse_recal_hbv], 'RMSE(RECAL_HBV)':[rmse_recal_hbv], 'BIAS(RECAL_HBV)':[pbias_recal_hbv], 'KGE(RECAL_HBV)':[kge_recal_hbv], 'HFB(RECAL_HBV)':[hfb_recal_hbv],
                                             'NSE(HYMOD)':[nse_hymod], 'RMSE(HYMOD)':[rmse_hymod], 'BIAS(HYMOD)':[pbias_hymod], 'KGE(HYMOD)':[kge_hymod], 'HFB(HYMOD)':[hfb_hymod],
                                             'NSE(LSTM)':[nse_lstm], 'RMSE(LSTM)':[rmse_lstm], 'BIAS(LSTM)':[pbias_lstm], 'KGE(LSTM)':[kge_lstm], 'HFB(LSTM)':[hfb_lstm],
+                                            'NSE(HYMOD-LSTM)':[nse_lstm_hymod], 'RMSE(HYMOD-LSTM)':[rmse_lstm_hymod], 'BIAS(HYMOD-LSTM)':[pbias_lstm_hymod], 'KGE(HYMOD-LSTM)':[kge_lstm_hymod], 'HFB(HYMOD-LSTM)':[hfb_lstm_hymod],
                                             'NSE(PRECIP)':[nse_precip], 'RMSE(PRECIP)':[rmse_precip], 'BIAS(PRECIP)':[pbias_precip], 'KGE(PRECIP)':[kge_precip]})
                 
                 df_total = pd.concat([df_total, df_result], axis=0)

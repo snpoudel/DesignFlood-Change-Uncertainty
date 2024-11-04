@@ -25,19 +25,19 @@ df = df.dropna(axis='rows')
 # df = df[df['station_id'].isin(stations_with_all_errors)]
 
 #boxplot for no error
-df_bias_melt = pd.melt(df, id_vars=['precip_cat'], value_vars=['BIAS(HBV)', 'BIAS(RECAL_HBV)', 'BIAS(HYMOD)', 'BIAS(LSTM)'])
+df_bias_melt = pd.melt(df, id_vars=['precip_cat'], value_vars=['BIAS(HBV)', 'BIAS(RECAL_HBV)', 'BIAS(HYMOD)', 'BIAS(LSTM)', 'BIAS(HYMOD-LSTM)'])
 df_bias_melt['objective'] = 'BIAS'
 
-df_hfb_melt = pd.melt(df, id_vars=['precip_cat'], value_vars= ['HFB(HBV)', 'HFB(RECAL_HBV)','HFB(HYMOD)' , 'HFB(LSTM)'])
+df_hfb_melt = pd.melt(df, id_vars=['precip_cat'], value_vars= ['HFB(HBV)', 'HFB(RECAL_HBV)','HFB(HYMOD)' , 'HFB(LSTM)', 'HFB(HYMOD-LSTM)'])
 df_hfb_melt['objective'] = 'HFB'
 
-df_rmse_melt = pd.melt(df, id_vars=['precip_cat'], value_vars=['RMSE(HBV)', 'RMSE(RECAL_HBV)','RMSE(HYMOD)' , 'RMSE(LSTM)'])
+df_rmse_melt = pd.melt(df, id_vars=['precip_cat'], value_vars=['RMSE(HBV)', 'RMSE(RECAL_HBV)','RMSE(HYMOD)' , 'RMSE(LSTM)', 'RMSE(HYMOD-LSTM)'])
 df_rmse_melt['objective'] = 'RMSE'
 
-df_nse_melt = pd.melt(df, id_vars=['precip_cat'], value_vars=['NSE(HBV)', 'NSE(RECAL_HBV)','NSE(HYMOD)' , 'NSE(LSTM)'])
+df_nse_melt = pd.melt(df, id_vars=['precip_cat'], value_vars=['NSE(HBV)', 'NSE(RECAL_HBV)','NSE(HYMOD)' , 'NSE(LSTM)', 'NSE(HYMOD-LSTM)'])
 df_nse_melt['objective'] = 'NSE'
 
-df_kge_melt = pd.melt(df, id_vars=['precip_cat'], value_vars=['KGE(HBV)','KGE(RECAL_HBV)', 'KGE(HYMOD)' , 'KGE(LSTM)'])
+df_kge_melt = pd.melt(df, id_vars=['precip_cat'], value_vars=['KGE(HBV)','KGE(RECAL_HBV)', 'KGE(HYMOD)' , 'KGE(LSTM)', 'KGE(HYMOD-LSTM)'])
 df_kge_melt['objective'] = 'KGE'
 #combine all dataframes
 df_all = pd.concat([df_bias_melt, df_hfb_melt, df_rmse_melt, df_nse_melt, df_kge_melt], axis=0)
