@@ -20,7 +20,8 @@ for id in basin_list:
 
                 #only extract date and hymod_lstm_streamflow
                 temp_df = temp_df.loc[:,['date', 'hymod_lstm_streamflow']]
-
+                #only keep date starting from 2000-12-30
+                temp_df = temp_df[temp_df['date']>='2000-12-30']
                 #save as a csv file
                 temp_df.to_csv(f'output/regional_lstm_hymod/final_output/historical/hymod_lstm{id}_coverage{coverage}_comb{comb}.csv')
 
@@ -38,6 +39,8 @@ for id in basin_list:
 
                 #only extract date and hymod_lstm_streamflow
                 temp_df = temp_df.loc[:,['date', 'hymod_lstm_streamflow']]
+                #only keep date starting from 2000-12-30
+                temp_df = temp_df[temp_df['date']>='2000-12-30']
 
                 #save as a csv file
                 temp_df.to_csv(f'output/regional_lstm_hymod/final_output/future/hymod_lstm{id}_coverage{coverage}_comb{comb}.csv')
