@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import os
 from geneticalgorithm import geneticalgorithm as ga
-from simp-hymod_model import hymod
+from simp_hymod_model import hymod
 from mpi4py import MPI
 
 #Set up communicator to parallelize job in cluster using MPI

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=idw-hymod            # Job name
+#SBATCH --job-name=sim-hymod            # Job name
 #SBATCH --output=idw-hymod%j.log       # Output file name (%j expands to jobID)
 #SBATCH --error=idw-hymod%j.log        # Error file name (%j expands to jobID)
 #SBATCH --time=72:00:00                 # Time limit (HH:MM:SS)
