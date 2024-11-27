@@ -1,7 +1,64 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pyextremes import EVA
+import lmoments3 as lm
+from lmoments3 import distr
+from scipy.stats import gumbel_r
+from scipy.stats import genextreme
+from scipy.stats import pearson3
+
+#function that returns flood specific return period
+def return_flood(data, return_period, distribution, method):
+    '''
+    data: annual extreme values, eg., [10, 20, 30]
+    return_period: 5-yr, eg., 5
+    distribution: Gumbel = 'gum' Log-Pearson3 =  'lp' GEV = 'gev'
+    method: L-moment = 'lm' or MLE = 'mle'
+    '''
+    data = data[data>0] #only keep non zero values
+    #calculate non exceedance probability from return period
+    exceedance_prob = 1/return_period
+    nep = 1 - exceedance_prob #non-exceedance probability
+
+    if distribution == 'gum': ##--Gumbel Distribution--##
+        
+        if method == 'lm': #fit using L-moment
+            params = distr.gum.lmom_fit(data)
+            model = distr.gum(**params)
+            flood = model.ppf(nep)
+            return flood
+        if method == 'mle': #fit using MLE
+            params = gumbel_r.fit(data) #MLE is default
+            flood = gumbel_r.ppf(nep, loc=params[0], scale=params[1])
+            return flood
+        
+    if distribution == 'gev': ##--Generalized Extreme Value distribution--##
+        
+        if method == 'lm':
+            #fit with L-moment
+            params = distr.gev.lmom_fit(data)
+            model = distr.gev(**params)
+            flood = model.ppf(nep)
+            return flood
+        if method == 'mle': #fit with MLE
+            params = genextreme.fit(data)
+            flood = genextreme.ppf(nep, c=params[0], loc=params[1], scale=params[2])
+            return flood
+        
+    if distribution == 'lp': ##--Log-Normal distribution--##
+        
+        if method == 'lm':
+            #fit with L-moment
+            params = distr.pe3.lmom_fit(np.log(data))
+            model = distr.pe3(**params)
+            flood = np.exp(model.ppf(nep))
+            return flood
+        if method == 'mle':
+            #fit with MLE
+            params = pearson3.fit(np.log(data))
+            flood = np.exp(pearson3.ppf(nep, skew=params[0], loc=params[1], scale=params[2]))
+            return flood
+
 
 #read the list of basin ID
 id = '01108000'
@@ -13,35 +70,6 @@ def rmse(q_obs, q_sim):
     rmse_value = np.sqrt(np.mean((q_obs - q_sim)**2))
     return rmse_value
  
-#write a function that takes in a pandas series and returns the extreme values
-def return_tyr_flood(data, ax=None):
-    '''
-    Input
-    data: It most be a pandas series with datetime index
-    Output
-    returns the value of the flood for 20, 50 and 100 years return period
-    '''
-    #create a eva model
-    eva_model = EVA(data) #input data must be a pandas series with datetime index
-    #find the extreme values
-    eva_model.get_extremes(method='BM', extremes_type='high') #Finds 1 extreme value per year
-    #visualize the extreme values
-    #eva_model.extremes.plot()
-    #fit the model
-    eva_model.fit_model() # By default, the best fitting distribution is selected using the AIC
-    # #calculate the return period
-    # eva_summary = eva_model.get_summary(
-    #     return_period=[20, 50, 100],
-    #     alpha=0.95, #Confidence interval
-    #     n_samples=2,) #1000#Number of samples for bootstrap confidence intervals
-    # #convert this into a dataframe
-    # eva_summary = pd.DataFrame(eva_summary)
-    #make a return period plot
-    eva_model.plot_return_values(alpha=None, ax=ax) #alpha is the confidence interval
-    #model diagnostics plot
-    # eva_model.plot_diagnostic(alpha=None) #alpha is the confidence interval
-    # plt.show() 
-    # return round(eva_summary.iloc[0,0],2), round(eva_summary.iloc[1,0],2), round(eva_summary.iloc[2,0],2)
 
 #########--TEST FOR PRECIPTATION--######### historical and future
 #read true precip, historical
@@ -60,19 +88,18 @@ precip_rmse = round(precip_rmse, 2)
 #########--TEST FOR HBV/Truth STREAMFLOW--#########
 #read true streamflow, historical
 true_streamflow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
-true_streamflow['date'] = pd.to_datetime(true_streamflow['date'])
+true_streamflow['year'] = pd.to_datetime(true_streamflow['date']).dt.year
+data = true_streamflow.groupby('year')['streamflow'].max()
 
 future_true_streamflow = pd.read_csv(f'output/future/hbv_true_future_streamflow/hbv_true_future_output_{id}.csv')
-future_true_streamflow['date'] = pd.to_datetime(true_streamflow['date'])
+future_true_streamflow['year'] = pd.to_datetime(true_streamflow['date']).dt.year
+data_future = future_true_streamflow.groupby('year')['streamflow'].max()
 
-#return period plot historical
-true_flow = true_streamflow.copy()
-true_flow.set_index('date', inplace=True)
-true_flow.index = pd.to_datetime(true_flow.index, format='%Y-%m-%d')
-#return period, future true
-future_flow = future_true_streamflow.copy()
-future_flow.set_index('date', inplace=True)
-future_flow.index = pd.to_datetime(future_flow.index, format='%Y-%m-%d')
+
+            
+
+
+
 
 
 #########--TEST FOR HYMOD STREAMFLOW--#########

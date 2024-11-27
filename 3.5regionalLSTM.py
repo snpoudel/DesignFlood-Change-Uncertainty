@@ -41,15 +41,12 @@ def set_seed(seed):
 # Function to create LSTM input sequences
 def create_sequences(features, targets, sequence_length):
     n_days = len(features) - sequence_length + 1
-    x_sequences = []
-    y_sequences = []
-
+    x_sequences, y_sequences = [], []
     for i in range(n_days):
         x_seq = features[i:i+sequence_length]
         y_seq = targets[i+sequence_length-1]
         x_sequences.append(x_seq)
         y_sequences.append(y_seq)
-
     return np.array(x_sequences), np.array(y_sequences)
 
 # LSTM Model Definition
@@ -83,7 +80,7 @@ class SeqDataset(Dataset):
         return self.n_samples
 
 #### Train the model for training period
-set_seed(1000000)
+set_seed(10)
 
 # Dates and basins for training
 # basin_list = ['01095375', '01096000', '01097000', '01103280', '01104500', '01105000']
@@ -92,36 +89,34 @@ basin_list = pd.read_csv("data/regional_lstm/MA_basins_gauges_2000-2020_filtered
 start_date = date(2000, 1, 1)
 end_date = date(2013, 12, 31)
 n_days_train = (end_date - start_date).days + 1
-#count number of basins
-basin_count = len([f for f in os.listdir(f'data/regional_lstm/processed_lstm_input/{pb}') if f.endswith('.csv')])
-n_total_days = basin_count * n_days_train
+
 
 #Get standard scaler from training data
-features = np.zeros((n_total_days, NUM_INPUT_FEATURES), dtype=np.float32)
-n = 0
+features = []
 for basin_id in basin_list:
     file_path = f'data/regional_lstm/processed_lstm_input/{pb}/lstm_input{basin_id}.csv'
     if os.path.exists(file_path):
         data = pd.read_csv(file_path)
         data = data.drop(columns=['date'])
-        features[n:n+n_days_train, :] = data.iloc[:n_days_train, :29].values
-        n += n_days_train
+        features.append(data.iloc[:n_days_train, :29].values) # 29 features
+features = np.vstack(features).astype(np.float32) #stack all basins
+
+#standardize features
 scaler = StandardScaler()
 scaler.fit(features)
 
 # Load and preprocess data
-features = np.zeros((n_total_days, NUM_INPUT_FEATURES), dtype=np.float32)
-targets = np.zeros((n_total_days, NUM_OUTPUT_FEATURES), dtype=np.float32)
-
-n = 0
+features, targets = [], []
 for basin_id in basin_list:
     file_path = f'data/regional_lstm/processed_lstm_input/{pb}/lstm_input{basin_id}.csv'
     if os.path.exists(file_path):
         data = pd.read_csv(file_path)
         data = data.drop(columns=['date'])
-        features[n:n+n_days_train, :] = data.iloc[:n_days_train, :29].values # 29 features
-        targets[n:n+n_days_train, :] = data.iloc[:n_days_train, [-1]].values # last column is the target
-        n += n_days_train
+        features.append(data.iloc[:n_days_train, :29].values) # 29 features
+        targets.append(data.iloc[:n_days_train, [-1]].values) # target is the last column
+features = np.vstack(features).astype(np.float32)
+targets = np.vstack(targets).astype(np.float32)
+
 #standardize features with training data scaler
 features = scaler.transform(features)
 
@@ -153,27 +148,22 @@ for epoch in range(NUM_EPOCHS):
         optimizer.step()
 
         end_time = time.time()
-        if (i+1) % 1000 == 0:
-            print(f'Epoch [{epoch+1}/{NUM_EPOCHS}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}, Time: {end_time - start_time:.2f} seconds')
+        if (i+1) % 500 == 0:
+            print(f'PB:{pb}, Epoch: [{epoch+1}/{NUM_EPOCHS}], Step: [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}, Time: {end_time - start_time:.2f} seconds')
 
 # Save the model
 torch.save(model.state_dict(), f'trained_lstm_model_{pb}.pth')
-
+#time taken to train the model
+end_time = time.time()
+print(f'Time taken for training: {end_time - start_time:.2f} seconds')
 
 #######---PREDICTION FOR HISTORICAL PERIOD---#######
 #### make prediction using trained model for historical period
 start_date = date(2000, 1, 1)
 end_date = date(2020, 12, 31)
 n_days_test = (end_date - start_date).days + 1
-#count number of basins
-basin_count = len([f for f in os.listdir(f'data/regional_lstm/prediction_datasets/historical/{pb}') if f.endswith('.csv')])
-n_total_days = basin_count * n_days_train
-n_total_days = len(basin_list) * n_days_test
 
-features = np.zeros((n_total_days, NUM_INPUT_FEATURES), dtype=np.float32)
-targets = np.zeros((n_total_days, NUM_OUTPUT_FEATURES), dtype=np.float32)
-
-n = 0
+features, targets = [], []
 for basin_id in basin_list:
     for coverage in np.append(np.arange(12), [99]):
         for comb in np.arange(12):
@@ -181,9 +171,10 @@ for basin_id in basin_list:
             if os.path.exists(file_path):
                 data = pd.read_csv(file_path)
                 data = data.drop(columns=['date'])
-                features[n:n+n_days_test, :] = data.iloc[:n_days_test, :29].values # 29 features
-                targets[n:n+n_days_test, :] = data.iloc[:n_days_test, [-1]].values # last column is the target
-                n += n_days_test
+                features.append(data.iloc[:n_days_test, :29].values)
+                targets.append(data.iloc[:n_days_test, [-1]].values)
+features = np.vstack(features).astype(np.float32)
+targets = np.vstack(targets).astype(np.float32)
 
 #standardize features with training data scaler
 features = scaler.transform(features)
@@ -195,7 +186,7 @@ test_dataset = SeqDataset(x_seq, y_seq)
 test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
-model.load_state_dict(torch.load(f'trained_lstm_model_{pb}.pth'))
+model.load_state_dict(torch.load(f'trained_lstm_model_{pb}.pth', weights_only=True))
 model.eval()
 
 all_outputs, all_targets = [], []
@@ -241,7 +232,7 @@ for basin_id in basin_list:
                 i += 1
 
 end_time = time.time()
-print(f'Time taken for historical dataset: {end_time - start_time:.2f} seconds')
+print(f'Time taken for historical dataset prediction: {end_time - start_time:.2f} seconds')
 
 
 
@@ -250,15 +241,8 @@ print(f'Time taken for historical dataset: {end_time - start_time:.2f} seconds')
 start_date = date(2000, 1, 1)
 end_date = date(2020, 12, 31)
 n_days_test = (end_date - start_date).days + 1
-#count number of basins
-basin_count = len([f for f in os.listdir(f'data/regional_lstm/prediction_datasets/future/{pb}') if f.endswith('.csv')])
-n_total_days = basin_count * n_days_train
-n_total_days = len(basin_list) * n_days_test
 
-features = np.zeros((n_total_days, NUM_INPUT_FEATURES), dtype=np.float32)
-targets = np.zeros((n_total_days, NUM_OUTPUT_FEATURES), dtype=np.float32)
-
-n = 0
+features, targets = [], []
 for basin_id in basin_list:
     for coverage in np.append(np.arange(12), [99]):
         for comb in np.arange(12):
@@ -266,9 +250,10 @@ for basin_id in basin_list:
             if os.path.exists(file_path):
                 data = pd.read_csv(file_path)
                 data = data.drop(columns=['date'])
-                features[n:n+n_days_test, :] = data.iloc[:n_days_test, :29].values # 29 features
-                targets[n:n+n_days_test, :] = data.iloc[:n_days_test, [-1]].values # last column is the target
-                n += n_days_test
+                features.append(data.iloc[:n_days_test, :29].values)
+                targets.append(data.iloc[:n_days_test, [-1]].values)
+features = np.vstack(features).astype(np.float32)
+targets = np.vstack(targets).astype(np.float32)
 
 #standardize features with training data scaler
 features = scaler.transform(features)
@@ -280,7 +265,7 @@ test_dataset = SeqDataset(x_seq, y_seq)
 test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
-model.load_state_dict(torch.load(f'trained_lstm_model_{pb}.pth'))
+model.load_state_dict(torch.load(f'trained_lstm_model_{pb}.pth', weights_only=True))
 model.eval()
 
 all_outputs, all_targets = [], []
@@ -326,4 +311,4 @@ for basin_id in basin_list:
                 i += 1
 
 end_time = time.time()
-print(f'Time taken for future dataset: {end_time - start_time:.2f} seconds')
+print(f'Time taken for future dataset prediction: {end_time - start_time:.2f} seconds')
