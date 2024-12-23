@@ -3,25 +3,22 @@ import pandas as pd
 import geopandas as gpd
 from mpi4py import MPI
 
-#set up MPI communicator
+#setup the MPI communicator
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
-size = comm.Get_size()
 
-#rad filtered basin with at least 2 gauges
-basin_list = pd.read_csv('data/ma29basins.csv', dtype={'basin_id':str})
-basin_id = basin_list['basin_id'][rank] #run 31 processess
 #basid id
 #basin_id = '01108000'
+basin_list = pd.read_csv('data/ma29basins.csv', dtype={'basin_id':str})
+basin_id = basin_list['basin_id'][rank]
 #read basin shapefile
-
 basin_shapefile = gpd.read_file(f'data/prms_drainage_area_shapes/model_{basin_id}_nhru.shp')
 #convert the basin shapefile to the same coordinate system as the stations
 basin_shapefile = basin_shapefile.to_crs(epsg=4326)
 
 ##Divide the basin into meshgrid of size 0.125 degree
 #find the bounding box of the basin
-grid_size = 0.0625 #0.0625
+grid_size = 0.0625 #0.03125
 minx, miny, maxx, maxy = basin_shapefile.total_bounds
 #create meshgrid
 x = np.arange(minx, maxx, grid_size)
@@ -44,7 +41,8 @@ gauge_stations = gauge_stations[gauge_stations['basin_id'] == basin_id]
 #read all gauge stations data for this basin and merge them
 precip_all_stations = pd.DataFrame()
 for gauge_id in gauge_stations['id']:
-    gauge_data = pd.read_csv(f'data/swg_data/swg_output/processed/gauge_precip/1/{gauge_id}_scenario1.csv')
+    #use scenario 11 which is temp increase of 2 degree and a clausius clapeyron scaling factor of 7 percent
+    gauge_data = pd.read_csv(f'data/swg_data/swg_output/processed/gauge_precip/11/{gauge_id}_scenario11.csv')
     #add the station id to the dataframe
     gauge_data['STATION'] = gauge_id
     #append the data to the dataframe
@@ -53,19 +51,20 @@ for gauge_id in gauge_stations['id']:
 #add the lat and lon of the stations to precip_all_stations from gauge_stations
 precip_all_stations = pd.merge(precip_all_stations, gauge_stations[['id','lat','lon']], left_on='STATION', right_on='id', how='left') 
 
+
 #loop through each day, calculate inverse distance weighted precipitation for each grid point in the basin
 precip_df = pd.DataFrame() 
 unique_dates = precip_all_stations['date'].unique()
 # unique_dates = np.array([np.datetime64(date) for date in unique_dates])
 # unique_dates = np.sort(unique_dates)
 for date in unique_dates:
-    #get the precipitation data for that day
     date = str(date)
+    #get the precipitation data for that day
     precip_day = precip_all_stations[precip_all_stations['date'] == date].reset_index(drop=True)
     precip_grid = [] #store the precipitation data for each grid point
     #loop through each grid point in the basin
     for i in range(len(gdf_grid)):
-        #get the lat and lon of the grid point
+        #get the latitude and longitude of the grid point
         lat = gdf_grid['lat'][i]
         lon = gdf_grid['lon'][i]
         #calculate the distance between the grid point and all stations
@@ -84,16 +83,16 @@ for date in unique_dates:
     precip_df = pd.concat([precip_df, precip_temp_df], ignore_index=True)
 
 #save the basin wise precipitation data to a csv file
-precip_df.to_csv(f'data/true_precip/true_precip{basin_id}.csv', index=False)
+precip_df.to_csv(f'data/future/future_true_precip/future_true_precip{basin_id}.csv', index=False)
 #also save the result in interpolated precip folder with 99 as coverage and 5 combinations(0,1,2,3,4)
 #these precipitation sets will be forced to models to see how model output can vary even under same input
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb0.csv', index=False)
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb1.csv', index=False)
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb2.csv', index=False)
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb3.csv', index=False)
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb4.csv', index=False)
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb5.csv', index=False)
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb6.csv', index=False)
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb7.csv', index=False)
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb8.csv', index=False)
-precip_df.to_csv(f'data/noisy_precip/noisy_precip{basin_id}_coverage99_comb9.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb0.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb1.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb2.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb3.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb4.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb5.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb6.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb7.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb8.csv', index=False)
+precip_df.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage99_comb9.csv', index=False)
