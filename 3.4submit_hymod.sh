@@ -2,7 +2,7 @@
 #SBATCH --job-name=idw-hymod            # Job name
 #SBATCH --output=idw-hymod%j.log       # Output file name (%j expands to jobID)
 #SBATCH --error=idw-hymod%j.log        # Error file name (%j expands to jobID)
-#SBATCH --time=72:00:00                 # Time limit (HH:MM:SS)
+#SBATCH --time=300:00:00                 # Time limit (HH:MM:SS)
 #SBATCH --nodes=2                       #5 Number of nodes
 #SBATCH --ntasks=98                    #394 Number of tasks (one for each job), if you don't know numner of tasks beforehand there are ways to make this input dynamic as well
 #SBATCH --cpus-per-task=1               # Number of CPU cores per task
@@ -17,4 +17,4 @@ module load python/3.11.5
 source ~/pyenv-hmodel/bin/activate
 
 # Run your Python script with mpi
-mpirun python3 3.4hymod_idw_streamflow.py
+mpirun python3 3.4hymod.py

@@ -57,15 +57,15 @@ model_order = ['RECAL_HBV', 'FULL-HYMOD-LSTM', 'FULL-HYMOD', 'LSTM', 'HYMOD-LSTM
 df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
 
 #make plot for nse, kge, rmse
-df_all_nkr = df_all[df_all['objective'].isin(['RMSE','NSE','KGE'])]
+df_all_nkr = df_all[df_all['objective'].isin(['RMSE','KGE','NSE'])]
 #Make boxplots using seaborn
 precip_cat_order = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
 seaplot = sns.catplot(
             data=df_all_nkr, order = precip_cat_order,
             x='precip_cat', y='value', row='objective',
-            hue='model', kind='box', showfliers = False, width =0.5,
+            hue='model', kind='box', showfliers = False, width =0.8,
             sharey=False,  legend_out=True,
-            height = 3, aspect = 3, #aspect times height gives width of each facet
+            height = 2.5, aspect = 2.5, #aspect times height gives width of each facet
             ) 
 seaplot.set_axis_labels('Precipitation Uncertainty (RMSE, mm/day)', "") #set x and y labels
 seaplot.legend.set_title("Model") #set legend title
@@ -78,6 +78,8 @@ for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of a
 plt.show()
 #save the plot
 seaplot.savefig('output/figures/diagnosticsNSE_allbasin.png', dpi=300)
+#also save as a pdf
+seaplot.savefig('output/figures/diagnosticsNSE_allbasin.pdf')
 # seaplot.savefig('output/figures/NoLSTM_diagnosticsKGE_allbasin.png', dpi=300) #without lstm
 #make plot for nse, kge, rmse
 df_all_bias = df_all[df_all['objective'].isin(['BIAS','HFB'])]
@@ -86,7 +88,7 @@ precip_cat_order = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
 seaplot = sns.catplot(
             data=df_all_bias, order = precip_cat_order,
             x='precip_cat', y='value', row='objective',
-            hue='model', kind='box', showfliers = False, width =0.5,
+            hue='model', kind='box', showfliers = False, width =0.7,
             sharey=False,  legend_out=True,
             height = 3, aspect = 3, #aspect times height gives width of each facet
             ) 

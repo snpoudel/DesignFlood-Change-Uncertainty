@@ -9,6 +9,8 @@ Reference:
 import numpy as np
 import pandas as pd
 import math
+from datetime import datetime
+
 # hymod function
 def hymod(pars, p, temp, date, latitude, routing):
     '''
@@ -69,8 +71,24 @@ def hymod(pars, p, temp, date, latitude, routing):
     
     #Calculate potential evapotranspiration using Hamon's method
     #convert date to julian date
-    date = pd.to_datetime(date) #convert first to python datetime format
-    jdate = date.dt.strftime('%j').astype(int) #convert to julian date
+    #pandas datatime couldn't handle 1040 years of data, so had to go extra steps
+    jdate = []
+    for d in date:
+        year, month, day = map(int, d.split('-'))  # Convert year, month, and day to integers
+        try:
+            # Attempt to create a valid datetime object
+            formatted_date = datetime(year, month, day)
+            jdate.append(formatted_date.timetuple().tm_yday)  # Convert to Julian date
+        except ValueError:
+            # Handle February 29 in non-leap years
+            if month == 2 and day == 29:
+                # Assign February 28 Julian date for non-leap years and increment by 1
+                formatted_date = datetime(year, 2, 28)
+                jdate.append(formatted_date.timetuple().tm_yday + 1)
+            else:
+                raise  # Re-raise other exceptions
+    jdate = np.array(jdate)
+    
     #calculate daylight hour
     var_theta = 0.2163108 + 2 * np.arctan(0.9671396 * np.tan(0.0086 * (jdate - 186)))
     var_pi = np.arcsin(0.39795 * np.cos(var_theta))
