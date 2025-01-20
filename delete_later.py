@@ -1,120 +1,256 @@
-#import libraries
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-import random
-from mpi4py import MPI
-from scipy.spatial import cKDTree
+import os
 
-#ignore warnings
-import warnings
-warnings.filterwarnings("ignore")
+#read all basin lists
+basin_list = pd.read_csv('data/ma29basins.csv',  dtype={'basin_id':str})
 
-#Set up communicator to parallelize job in cluster using MPI
-comm = MPI.COMM_WORLD #Get the default communicator object
-rank = comm.Get_rank() #Get the rank of the current process
-size = comm.Get_size() #Get the total number of processes
+#function to calculate rmse value
+def rmse(q_obs, q_sim):
+    rmse_value = np.sqrt(np.mean((q_obs - q_sim)**2))
+    return rmse_value
 
-# Read basin lists with at least 2 stations
-basin_list = pd.read_csv('data/ma29basins.csv', dtype={'basin_id': str})
 
-# Prepare the basin list with necessary columns and combinations
-basin_list['total_num_stn_used'] = basin_list['num_stations'] - 1
-basin_list['stn_array'] = basin_list['total_num_stn_used'].apply(lambda x: np.arange(1, x + 1))
-basin_list = basin_list.explode('stn_array').reset_index(drop=True)
-basin_list['total_comb'] = basin_list['num_stations'].apply(lambda x: min(10, x))
-basin_list['comb_array'] = basin_list['total_comb'].apply(lambda x: np.arange(1, x + 1))
-basin_list = basin_list.explode('comb_array').reset_index(drop=True)
+######---for training dataset---######
+#--FOR TRUE PRECIP--#
+for id in basin_list['basin_id']:
+    for case in ['', 'future_']: #iterate over historical and future case
+        precip_true = pd.read_csv(f'data/regional_lstm/{case}noisy_precip_buckets/pb0/{case}true_precip{id}.csv')
+        #extract static features from previous input datasets
+        previous_file = pd.read_csv(f'data/regional_lstm/lstm_static_input/lstm_input_{id}.csv').iloc[[0]]
+        previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
+                                              'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
+                                              'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
+        previous_file = round(previous_file, 4)
+        previous_file = pd.concat([previous_file]*len(precip_true))
+        previous_file = previous_file.reset_index(drop=True)
+        
+        #read true discharge for this basin
+        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv') #we don't need flow information for future, so no need to update!
+        #read simulated hymod discharge for this basin
+        if case == '':
+            hymod_flow = pd.read_csv(f'output/simp_hymod/simp_hymod{id}_coverage99_comb0.csv')
+        else:
+            hymod_flow = pd.read_csv(f'output/future/simp_hymod/simp_hymod{id}_coverage99_comb0.csv')
+        #merge data,temp,flow from true file to previous file
+        previous_file['idw_precip'] = precip_true['PRECIP']
+        previous_file['era5temp'] = true_flow['era5temp']
+        # previous_file['hymod_flow'] = hymod_flow['streamflow']
+        previous_file['date'] = true_flow['date']
+        previous_file['qobs_error'] = true_flow['streamflow'] - hymod_flow['streamflow']
+        previous_file = previous_file.reset_index(drop=True)
 
-#extract necessary input for each MPI jobs
-basin_id = basin_list['basin_id'][rank]
-# total_comb = min(10, basin_list['num_stations'][rank])
-num_station = basin_list['stn_array'][rank]
-comb = basin_list['comb_array'][rank]
+        #save the final lstm input file
+        previous_file.to_csv(f'data/regional_lstm_simp_hymod/{case}processed_lstm_train_datasets/pb0/lstm_input{id}.csv', index=False)
 
-#read basin shapefile
-basin_shapefile = gpd.read_file(f'data/prms_drainage_area_shapes/model_{basin_id}_nhru.shp')
-#convert the basin shapefile to the same coordinate system as the stations
-basin_shapefile = basin_shapefile.to_crs(epsg=4326)
 
-#Divide the basin into meshgrid of size 0.125 degree
-grid_size = 0.0625 #0.0625
-minx, miny, maxx, maxy = basin_shapefile.total_bounds
-#create meshgrid
-x = np.arange(minx, maxx, grid_size)
-y = np.arange(miny, maxy, grid_size)
-#meshgrid
-xx, yy = np.meshgrid(x, y)
-#flatten the meshgrid
-xx = xx.flatten()
-yy = yy.flatten()
-#create a dataframe
-df_grid = pd.DataFrame({'lon':xx,'lat':yy})
-#only keep the points that lies within the basin
-gdf_grid = gpd.GeoDataFrame(df_grid,geometry=gpd.points_from_xy(df_grid['lon'],df_grid['lat']))
-gdf_grid = gdf_grid[gdf_grid.within(basin_shapefile.unary_union)].reset_index(drop=True)
 
-#read all gauging stations for this basin
-gauge_stations = pd.read_csv('data/ma_basins_gaugelist.csv', dtype={'basin_id':str})
-gauge_stations = gauge_stations[gauge_stations['basin_id'] == basin_id]
 
-#read all gauge stations data for this basin and merge them
-def read_gauge_data(scenario):
-    precip_all = pd.DataFrame()
-    for gauge_id in gauge_stations['id']:
-        gauge_data = pd.read_csv(f'data/swg_data/swg_output/processed/gauge_precip/{scenario}/{gauge_id}_scenario{scenario}.csv')
-        gauge_data['STATION'] = gauge_id
-        precip_all = pd.concat([precip_all, gauge_data], ignore_index=True)
-    return precip_all
+#--HISTORICAL--#
+for id in basin_list['basin_id']:
+    #read interpolate precip for this basin
+    for precip_bucket in ['0-1','1-2','2-3', '3-4', '4-6', '6-8','8-10']:
+        random_precip_rmse = 1000
+        for coverage in range(15):
+            for comb in range(15):
+                file_path = f'data/regional_lstm/noisy_precip_buckets/pb{precip_bucket}/noisy_precip{id}_coverage{coverage}_comb{comb}.csv'
+                if os.path.exists(file_path):
+                    #true precip
+                    true_precip = pd.read_csv(f'data/true_precip/true_precip{id}.csv')
+                    #read interpolated precip
+                    idw_precip =pd.read_csv(file_path)
+                    precip_rmse = rmse(idw_precip['PRECIP'], true_precip['PRECIP'])
+                    precip_rmse = round(precip_rmse, 3)
+                    if precip_rmse < random_precip_rmse:
+                        random_precip_rmse = precip_rmse
+                        #extract static features from previous input datasets
+                        previous_file = pd.read_csv(f'data/regional_lstm/lstm_static_input/lstm_input_{id}.csv').iloc[[0]]
+                        previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
+                                              'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
+                                              'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
+                        previous_file = round(previous_file, 2)
+                        previous_file = pd.concat([previous_file]*len(idw_precip))
+                        previous_file = previous_file.reset_index(drop=True)
+                        
+                        #read true discharge for this basin
+                        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
+                        #read hymod discharge
+                        hymod_flow = pd.read_csv(f'output/simp_hymod/simp_hymod{id}_coverage{coverage}_comb{comb}.csv')
+                        #merge data,temp,flow from true file to previous file
+                        previous_file['idw_precip'] = idw_precip['PRECIP']
+                        previous_file['era5temp'] = true_flow['era5temp']
+                        # previous_file['hymod_flow'] = hymod_flow['streamflow']
+                        previous_file['date'] = true_flow['date']
+                        previous_file['qobs_error'] = true_flow['streamflow'] - hymod_flow['streamflow']
+                        previous_file = previous_file.reset_index(drop=True)
 
-precip_all_historical = read_gauge_data(1)
-precip_all_future = read_gauge_data(11)
+                        #save the final lstm input file
+                        previous_file.to_csv(f'data/regional_lstm_simp_hymod/processed_lstm_train_datasets/pb{precip_bucket}/lstm_input{id}.csv', index=False)
 
-#add the lat and lon of the stations to precip_all_stations from gauge_stations
-precip_all_historical = pd.merge(precip_all_historical, gauge_stations[['id','lat','lon']], left_on='STATION', right_on='id', how='left') 
-precip_all_future = pd.merge(precip_all_future, gauge_stations[['id','lat','lon']], left_on='STATION', right_on='id', how='left')
 
-# Function to generate random combinations of grid cells
-def generate_random_combinations(total_stations, used_stations, num_combinations): 
-    random_combinations = []
-    while len(random_combinations) < num_combinations:
-        combination = random.sample(range(total_stations), used_stations)
-        combination.sort()  # Ensure combinations are sorted for uniqueness
-        if combination not in random_combinations:
-            random_combinations.append(combination)
-    return random_combinations
 
-#generate sets of precipitation dataset with different gridded data coverage and different combination of grids coverage
-grid = num_station
-stn_keep_index = generate_random_combinations(len(gauge_stations), int(grid), num_combinations=comb)
+#--FUTURE--#
+for id in basin_list['basin_id']:
+    #read interpolate precip for this basin
+    for precip_bucket in ['0-1','1-2','2-3', '3-4', '4-6', '6-8','8-10']:
+        random_precip_rmse = 1000
+        for coverage in range(15):
+            for comb in range(15):
+                file_path = f'data/regional_lstm/future_noisy_precip_buckets/pb{precip_bucket}/noisy_precip{id}_coverage{coverage}_comb{comb}.csv'
+                if os.path.exists(file_path):
+                    #true precip
+                    true_precip = pd.read_csv(f'data/future/future_true_precip/future_true_precip{id}.csv')
+                    #read interpolated precip
+                    idw_precip =pd.read_csv(file_path)
+                    precip_rmse = rmse(idw_precip['PRECIP'], true_precip['PRECIP'])
+                    precip_rmse = round(precip_rmse, 3)
 
-# Create a KDTree for efficient distance calculations
-tree = cKDTree(gdf_grid[['lon', 'lat']]) #ckdtree finds the nearest point in the grid to the station
+                    if precip_rmse < random_precip_rmse:
+                        random_precip_rmse = precip_rmse
+                        #extract static features from previous input datasets
+                        previous_file = pd.read_csv(f'data/regional_lstm/lstm_static_input/lstm_input_{id}.csv').iloc[[0]]
+                        previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
+                                              'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
+                                              'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
+                        previous_file = round(previous_file, 2)
+                        previous_file = pd.concat([previous_file]*len(idw_precip))
+                        previous_file = previous_file.reset_index(drop=True)
+                        
+                        #read true discharge for this basin
+                        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv') #this won't be used so fine even without updating!
+                        #read hymod discharge
+                        hymod_flow = pd.read_csv(f'output/future/simp_hymod/simp_hymod{id}_coverage{coverage}_comb{comb}.csv')
 
-def calculate_precipitation(precip_data, stn_keep, gdf_grid, tree):
-    precip_df = pd.DataFrame()
-    unique_dates = precip_data['date'].unique()
-    for date in unique_dates[0:3]:
-        date = str(date)
-        precip_day = precip_data[precip_data['date'] == date].reset_index(drop=True)
-        precip_day = precip_day[precip_day['STATION'].isin(stn_keep['id'])].reset_index(drop=True)
-        distances, indices = tree.query(precip_day[['lon', 'lat']], k=len(gdf_grid))
-        weights = 1 / (distances ** 2)
-        precip_weighted = np.sum(weights * precip_day['prcp'].values[:, np.newaxis], axis=0) / np.sum(weights, axis=0)
-        precip_mean = np.mean(precip_weighted)
-        precip_mean = round(precip_mean, 3)
-        precip_temp_df = pd.DataFrame({'DATE': date, 'PRECIP': [precip_mean]})
-        precip_df = pd.concat([precip_df, precip_temp_df], ignore_index=True)
-    return precip_df
+                        #merge data,temp,flow from true file to previous file
+                        previous_file['idw_precip'] = idw_precip['PRECIP']
+                        previous_file['era5temp'] = true_flow['era5temp']
+                        # previous_file['hymod_flow'] = hymod_flow['streamflow']
+                        previous_file['date'] = true_flow['date']
+                        previous_file['qobs_error'] = true_flow['streamflow'] - hymod_flow['streamflow']
+                        previous_file = previous_file.reset_index(drop=True)
 
-# Keep only the stations that are in the random combination
-comb = comb - 1 # Subtract 1 to get the correct index
-stn_keep = gauge_stations.iloc[stn_keep_index[comb], :]
+                        #save the final lstm input file
+                        previous_file.to_csv(f'data/regional_lstm_simp_hymod/future_processed_lstm_train_datasets/pb{precip_bucket}/lstm_input{id}.csv', index=False)
 
-# Historical precipitation
-precip_df_historical = calculate_precipitation(precip_all_historical, stn_keep, gdf_grid, tree)
-precip_df_historical.to_csv(f'data/dnoisy_precip/noisy_precip{basin_id}_coverage{grid}_comb{comb}.csv', index=False)
 
-# # Future precipitation
-# precip_df_future = calculate_precipitation(precip_all_future, stn_keep, gdf_grid, tree)
-# precip_df_future.to_csv(f'data/future/future_noisy_precip/future_noisy_precip{basin_id}_coverage{grid}_comb{comb}.csv', index=False)
+##############################################################################################################################################################################################################################################################################################################################################################
+
+
+######---for prediction dataset---######
+#--FOR TRUE PRECIP--#
+for id in basin_list['basin_id']:
+    for case in ['', 'future_']: #iterate over historical and future case
+        precip_true = pd.read_csv(f'data/regional_lstm/{case}noisy_precip_buckets/pb0/{case}true_precip{id}.csv')
+        #extract static features from previous input datasets
+        previous_file = pd.read_csv(f'data/regional_lstm/lstm_static_input/lstm_input_{id}.csv').iloc[[0]]
+        previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
+                                              'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
+                                              'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
+        previous_file = round(previous_file, 4)
+        previous_file = pd.concat([previous_file]*len(precip_true))
+        previous_file = previous_file.reset_index(drop=True)
+        
+        #read true discharge for this basin
+        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
+        #read simulated hymod discharge for this basin
+        if case == '':
+            hymod_flow = pd.read_csv(f'output/simp_hymod/simp_hymod{id}_coverage99_comb0.csv')
+        else:
+            hymod_flow = pd.read_csv(f'output/future/simp_hymod/simp_hymod{id}_coverage99_comb0.csv')
+
+        #merge data,temp,flow from true file to previous file
+        previous_file['idw_precip'] = precip_true['PRECIP']
+        previous_file['era5temp'] = true_flow['era5temp']
+        # previous_file['hymod_flow'] = hymod_flow['streamflow']
+        previous_file['date'] = true_flow['date']
+        previous_file['qobs_error'] = true_flow['streamflow'] - hymod_flow['streamflow']
+        previous_file = previous_file.reset_index(drop=True)
+
+        #save the final lstm input file
+        if case == '':
+            tag = 'historical'
+        else:
+            tag = 'future'
+        previous_file.to_csv(f'data/regional_lstm_simp_hymod/processed_lstm_prediction_datasets/{tag}/pb0/lstm_input{id}_coverage99_comb0.csv', index=False)
+
+
+
+#--HISTORICAL--#
+for id in basin_list['basin_id']:
+    #read interpolate precip for this basin
+    for precip_bucket in ['0-1','1-2','2-3', '3-4', '4-6', '6-8','8-10']:
+        for coverage in range(15):
+            for comb in range(15):
+                file_path = f'data/regional_lstm/noisy_precip_buckets/pb{precip_bucket}/noisy_precip{id}_coverage{coverage}_comb{comb}.csv'
+                if os.path.exists(file_path):
+                    #true precip
+                    true_precip = pd.read_csv(f'data/true_precip/true_precip{id}.csv')
+                    #read interpolated precip
+                    idw_precip =pd.read_csv(file_path)
+                    precip_rmse = rmse(idw_precip['PRECIP'], true_precip['PRECIP'])
+                    precip_rmse = round(precip_rmse, 3)
+                    #extract static features from previous input datasets
+                    previous_file = pd.read_csv(f'data/regional_lstm/lstm_static_input/lstm_input_{id}.csv').iloc[[0]]
+                    previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
+                                            'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
+                                            'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
+                    previous_file = round(previous_file, 2)
+                    previous_file = pd.concat([previous_file]*len(idw_precip))
+                    previous_file = previous_file.reset_index(drop=True)
+                    
+                    #read true discharge for this basin
+                    true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
+                    #read hymod discharge
+                    hymod_flow = pd.read_csv(f'output/simp_hymod/simp_hymod{id}_coverage{coverage}_comb{comb}.csv')
+
+                    #merge data,temp,flow from true file to previous file
+                    previous_file['idw_precip'] = idw_precip['PRECIP']
+                    previous_file['era5temp'] = true_flow['era5temp']
+                    # previous_file['hymod_flow'] = hymod_flow['streamflow']
+                    previous_file['date'] = true_flow['date']
+                    previous_file['qobs_error'] = true_flow['streamflow'] - hymod_flow['streamflow']
+                    previous_file = previous_file.reset_index(drop=True)
+
+                    #save the final lstm input file
+                    previous_file.to_csv(f'data/regional_lstm_simp_hymod/processed_lstm_prediction_datasets/historical/pb{precip_bucket}/lstm_input{id}_coverage{coverage}_comb{comb}.csv', index=False)
+
+
+
+#--FUTURE--#
+for id in basin_list['basin_id']:
+    #read interpolate precip for this basin
+    for precip_bucket in ['0-1','1-2','2-3', '3-4', '4-6', '6-8','8-10']:
+        for coverage in range(15):
+            for comb in range(15):
+                file_path = f'data/regional_lstm/future_noisy_precip_buckets/pb{precip_bucket}/noisy_precip{id}_coverage{coverage}_comb{comb}.csv'
+                if os.path.exists(file_path):
+                    #true precip
+                    true_precip = pd.read_csv(f'data/future/future_true_precip/future_true_precip{id}.csv')
+                    #read interpolated precip
+                    idw_precip =pd.read_csv(file_path)
+                    precip_rmse = rmse(idw_precip['PRECIP'], true_precip['PRECIP'])
+                    precip_rmse = round(precip_rmse, 3)
+                    #extract static features from previous input datasets
+                    previous_file = pd.read_csv(f'data/regional_lstm/lstm_static_input/lstm_input_{id}.csv').iloc[[0]]
+                    previous_file = previous_file.loc[:, ['DRAIN_SQKM', 'ELEV_MEAN_M_BASIN', 'ELEV_MAX_M_BASIN', 'ELEV_MIN_M_BASIN', 'ELEV_SITE_M', 'SLOPE_PCT', 'ASPECT_DEGREES', 'ASPECT_NORTHNESS', 'ASPECT_EASTNESS',
+                                            'CLAYAVE', 'SILTAVE', 'SANDAVE', 'KFACT_UP', 'RFACT', 'HGA', 'HGB', 'HGC', 'HGD', 'PERMAVE',
+                                            'BARRENNLCD06', 'DECIDNLCD06', 'EVERGRNLCD06', 'MIXEDFORNLCD06', 'SHRUBNLCD06', 'GRASSNLCD06', 'PASTURENLCD06', 'CROPSNLCD06']]
+                    previous_file = round(previous_file, 2)
+                    previous_file = pd.concat([previous_file]*len(idw_precip))
+                    previous_file = previous_file.reset_index(drop=True)
+                    
+                    #read true discharge for this basin
+                    true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
+                    #read hymod discharge
+                    hymod_flow = pd.read_csv(f'output/future/simp_hymod/simp_hymod{id}_coverage{coverage}_comb{comb}.csv')
+
+                    #merge data,temp,flow from true file to previous file
+                    previous_file['idw_precip'] = idw_precip['PRECIP']
+                    previous_file['era5temp'] = true_flow['era5temp']
+                    # previous_file['hymod_flow'] = hymod_flow['streamflow']
+                    previous_file['date'] = true_flow['date']
+                    previous_file['qobs_error'] = true_flow['streamflow'] - hymod_flow['streamflow']
+                    previous_file = previous_file.reset_index(drop=True)
+
+                    #save the final lstm input file
+                    previous_file.to_csv(f'data/regional_lstm_simp_hymod/processed_lstm_prediction_datasets/future/pb{precip_bucket}/lstm_input{id}_coverage{coverage}_comb{comb}.csv', index=False)

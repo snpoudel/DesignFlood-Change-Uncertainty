@@ -5,6 +5,8 @@ import os
 from geneticalgorithm import geneticalgorithm as ga
 from simp_hymod_model import hymod
 from mpi4py import MPI
+import warnings
+warnings.filterwarnings("ignore")
 
 #Set up communicator to parallelize job in cluster using MPI
 comm = MPI.COMM_WORLD #Get the default communicator object
@@ -36,10 +38,10 @@ def calibNSE(station_id, grid, combination):
         q_sim = hymod(pars, p, temp, date, latitude, routing)
         #use first 2 years as spinup
         q_sim = q_sim[730:] #remove first 2 years
-        q_obs = q_obs[730:]
+        q_obs_inner = q_obs[730:] #remove first 2 years
         #calculate nse
-        denominator = np.sum((q_obs - (np.mean(q_obs)))**2)
-        numerator = np.sum((q_obs - q_sim)**2)
+        denominator = np.sum((q_obs_inner - (np.mean(q_obs_inner)))**2)
+        numerator = np.sum((q_obs_inner - q_sim)**2)
         nse_value = 1 - (numerator/denominator)
         return -nse_value #minimize this (use negative sign if you need to maximize)
 
@@ -125,7 +127,7 @@ for combination in np.arange(12):
 
         #run hbv model
         q_sim = hymod(params_in, precip_in['PRECIP'], temp_in['tavg'], precip_in['DATE'], lat_in, routing=1)
-        q_sim = np.round(q_sim, 4)
+        q_sim = np.round(q_sim, 3)
 
         #keep result in a dataframe
         output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })
@@ -147,7 +149,7 @@ for combination in np.arange(12):
 
         #run hymod model
         q_sim = hymod(params_in, precip_in['PRECIP'], temp_in['tavg'], precip_in['DATE'], lat_in, routing=1)
-        q_sim = np.round(q_sim, 4)
+        q_sim = np.round(q_sim, 3)
 
         #keep result in a dataframe
         output_df = pd.DataFrame({ 'date':precip_in['DATE'], 'streamflow':q_sim })

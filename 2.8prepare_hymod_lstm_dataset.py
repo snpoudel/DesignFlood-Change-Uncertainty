@@ -26,12 +26,12 @@ for id in basin_list['basin_id']:
         previous_file = previous_file.reset_index(drop=True)
         
         #read true discharge for this basin
-        true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv') #we don't need flow information for future, so no need to update!
+        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv') #we don't need flow information for future, so no need to update!
         #read simulated hymod discharge for this basin
         if case == '':
-            hymod_flow = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage99_comb0.csv')
+            hymod_flow = pd.read_csv(f'output/hymod/hymod{id}_coverage99_comb0.csv')
         else:
-            hymod_flow = pd.read_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage99_comb0.csv')
+            hymod_flow = pd.read_csv(f'output/future/hymod/hymod{id}_coverage99_comb0.csv')
         #merge data,temp,flow from true file to previous file
         previous_file['noisy_precip'] = precip_true['PRECIP']
         previous_file['era5temp'] = true_flow['era5temp']
@@ -73,9 +73,9 @@ for id in basin_list['basin_id']:
                         previous_file = previous_file.reset_index(drop=True)
                         
                         #read true discharge for this basin
-                        true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
+                        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
                         #read hymod discharge
-                        hymod_flow = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{coverage}_comb{comb}.csv')
+                        hymod_flow = pd.read_csv(f'output/hymod/hymod{id}_coverage{coverage}_comb{comb}.csv')
                         #merge data,temp,flow from true file to previous file
                         previous_file['noisy_precip'] = noisy_precip['PRECIP']
                         previous_file['era5temp'] = true_flow['era5temp']
@@ -117,9 +117,9 @@ for id in basin_list['basin_id']:
                         previous_file = previous_file.reset_index(drop=True)
                         
                         #read true discharge for this basin
-                        true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv') #this won't be used so fine even without updating!
+                        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv') #this won't be used so fine even without updating!
                         #read hymod discharge
-                        hymod_flow = pd.read_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage{coverage}_comb{comb}.csv')
+                        hymod_flow = pd.read_csv(f'output/future/hymod/hymod{id}_coverage{coverage}_comb{comb}.csv')
 
                         #merge data,temp,flow from true file to previous file
                         previous_file['noisy_precip'] = noisy_precip['PRECIP']
@@ -151,12 +151,12 @@ for id in basin_list['basin_id']:
         previous_file = previous_file.reset_index(drop=True)
         
         #read true discharge for this basin
-        true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
+        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
         #read simulated hymod discharge for this basin
         if case == '':
-            hymod_flow = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage99_comb0.csv')
+            hymod_flow = pd.read_csv(f'output/hymod/hymod{id}_coverage99_comb0.csv')
         else:
-            hymod_flow = pd.read_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage99_comb0.csv')
+            hymod_flow = pd.read_csv(f'output/future/hymod/hymod{id}_coverage99_comb0.csv')
 
         #merge data,temp,flow from true file to previous file
         previous_file['noisy_precip'] = precip_true['PRECIP']
@@ -199,9 +199,9 @@ for id in basin_list['basin_id']:
                     previous_file = previous_file.reset_index(drop=True)
                     
                     #read true discharge for this basin
-                    true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
+                    true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
                     #read hymod discharge
-                    hymod_flow = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{coverage}_comb{comb}.csv')
+                    hymod_flow = pd.read_csv(f'output/hymod/hymod{id}_coverage{coverage}_comb{comb}.csv')
 
                     #merge data,temp,flow from true file to previous file
                     previous_file['noisy_precip'] = noisy_precip['PRECIP']
@@ -240,9 +240,9 @@ for id in basin_list['basin_id']:
                     previous_file = previous_file.reset_index(drop=True)
                     
                     #read true discharge for this basin
-                    true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
+                    true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
                     #read hymod discharge
-                    hymod_flow = pd.read_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage{coverage}_comb{comb}.csv')
+                    hymod_flow = pd.read_csv(f'output/future/hymod/hymod{id}_coverage{coverage}_comb{comb}.csv')
 
                     #merge data,temp,flow from true file to previous file
                     previous_file['noisy_precip'] = noisy_precip['PRECIP']

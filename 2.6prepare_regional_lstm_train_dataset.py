@@ -24,7 +24,7 @@ for id in basin_list['basin_id']:
         previous_file = previous_file.reset_index(drop=True)
         
         #read true discharge for this basin
-        true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv') #we don't need flow information for future, so no need to update!
+        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv') #we don't need flow information for future, so no need to update!
 
         #merge data,temp,flow from true file to previous file
         previous_file['noisy_precip'] = precip_true['PRECIP']
@@ -66,7 +66,7 @@ for id in basin_list['basin_id']:
                         previous_file = previous_file.reset_index(drop=True)
                         
                         #read true discharge for this basin
-                        true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
+                        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
 
                         #merge data,temp,flow from true file to previous file
                         previous_file['noisy_precip'] = noisy_precip['PRECIP']
@@ -108,7 +108,7 @@ for id in basin_list['basin_id']:
                         previous_file = previous_file.reset_index(drop=True)
                         
                         #read true discharge for this basin
-                        true_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
+                        true_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
 
                         #merge data,temp,flow from true file to previous file
                         previous_file['noisy_precip'] = noisy_precip['PRECIP']
