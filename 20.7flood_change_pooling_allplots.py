@@ -7,7 +7,8 @@ import warnings
 warnings.filterwarnings('ignore')
 #set colorblind friendly seaborn color
 sns.set_palette('colorblind')
-df = pd.read_csv('output/allbasins_change_tyr_flood_modified.csv')
+df = pd.read_csv('output/allbasins_pooling_tyr_flood_modified.csv')
+
 distribution = 'gev'
 #loop through all combinations of method and distribution and make boxplots
 for method in ['mle']:
@@ -23,9 +24,28 @@ for method in ['mle']:
 
     #merge back zero precips
     df = pd.concat([df,df_zeroprecip], ignore_index=True)
+    df = df.drop(columns=['change_5yr_flood', 'change_10yr_flood', 'change_20yr_flood'])
     df = df.dropna(axis='rows')
     #only keep df with this method and distribution
     df = df[(df['method'] == method) & (df['distribution'] == distribution)]
+    #apply pooling by calculating average est_change in flood across all basins for a precip category
+    df['avg_est_change_5yr_flood'] = df.groupby(['precip_cat', 'model'])['est_change_5yr_flood'].transform('mean')
+    df['avg_est_change_10yr_flood'] = df.groupby(['precip_cat', 'model'])['est_change_10yr_flood'].transform('mean')
+    df['avg_est_change_20yr_flood'] = df.groupby(['precip_cat', 'model'])['est_change_20yr_flood'].transform('mean')
+
+    #calculate change in tyr flood
+    df['change_5yr_flood'] = df['avg_est_change_5yr_flood'] - df['true_change_5yr_flood']
+    df['change_10yr_flood'] = df['avg_est_change_10yr_flood'] - df['true_change_10yr_flood']
+    df['change_20yr_flood'] = df['avg_est_change_20yr_flood'] - df['true_change_20yr_flood']
+
+    #deletelater#
+    #only keep df for HBV recalib at precip error 0
+    new_df = df[(df['model'] == 'HBV Recalib') & (df['precip_cat'] == '0-1')]
+    #only keep column: station, model, precip_cat, true_change_5yr_flood, est_change_5yr_flood, avg_est_change_5yr_flood, change_5yr_flood
+    new_df = new_df[['station', 'model', 'precip_cat', 'true_change_5yr_flood', 'est_change_5yr_flood', 'avg_est_change_5yr_flood', 'change_5yr_flood']]
+    #only keep rows with unique station
+    new_df = new_df.drop_duplicates(subset='station')
+    #delete later#
 
     #boxplot for no error
     df_5yr = pd.melt(df, id_vars=['precip_cat', 'model'], value_vars=['change_5yr_flood'])
@@ -63,12 +83,12 @@ for method in ['mle']:
     seaplot.legend.set_title("Model") #set legend title
     seaplot.set_titles("") #remove default titles
     for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of all axes in facetgrid/catplot
-        ax.set_ylabel(['Δ in 25yr-flood (%)', 'Δ in 50yr-flood (%)\n(Est Δ - True Δ) / True Δ', 'Δ in 100yr-flood (%)'][index])
+        ax.set_ylabel(['Δ in 25yr-flood (%)', 'Δ in 50yr-flood (%)\n Δ Model(%) - Δ True(%)', 'Δ in 100yr-flood (%)'][index])
         ax.axhline(y=0, linestyle='--', color='red', alpha=0.5)
         ax.grid(True, linestyle ='--', alpha = 0.5)
     plt.show()
     #save the plot
-    seaplot.savefig(f'output/figures/change_flood_{distribution}_{method}.png', dpi=300)
+    seaplot.savefig(f'output/figures/pooled_difference_flood_{distribution}_{method}.png', dpi=300)
     #also save as a pdf file
     # seaplot.savefig(f'output/figures/change_flood_{distribution}_{method}.pdf')
     # seaplot.savefig('output/figures/NoLSTM_tyr-flood_allbasin.png', dpi=300)

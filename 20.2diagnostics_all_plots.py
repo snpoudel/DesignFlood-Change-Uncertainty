@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import warnings
+warnings.filterwarnings("ignore")
 #set colorblind friendly colors from seaborn
 sns.set_palette('colorblind')
 
@@ -49,11 +50,14 @@ df_all['model'] = df_all['variable'].apply(lambda x: x.split('(')[1].split(')')[
 #remove HBV model
 df_all = df_all[df_all['model'] != 'HBV']
 # df_all = df_all[df_all['model'] != 'FULL-HYMOD']
-# df_all = df_all[df_all['model'] != 'FULL-HYMOD-LSTM']
-# df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
+df_all = df_all[df_all['model'] != 'FULL-HYMOD-LSTM']
+df_all = df_all[df_all['model'] != 'HYMOD-LSTM']
+df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
 
 #set order of model categories
-model_order = ['RECAL_HBV', 'FULL-HYMOD-LSTM', 'FULL-HYMOD', 'LSTM', 'HYMOD-LSTM', 'HYMOD']
+# model_order = ['RECAL_HBV', 'FULL-HYMOD-LSTM', 'FULL-HYMOD', 'LSTM', 'HYMOD-LSTM', 'HYMOD']
+model_order = ['RECAL_HBV', 'FULL-HYMOD', 'HYMOD']
+
 df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
 
 #make plot for nse, kge, rmse
@@ -77,9 +81,9 @@ for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of a
 # plt.tight_layout()
 plt.show()
 #save the plot
-seaplot.savefig('output/figures/diagnosticsNSE_allbasin.png', dpi=300)
+seaplot.savefig('output/figures/NSE_allbasin.png', dpi=300)
 #also save as a pdf
-seaplot.savefig('output/figures/diagnosticsNSE_allbasin.pdf')
+# seaplot.savefig('output/figures/diagnosticsNSE_allbasin.pdf')
 # seaplot.savefig('output/figures/NoLSTM_diagnosticsKGE_allbasin.png', dpi=300) #without lstm
 #make plot for nse, kge, rmse
 df_all_bias = df_all[df_all['objective'].isin(['BIAS','HFB'])]
@@ -104,4 +108,4 @@ plt.show()
 
 #save the plot
 # seaplot.savefig('output/figures/NoLSTM_diagnosticsBIAS_allbasin.png', dpi=300) #without lstm
-seaplot.savefig('output/figures/diagnosticsBIAS_allbasin.png', dpi=300)
+seaplot.savefig('output/figures/BIAS_allbasin.png', dpi=300)

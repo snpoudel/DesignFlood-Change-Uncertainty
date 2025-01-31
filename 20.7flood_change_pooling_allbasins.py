@@ -63,10 +63,8 @@ def return_flood(data, return_period, distribution, method):
 
 
 #function to return change in design flood wrt true change in design flood 
-def percent_change(value_future, value_historical, true_change):
-    estimated_change = value_future - value_historical
-    return ((estimated_change - true_change)/true_change)*100
-
+def percent_change(value_future, value_historical):
+    return ((value_future - value_historical)/value_historical)*100
 
 #initialize the dataframe
 df_change = pd.DataFrame() #merge final
@@ -99,8 +97,8 @@ for method in ['mle']: #['mle', 'lm']:
             flood_5, flood_10, flood_20 = return_flood(data,25,distribution,method), return_flood(data,50,distribution,method), return_flood(data,100,distribution,method)
             true_tyr_flood =pd.DataFrame({'model':'HBV True', 'grid':'NA', 'comb':'NA', '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':0}, index=[0])
             df_tyr_flood = pd.concat([df_tyr_flood, true_tyr_flood], ignore_index=True)
-
             flood_5t, flood_10t, flood_20t = flood_5, flood_10, flood_20 #save true floods
+
             #read the future streamflow data
             hbv_true_future = pd.read_csv(f'output/future/hbv_true/hbv_true{basin_id}.csv')
             # hbv_true_future['year'] = pd.to_datetime(hbv_true_future['date']).dt.year
@@ -112,9 +110,9 @@ for method in ['mle']: #['mle', 'lm']:
             df_tyr_flood = pd.concat([df_tyr_flood, true_tyr_flood_future], ignore_index=True)
             
             #true change in 5 10 20yr flood
-            true_change_5yr = flood_5 - flood_5t
-            true_change_10yr = flood_10 - flood_10t
-            true_change_20yr = flood_20 - flood_20t
+            true_change_5yr = ((flood_5 - flood_5t)/flood_5t)*100
+            true_change_10yr = ((flood_10 - flood_10t)/flood_10t)*100
+            true_change_20yr = ((flood_20 - flood_20t)/flood_20t)*100
 
             #loop through each grid coverage and combination
             grid_list = np.arange(30)
@@ -318,34 +316,34 @@ for method in ['mle']: #['mle', 'lm']:
 
 
                         change_hbv_recalib = pd.DataFrame({'station':basin_id,'model':'HBV Recalib',
-                                        'change_5yr_flood':percent_change(temp_df_hbvrf['5yr_flood'] , temp_df_hbvr['5yr_flood'], true_change_5yr ),
-                                        'change_10yr_flood':percent_change(temp_df_hbvrf['10yr_flood'] , temp_df_hbvr['10yr_flood'], true_change_10yr),
-                                        'change_20yr_flood':percent_change(temp_df_hbvrf['20yr_flood'] , temp_df_hbvr['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                                        'true_change_5yr_flood':true_change_5yr, 'est_change_5yr_flood':percent_change(temp_df_hbvrf['5yr_flood'] , temp_df_hbvr['5yr_flood']),
+                                        'true_change_10yr_flood':true_change_10yr, 'est_change_10yr_flood':percent_change(temp_df_hbvrf['10yr_flood'] , temp_df_hbvr['10yr_flood']),
+                                        'true_change_20yr_flood':true_change_20yr, 'est_change_20yr_flood':percent_change(temp_df_hbvrf['20yr_flood'] , temp_df_hbvr['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
                         
-                        change_full_hymod = pd.DataFrame({'station':basin_id,'model':'Full-Hymod', 
-                                        'change_5yr_flood':percent_change(temp_df_fullhyf['5yr_flood'] , temp_df_fullhy['5yr_flood'], true_change_5yr),
-                                        'change_10yr_flood':percent_change(temp_df_fullhyf['10yr_flood'] , temp_df_fullhy['10yr_flood'], true_change_10yr),
-                                        'change_20yr_flood':percent_change(temp_df_fullhyf['20yr_flood'] , temp_df_fullhy['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                        change_full_hymod = pd.DataFrame({'station':basin_id,'model':'Full-Hymod',
+                                        'true_change_5yr_flood':true_change_5yr, 'est_change_5yr_flood':percent_change(temp_df_fullhyf['5yr_flood'] , temp_df_fullhy['5yr_flood']),
+                                        'true_change_10yr_flood':true_change_10yr, 'est_change_10yr_flood':percent_change(temp_df_fullhyf['10yr_flood'] , temp_df_fullhy['10yr_flood']),
+                                        'true_change_20yr_flood':true_change_20yr, 'est_change_20yr_flood':percent_change(temp_df_fullhyf['20yr_flood'] , temp_df_fullhy['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
                         
                         change_lstm = pd.DataFrame({'station':basin_id,'model':'LSTM', 
-                                        'change_5yr_flood':percent_change(temp_df_lstmf['5yr_flood'] , temp_df_lstm['5yr_flood'], true_change_5yr),
-                                        'change_10yr_flood':percent_change(temp_df_lstmf['10yr_flood'] , temp_df_lstm['10yr_flood'], true_change_10yr),
-                                        'change_20yr_flood':percent_change(temp_df_lstmf['20yr_flood'] , temp_df_lstm['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                                        'true_change_5yr_flood':true_change_5yr, 'est_change_5yr_flood':percent_change(temp_df_lstmf['5yr_flood'] , temp_df_lstm['5yr_flood']),
+                                        'true_change_10yr_flood':true_change_10yr, 'est_change_10yr_flood':percent_change(temp_df_lstmf['10yr_flood'] , temp_df_lstm['10yr_flood']),
+                                        'true_change_20yr_flood':true_change_20yr, 'est_change_20yr_flood':percent_change(temp_df_lstmf['20yr_flood'] , temp_df_lstm['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
                         
                         change_full_hymod_lstm = pd.DataFrame({'station':basin_id,'model':'FULL-HYMOD-LSTM', 
-                                        'change_5yr_flood':percent_change(temp_df_lstm_fullhymodf['5yr_flood'] , temp_df_lstm_fullhymod['5yr_flood'], true_change_5yr),
-                                        'change_10yr_flood':percent_change(temp_df_lstm_fullhymodf['10yr_flood'] , temp_df_lstm_fullhymod['10yr_flood'], true_change_10yr),
-                                        'change_20yr_flood':percent_change(temp_df_lstm_fullhymodf['20yr_flood'] , temp_df_lstm_fullhymod['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                                        'true_change_5yr_flood':true_change_5yr, 'est_change_5yr_flood':percent_change(temp_df_lstm_fullhymodf['5yr_flood'] , temp_df_lstm_fullhymod['5yr_flood']),
+                                        'true_change_10yr_flood':true_change_10yr, 'est_change_10yr_flood':percent_change(temp_df_lstm_fullhymodf['10yr_flood'] , temp_df_lstm_fullhymod['10yr_flood']),
+                                        'true_change_20yr_flood':true_change_20yr, 'est_change_20yr_flood':percent_change(temp_df_lstm_fullhymodf['20yr_flood'] , temp_df_lstm_fullhymod['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
                         
                         change_hymod_lstm = pd.DataFrame({'station':basin_id,'model':'HYMOD-LSTM', 
-                                        'change_5yr_flood':percent_change(temp_df_lstm_hymodf['5yr_flood'] , temp_df_lstm_hymod['5yr_flood'], true_change_5yr),
-                                        'change_10yr_flood':percent_change(temp_df_lstm_hymodf['10yr_flood'] , temp_df_lstm_hymod['10yr_flood'], true_change_10yr),
-                                        'change_20yr_flood':percent_change(temp_df_lstm_hymodf['20yr_flood'] , temp_df_lstm_hymod['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                                        'true_change_5yr_flood':true_change_5yr, 'est_change_5yr_flood':percent_change(temp_df_lstm_hymodf['5yr_flood'] , temp_df_lstm_hymod['5yr_flood']),
+                                        'true_change_10yr_flood':true_change_10yr, 'est_change_10yr_flood':percent_change(temp_df_lstm_hymodf['10yr_flood'] , temp_df_lstm_hymod['10yr_flood']),
+                                        'true_change_20yr_flood':true_change_20yr, 'est_change_20yr_flood':percent_change(temp_df_lstm_hymodf['20yr_flood'] , temp_df_lstm_hymod['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
                         
                         change_hymod = pd.DataFrame({'station':basin_id,'model':'Hymod', 
-                                        'change_5yr_flood':percent_change(temp_df_hyf['5yr_flood'] , temp_df_hy['5yr_flood'], true_change_5yr),
-                                        'change_10yr_flood':percent_change(temp_df_hyf['10yr_flood'] , temp_df_hy['10yr_flood'], true_change_10yr),
-                                        'change_20yr_flood':percent_change(temp_df_hyf['20yr_flood'] , temp_df_hy['20yr_flood'], true_change_20yr), 'precip_rmse':precip_rmse}, index=[0])
+                                        'true_change_5yr_flood':true_change_5yr, 'est_change_5yr_flood':percent_change(temp_df_hyf['5yr_flood'] , temp_df_hy['5yr_flood']),
+                                        'true_change_10yr_flood':true_change_10yr, 'est_change_10yr_flood':percent_change(temp_df_hyf['10yr_flood'] , temp_df_hy['10yr_flood']),
+                                        'true_change_20yr_flood':true_change_20yr, 'est_change_20yr_flood':percent_change(temp_df_hyf['20yr_flood'] , temp_df_hy['20yr_flood']), 'precip_rmse':precip_rmse}, index=[0])
                         
                         
                         df_change_flood = pd.concat([df_change_flood, change_hbv_recalib,  change_full_hymod, change_hymod, change_lstm, change_full_hymod_lstm, change_hymod_lstm], ignore_index=True)
@@ -357,4 +355,4 @@ for method in ['mle']: #['mle', 'lm']:
     #merge the dataframes after each method and distribution
     df_change = pd.concat([df_change, df_change_dist], ignore_index=True)
 #save the dataframes after all methods and distributions
-df_change.to_csv(f'output/allbasins_change_tyr_flood_modified.csv', index=False)
+df_change.to_csv(f'output/allbasins_pooling_tyr_flood_modified.csv', index=False)

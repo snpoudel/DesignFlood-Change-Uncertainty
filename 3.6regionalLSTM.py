@@ -176,12 +176,8 @@ torch.cuda.empty_cache() #free unused memory
 ####################################################################################################################################################################################################################################
 #######---PREDICTION FOR HISTORICAL PERIOD---#######
 #### make prediction using trained model for historical period
-
-# series_start_date = [date(1, 1, 1), date(100, 1, 1), date(200, 1, 1), date(300, 1, 1), date(400, 1, 1), date(500, 1, 1), date(600, 1, 1), date(700, 1, 1), date(800, 1, 1), date(900, 1, 1), date(1000, 1, 1)]
-# series_end_date = [date(100, 12, 31), date(200, 12, 31), date(300, 12, 31), date(400, 12, 31), date(500, 12, 31), date(600, 12, 31), date(700, 12, 31), date(800, 12, 31), date(900, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
-
 series_start_date = [date(1, 1, 1), date(50, 1, 1), date(100, 1, 1), date(150, 1, 1), date(200, 1, 1), date(250, 1, 1), date(300, 1, 1), date(350, 1, 1), date(400, 1, 1), date(450, 1, 1), date(500, 1, 1), date(550, 1, 1), date(600, 1, 1), date(650, 1, 1), date(700, 1, 1), date(750, 1, 1), date(800, 1, 1), date(850, 1, 1), date(900, 1, 1), date(950, 1, 1), date(1000, 1, 1)]
-series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 1, 1), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
+series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 12, 31), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
 
 for s_date, e_date in zip(series_start_date, series_end_date):
     start_date = s_date
@@ -281,7 +277,7 @@ for s_date, e_date in zip(series_start_date, series_end_date):
 #### make prediction using trained model for future period
 
 series_start_date = [date(1, 1, 1), date(50, 1, 1), date(100, 1, 1), date(150, 1, 1), date(200, 1, 1), date(250, 1, 1), date(300, 1, 1), date(350, 1, 1), date(400, 1, 1), date(450, 1, 1), date(500, 1, 1), date(550, 1, 1), date(600, 1, 1), date(650, 1, 1), date(700, 1, 1), date(750, 1, 1), date(800, 1, 1), date(850, 1, 1), date(900, 1, 1), date(950, 1, 1), date(1000, 1, 1)]
-series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 1, 1), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
+series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 12, 31), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
 
 for s_date, e_date in zip(series_start_date, series_end_date):
     start_date = s_date

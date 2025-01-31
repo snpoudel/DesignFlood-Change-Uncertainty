@@ -43,7 +43,7 @@ def high_flow_bias(q_obs, q_sim):
 
 
 ###---step 02---###
-basin_list = pd.read_csv("data/regional_lstm/MA_basins_gauges_2000-2020_filtered.csv", dtype={'basin_id':str})
+basin_list = pd.read_csv("data/ma29basins.csv", dtype={'basin_id':str})
 used_basin_list = basin_list['basin_id']
 
 df_total = pd.DataFrame() #create an empty dataframe to store the results
@@ -55,96 +55,105 @@ for id in used_basin_list:
     #Loop through each basin
     for grid in grid_coverage: #1
         #read true streamflow
-        true_hbv_flow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
-        true_hbv_flow = true_hbv_flow[364:] #remove the first 364 days
-        true_hbv_flow = true_hbv_flow.reset_index(drop=True)
+        true_hbv_flow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
+        #keep between date 26-1-1 to 40-12-31
+        start_date = true_hbv_flow[true_hbv_flow['date'] == '26-1-1'].index[0]
+        end_date = true_hbv_flow[true_hbv_flow['date'] == '40-12-31'].index[0]
+        true_hbv_flow = true_hbv_flow[start_date:end_date+1].reset_index(drop=True)
+
         #read true precipitation
         true_precip = pd.read_csv(f'data/true_precip/true_precip{id}.csv')
 
         for combination in range(10): #2
             #Read real streamflow from interpolated precipitation
-            file_path = f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv'
+            file_path = f'output/rehbv/rehbv{id}_coverage{grid}_comb{combination}.csv'
             if os.path.exists(file_path):
                 #read real hbv flow
-                # if os.path.exists(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv'):             
-                real_hbv_flow = pd.read_csv(f'output/hbv_idw_streamflow/hbv_idw_streamflow{id}_coverage{grid}_comb{combination}.csv')
-                real_hbv_flow = real_hbv_flow[364:] #remove the first 364 days
-                real_hbv_flow = real_hbv_flow.reset_index(drop=True)
+                real_hbv_flow = pd.read_csv(f'output/hbv_noisy/hbv_noisy{id}_coverage{grid}_comb{combination}.csv')
+                real_hbv_flow = real_hbv_flow[start_date:end_date+1].reset_index(drop=True)
+
                 #read recalibrated hbv flow
-                recal_hbv_flow = pd.read_csv(f'output/hbv_idw_recalib_streamflow/hbv_idw_recalib_streamflow{id}_coverage{grid}_comb{combination}.csv')
-                recal_hbv_flow = recal_hbv_flow[364:] #remove the first 364 days
-                recal_hbv_flow = recal_hbv_flow.reset_index(drop=True)
+                recal_hbv_flow = pd.read_csv(f'output/rehbv/rehbv{id}_coverage{grid}_comb{combination}.csv')
+                recal_hbv_flow = recal_hbv_flow[start_date:end_date+1].reset_index(drop=True)
+
                 #read real hymod flow
-                real_hymod_flow = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{grid}_comb{combination}.csv')
-                real_hymod_flow = real_hymod_flow[364:] #remove the first 364 days
-                real_hymod_flow = real_hymod_flow.reset_index(drop=True)
+                real_hymod_flow = pd.read_csv(f'output/hymod/hymod{id}_coverage{grid}_comb{combination}.csv')
+                real_hymod_flow = real_hymod_flow[start_date:end_date+1].reset_index(drop=True)
+
                 #read simplified hymod flow
-                simp_hymod_flow = pd.read_csv(f'output/simp-hymod/hymod_interpol_streamflow{id}_coverage{grid}_comb{combination}.csv')
-                simp_hymod_flow = simp_hymod_flow[364:] #remove the first 364 days
-                simp_hymod_flow = simp_hymod_flow.reset_index(drop=True)
+                simp_hymod_flow = pd.read_csv(f'output/simp_hymod/simp_hymod{id}_coverage{grid}_comb{combination}.csv')
+                simp_hymod_flow = simp_hymod_flow[start_date:end_date+1].reset_index(drop=True)
+
                 #read real lstm flow for different cases
-                if os.path.exists(f'output/regional_lstm/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):
-                    real_lstm_flow = pd.read_csv(f'output/regional_lstm/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv')
+                if os.path.exists(f'output/regional_lstm/merged/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):
+                    real_lstm_flow = pd.read_csv(f'output/regional_lstm/merged/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv')
+                    start_date_lstm = real_lstm_flow[real_lstm_flow['date'] == '0026-01-01'].index[0]
+                    end_date_lstm = real_lstm_flow[real_lstm_flow['date'] == '0040-12-31'].index[0]
+                    real_lstm_flow = real_lstm_flow[start_date_lstm:end_date_lstm+1].reset_index(drop=True)
+
                     real_lstm_hymod_flow = pd.read_csv(f'output/regional_lstm_hymod/final_output/historical/hymod_lstm{id}_coverage{grid}_comb{combination}.csv')
+                    real_lstm_hymod_flow = real_lstm_hymod_flow[start_date_lstm:end_date_lstm+1].reset_index(drop=True)
+
                     real_lstm_simp_hymod_flow = pd.read_csv(f'output/regional_lstm_simp_hymod/final_output/historical/hymod_lstm{id}_coverage{grid}_comb{combination}.csv')
-            
+                    real_lstm_simp_hymod_flow = real_lstm_simp_hymod_flow[start_date_lstm:end_date_lstm+1].reset_index(drop=True)
+
                 #read real precipitation
-                real_precip = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{grid}_comb{combination}.csv')
+                real_precip = pd.read_csv(f'data/noisy_precip/noisy_precip{id}_coverage{grid}_comb{combination}.csv')
 
                 #now calculate nse, rmse, pbias, kge, hfb for real hbv and hymod streamflow against true hbv streamflow
-                #calculate results only for validation period
-                val_pd = 5120 # ~ validation period starts from 2000th day
+                #calculate results only for test period
                 #for hbv model
-                nse_hbv = nse(true_hbv_flow['streamflow'][val_pd:], real_hbv_flow['streamflow'][val_pd:])
-                rmse_hbv = rmse(true_hbv_flow['streamflow'][val_pd:], real_hbv_flow['streamflow'][val_pd:])
-                pbias_hbv = pbias(true_hbv_flow['streamflow'][val_pd:], real_hbv_flow['streamflow'][val_pd:])
-                kge_hbv = kge(true_hbv_flow['streamflow'][val_pd:], real_hbv_flow['streamflow'][val_pd:])
-                hfb_hbv = high_flow_bias(true_hbv_flow['streamflow'][val_pd:], real_hbv_flow['streamflow'][val_pd:])
+                nse_hbv = nse(true_hbv_flow['streamflow'], real_hbv_flow['streamflow'])
+                rmse_hbv = rmse(true_hbv_flow['streamflow'], real_hbv_flow['streamflow'])
+                pbias_hbv = pbias(true_hbv_flow['streamflow'], real_hbv_flow['streamflow'])
+                kge_hbv = kge(true_hbv_flow['streamflow'], real_hbv_flow['streamflow'])
+                hfb_hbv = high_flow_bias(true_hbv_flow['streamflow'], real_hbv_flow['streamflow'])
                 #for recalibrated hbv model
-                nse_recal_hbv = nse(true_hbv_flow['streamflow'][val_pd:], recal_hbv_flow['streamflow'][val_pd:])
-                rmse_recal_hbv = rmse(true_hbv_flow['streamflow'][val_pd:], recal_hbv_flow['streamflow'][val_pd:])
-                pbias_recal_hbv = pbias(true_hbv_flow['streamflow'][val_pd:], recal_hbv_flow['streamflow'][val_pd:])
-                kge_recal_hbv = kge(true_hbv_flow['streamflow'][val_pd:], recal_hbv_flow['streamflow'][val_pd:])
-                hfb_recal_hbv = high_flow_bias(true_hbv_flow['streamflow'][val_pd:], recal_hbv_flow['streamflow'][val_pd:])
+                nse_recal_hbv = nse(true_hbv_flow['streamflow'], recal_hbv_flow['streamflow'])
+                rmse_recal_hbv = rmse(true_hbv_flow['streamflow'], recal_hbv_flow['streamflow'])
+                pbias_recal_hbv = pbias(true_hbv_flow['streamflow'], recal_hbv_flow['streamflow'])
+                kge_recal_hbv = kge(true_hbv_flow['streamflow'], recal_hbv_flow['streamflow'])
+                hfb_recal_hbv = high_flow_bias(true_hbv_flow['streamflow'], recal_hbv_flow['streamflow'])
                 #for hymod model
-                nse_hymod = nse(true_hbv_flow['streamflow'][val_pd:], real_hymod_flow['streamflow'][val_pd:])
-                rmse_hymod = rmse(true_hbv_flow['streamflow'][val_pd:], real_hymod_flow['streamflow'][val_pd:])
-                pbias_hymod = pbias(true_hbv_flow['streamflow'][val_pd:], real_hymod_flow['streamflow'][val_pd:])
-                kge_hymod = kge(true_hbv_flow['streamflow'][val_pd:], real_hymod_flow['streamflow'][val_pd:])
-                hfb_hymod = high_flow_bias(true_hbv_flow['streamflow'][val_pd:], real_hymod_flow['streamflow'][val_pd:])
+                nse_hymod = nse(true_hbv_flow['streamflow'], real_hymod_flow['streamflow'])
+                rmse_hymod = rmse(true_hbv_flow['streamflow'], real_hymod_flow['streamflow'])
+                pbias_hymod = pbias(true_hbv_flow['streamflow'], real_hymod_flow['streamflow'])
+                kge_hymod = kge(true_hbv_flow['streamflow'], real_hymod_flow['streamflow'])
+                hfb_hymod = high_flow_bias(true_hbv_flow['streamflow'], real_hymod_flow['streamflow'])
                 #for simplified hymod model
-                nse_sim_hymod = nse(true_hbv_flow['streamflow'][val_pd:], simp_hymod_flow['streamflow'][val_pd:])
-                rmse_sim_hymod = rmse(true_hbv_flow['streamflow'][val_pd:], simp_hymod_flow['streamflow'][val_pd:])
-                pbias_sim_hymod = pbias(true_hbv_flow['streamflow'][val_pd:], simp_hymod_flow['streamflow'][val_pd:])
-                kge_sim_hymod = kge(true_hbv_flow['streamflow'][val_pd:], simp_hymod_flow['streamflow'][val_pd:])
-                hfb_sim_hymod = high_flow_bias(true_hbv_flow['streamflow'][val_pd:], simp_hymod_flow['streamflow'][val_pd:])
+                nse_sim_hymod = nse(true_hbv_flow['streamflow'], simp_hymod_flow['streamflow'])
+                rmse_sim_hymod = rmse(true_hbv_flow['streamflow'], simp_hymod_flow['streamflow'])
+                pbias_sim_hymod = pbias(true_hbv_flow['streamflow'], simp_hymod_flow['streamflow'])
+                kge_sim_hymod = kge(true_hbv_flow['streamflow'], simp_hymod_flow['streamflow'])
+                hfb_sim_hymod = high_flow_bias(true_hbv_flow['streamflow'], simp_hymod_flow['streamflow'])
+                
                 #for lstm model
-                if os.path.exists(f'output/regional_lstm/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):
-                    nse_lstm = nse(true_hbv_flow['streamflow'][val_pd:], real_lstm_flow['streamflow'][val_pd:])
-                    rmse_lstm = rmse(true_hbv_flow['streamflow'][val_pd:], real_lstm_flow['streamflow'][val_pd:])
-                    pbias_lstm = pbias(true_hbv_flow['streamflow'][val_pd:], real_lstm_flow['streamflow'][val_pd:])
-                    kge_lstm = kge(true_hbv_flow['streamflow'][val_pd:], real_lstm_flow['streamflow'][val_pd:])
-                    hfb_lstm = high_flow_bias(true_hbv_flow['streamflow'][val_pd:], real_lstm_flow['streamflow'][val_pd:])
+                if os.path.exists(f'output/regional_lstm/merged/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):
+                    nse_lstm = nse(true_hbv_flow['streamflow'], real_lstm_flow['streamflow'])
+                    rmse_lstm = rmse(true_hbv_flow['streamflow'], real_lstm_flow['streamflow'])
+                    pbias_lstm = pbias(true_hbv_flow['streamflow'], real_lstm_flow['streamflow'])
+                    kge_lstm = kge(true_hbv_flow['streamflow'], real_lstm_flow['streamflow'])
+                    hfb_lstm = high_flow_bias(true_hbv_flow['streamflow'], real_lstm_flow['streamflow'])
                 else:
                     nse_lstm, rmse_lstm, pbias_lstm, kge_lstm, hfb_lstm = np.NAN, np.NAN, np.NAN, np.NAN, np.NAN
 
                 #for lstm-hymod model
                 if os.path.exists(f'output/regional_lstm_hymod/final_output/historical/hymod_lstm{id}_coverage{grid}_comb{combination}.csv'):
-                    nse_lstm_hymod = nse(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
-                    rmse_lstm_hymod = rmse(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
-                    pbias_lstm_hymod = pbias(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
-                    kge_lstm_hymod = kge(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
-                    hfb_lstm_hymod = high_flow_bias(true_hbv_flow['streamflow'][val_pd:], real_lstm_hymod_flow['hymod_lstm_streamflow'][val_pd:])
+                    nse_lstm_hymod = nse(true_hbv_flow['streamflow'], real_lstm_hymod_flow['hymod_lstm_streamflow'])
+                    rmse_lstm_hymod = rmse(true_hbv_flow['streamflow'], real_lstm_hymod_flow['hymod_lstm_streamflow'])
+                    pbias_lstm_hymod = pbias(true_hbv_flow['streamflow'], real_lstm_hymod_flow['hymod_lstm_streamflow'])
+                    kge_lstm_hymod = kge(true_hbv_flow['streamflow'], real_lstm_hymod_flow['hymod_lstm_streamflow'])
+                    hfb_lstm_hymod = high_flow_bias(true_hbv_flow['streamflow'], real_lstm_hymod_flow['hymod_lstm_streamflow'])
                 else:
                     nse_lstm_hymod, rmse_lstm_hymod, pbias_lstm_hymod, kge_lstm_hymod, hfb_lstm_hymod = np.NAN, np.NAN, np.NAN, np.NAN, np.NAN
 
                 #for lstm-simpler-hymod model
                 if os.path.exists(f'output/regional_lstm_simp_hymod/final_output/historical/hymod_lstm{id}_coverage{grid}_comb{combination}.csv'):
-                    nse_lstm_simp_hymod = nse(true_hbv_flow['streamflow'][val_pd:], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'][val_pd:])
-                    rmse_lstm_simp_hymod = rmse(true_hbv_flow['streamflow'][val_pd:], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'][val_pd:])
-                    pbias_lstm_simp_hymod = pbias(true_hbv_flow['streamflow'][val_pd:], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'][val_pd:])
-                    kge_lstm_simp_hymod = kge(true_hbv_flow['streamflow'][val_pd:], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'][val_pd:])
-                    hfb_lstm_simp_hymod = high_flow_bias(true_hbv_flow['streamflow'][val_pd:], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'][val_pd:])
+                    nse_lstm_simp_hymod = nse(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
+                    rmse_lstm_simp_hymod = rmse(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
+                    pbias_lstm_simp_hymod = pbias(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
+                    kge_lstm_simp_hymod = kge(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
+                    hfb_lstm_simp_hymod = high_flow_bias(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
                 else:
                     nse_lstm_simp_hymod, rmse_lstm_simp_hymod, pbias_lstm_simp_hymod, kge_lstm_simp_hymod, hfb_lstm_simp_hymod = np.NAN, np.NAN, np.NAN, np.NAN, np.NAN
 

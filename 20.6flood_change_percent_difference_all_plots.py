@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings('ignore')
 #set colorblind friendly seaborn color
 sns.set_palette('colorblind')
-df = pd.read_csv('output/allbasins_change_tyr_flood_modified.csv')
+df = pd.read_csv('output/allbasins_difference_tyr_flood_modified.csv')
 distribution = 'gev'
 #loop through all combinations of method and distribution and make boxplots
 for method in ['mle']:
@@ -63,12 +63,12 @@ for method in ['mle']:
     seaplot.legend.set_title("Model") #set legend title
     seaplot.set_titles("") #remove default titles
     for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of all axes in facetgrid/catplot
-        ax.set_ylabel(['Δ in 25yr-flood (%)', 'Δ in 50yr-flood (%)\n(Est Δ - True Δ) / True Δ', 'Δ in 100yr-flood (%)'][index])
+        ax.set_ylabel(['Δ in 25yr-flood (%)', 'Δ in 50yr-flood (%)\n Δ Model(%) - Δ True(%)', 'Δ in 100yr-flood (%)'][index])
         ax.axhline(y=0, linestyle='--', color='red', alpha=0.5)
         ax.grid(True, linestyle ='--', alpha = 0.5)
     plt.show()
     #save the plot
-    seaplot.savefig(f'output/figures/change_flood_{distribution}_{method}.png', dpi=300)
+    seaplot.savefig(f'output/figures/difference_flood_{distribution}_{method}.png', dpi=300)
     #also save as a pdf file
     # seaplot.savefig(f'output/figures/change_flood_{distribution}_{method}.pdf')
     # seaplot.savefig('output/figures/NoLSTM_tyr-flood_allbasin.png', dpi=300)

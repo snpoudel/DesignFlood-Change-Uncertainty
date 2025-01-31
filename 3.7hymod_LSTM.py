@@ -15,6 +15,8 @@ comm = MPI.COMM_WORLD #Get the default communicator object
 rank = comm.Get_rank() #Get the rank of the current process
 size = comm.Get_size() #Get the total number of processes
 
+# rank = 0
+# os.chdir('Z:/MA-Precip-Uncertainty-GaugeData')
 #precip buckets
 precip_buckets = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
 pb = 'pb' + precip_buckets[rank]
@@ -26,12 +28,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyperparameters
 NUM_INPUT_FEATURES = 29
 NUM_OUTPUT_FEATURES = 1
-NUM_EPOCHS = 1#20
+NUM_EPOCHS = 20#20
 NUM_HIDDEN_LAYERS = 1
 SEQUENCE_LENGTH = 365
-NUM_HIDDEN_NEURONS = 2#256
+NUM_HIDDEN_NEURONS = 256#256
 BATCH_SIZE = 64
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.0005
 DROPOUT_RATE = 0.2
 
 # Function to set random seed
@@ -121,7 +123,7 @@ features = scaler.transform(features)
 #create sequences of features and targets
 # x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
 #first, calculate total number of basins present in this precip bucket
-total_num_basins = os.listdir(f'data/regional_lstm/processed_lstm_train_datasets/{pb}/')
+total_num_basins = os.listdir(f'data/regional_lstm_hymod/processed_lstm_train_datasets/{pb}/')
 x_seq, y_seq = [], []
 for j in range(len(total_num_basins)):
     x_seq_temp, y_seq_temp = create_sequences(features[j*n_days_train:(j+1)*n_days_train], targets[j*n_days_train:(j+1)*n_days_train], SEQUENCE_LENGTH)
@@ -163,13 +165,15 @@ torch.save(model.state_dict(), f'trained_hymod_lstm_model_{pb}.pth')
 #time taken to train the model
 end_time = time.time()
 print(f'Time taken for training PB{pb} : {end_time - start_time:.2f} seconds')
-
+#memory cleanup
+gc.collect() #garbage collection
+torch.cuda.empty_cache() #free unused memory
 
 ####################################################################################################################################################################################################################################
 #######---PREDICTION FOR HISTORICAL PERIOD---#######
 #### make prediction using trained model for historical period
 series_start_date = [date(1, 1, 1), date(50, 1, 1), date(100, 1, 1), date(150, 1, 1), date(200, 1, 1), date(250, 1, 1), date(300, 1, 1), date(350, 1, 1), date(400, 1, 1), date(450, 1, 1), date(500, 1, 1), date(550, 1, 1), date(600, 1, 1), date(650, 1, 1), date(700, 1, 1), date(750, 1, 1), date(800, 1, 1), date(850, 1, 1), date(900, 1, 1), date(950, 1, 1), date(1000, 1, 1)]
-series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 1, 1), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
+series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 12, 31), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
 
 for s_date, e_date in zip(series_start_date, series_end_date):
     start_date = s_date
@@ -224,7 +228,7 @@ for s_date, e_date in zip(series_start_date, series_end_date):
                 if os.path.exists(file_path):
                     if i == 0: #first basin
                         first_n_days_test = n_days_test - SEQUENCE_LENGTH + 1
-                        prediction_start_date = date(2000, 1, 1) + pd.DateOffset(days=SEQUENCE_LENGTH-1)
+                        prediction_start_date = start_date + pd.DateOffset(days=SEQUENCE_LENGTH-1)
                         test_basin_outputs = all_outputs[i * first_n_days_test:(i + 1) * first_n_days_test]
                         test_basin_targets = all_targets[i * first_n_days_test:(i + 1) * first_n_days_test]
                         # date_range = pd.date_range(prediction_start_date, end_date)[:len(test_basin_outputs)]
@@ -233,6 +237,7 @@ for s_date, e_date in zip(series_start_date, series_end_date):
                         temp_df = pd.DataFrame({'date': date_range, 'true_error': test_basin_targets, 'streamflow_error': test_basin_outputs})
 
                     else: #other basins
+                        prediction_start_date = start_date + pd.DateOffset(days=SEQUENCE_LENGTH-1)
                         test_basin_outputs = all_outputs[i * n_days_test:(i + 1) * n_days_test]
                         test_basin_targets = all_targets[i * n_days_test:(i + 1) * n_days_test]
                         # date_range = pd.date_range(prediction_start_date, end_date)
@@ -266,7 +271,7 @@ for s_date, e_date in zip(series_start_date, series_end_date):
 #######---PREDICTION FOR Future PERIOD---#######
 #### make prediction using trained model for future period
 series_start_date = [date(1, 1, 1), date(50, 1, 1), date(100, 1, 1), date(150, 1, 1), date(200, 1, 1), date(250, 1, 1), date(300, 1, 1), date(350, 1, 1), date(400, 1, 1), date(450, 1, 1), date(500, 1, 1), date(550, 1, 1), date(600, 1, 1), date(650, 1, 1), date(700, 1, 1), date(750, 1, 1), date(800, 1, 1), date(850, 1, 1), date(900, 1, 1), date(950, 1, 1), date(1000, 1, 1)]
-series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 1, 1), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
+series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 12, 31), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
 
 for s_date, e_date in zip(series_start_date, series_end_date):
     start_date = s_date
@@ -330,6 +335,7 @@ for s_date, e_date in zip(series_start_date, series_end_date):
                         temp_df = pd.DataFrame({'date': date_range, 'true_error': test_basin_targets, 'streamflow_error': test_basin_outputs})
 
                     else: #other basins
+                        prediction_start_date = start_date + pd.DateOffset(days=SEQUENCE_LENGTH-1)
                         test_basin_outputs = all_outputs[i * n_days_test:(i + 1) * n_days_test]
                         test_basin_targets = all_targets[i * n_days_test:(i + 1) * n_days_test]
                         # date_range = pd.date_range(prediction_start_date, end_date)
