@@ -50,13 +50,13 @@ df_all['model'] = df_all['variable'].apply(lambda x: x.split('(')[1].split(')')[
 #remove HBV model
 df_all = df_all[df_all['model'] != 'HBV']
 # df_all = df_all[df_all['model'] != 'FULL-HYMOD']
-df_all = df_all[df_all['model'] != 'FULL-HYMOD-LSTM']
-df_all = df_all[df_all['model'] != 'HYMOD-LSTM']
-df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
+# df_all = df_all[df_all['model'] != 'FULL-HYMOD-LSTM']
+# df_all = df_all[df_all['model'] != 'HYMOD-LSTM']
+# df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
 
 #set order of model categories
-# model_order = ['RECAL_HBV', 'FULL-HYMOD-LSTM', 'FULL-HYMOD', 'LSTM', 'HYMOD-LSTM', 'HYMOD']
-model_order = ['RECAL_HBV', 'FULL-HYMOD', 'HYMOD']
+model_order = ['RECAL_HBV', 'FULL-HYMOD', 'FULL-HYMOD-LSTM' , 'LSTM', 'HYMOD-LSTM', 'HYMOD']
+# model_order = ['RECAL_HBV', 'FULL-HYMOD', 'HYMOD']
 
 df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
 

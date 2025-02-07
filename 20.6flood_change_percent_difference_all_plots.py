@@ -41,13 +41,13 @@ for method in ['mle']:
     df_all = pd.concat([df_5yr, df_10yr, df_20yr], axis=0)
     df_all = df_all.dropna(axis='rows')
 
-    df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
-    df_all = df_all[df_all['model'] != 'FULL-HYMOD-LSTM'] 
-    df_all = df_all[df_all['model'] != 'HYMOD-LSTM']
+    # df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
+    # df_all = df_all[df_all['model'] != 'FULL-HYMOD-LSTM'] 
+    # df_all = df_all[df_all['model'] != 'HYMOD-LSTM']
 
     # #set order of model categories
-    # model_order = ['HBV Recalib', 'FULL-HYMOD-LSTM', 'Full-Hymod', 'LSTM', 'HYMOD-LSTM', 'Hymod']
-    model_order = ['HBV Recalib', 'Full-Hymod', 'Hymod']
+    model_order = ['HBV Recalib', 'FULL-HYMOD-LSTM', 'Full-Hymod', 'LSTM', 'HYMOD-LSTM', 'Hymod']
+    # model_order = ['HBV Recalib', 'Full-Hymod', 'Hymod']
     df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
 
     #Make boxplots using seaborn

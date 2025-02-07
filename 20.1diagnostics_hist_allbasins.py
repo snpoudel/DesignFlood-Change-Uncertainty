@@ -85,10 +85,10 @@ for id in used_basin_list:
                 simp_hymod_flow = simp_hymod_flow[start_date:end_date+1].reset_index(drop=True)
 
                 #read real lstm flow for different cases
-                if os.path.exists(f'output/regional_lstm/merged/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):
-                    real_lstm_flow = pd.read_csv(f'output/regional_lstm/merged/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv')
-                    start_date_lstm = real_lstm_flow[real_lstm_flow['date'] == '0026-01-01'].index[0]
-                    end_date_lstm = real_lstm_flow[real_lstm_flow['date'] == '0040-12-31'].index[0]
+                if os.path.exists(f'output/regional_lstm/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):
+                    real_lstm_flow = pd.read_csv(f'output/regional_lstm/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv')
+                    start_date_lstm = real_lstm_flow[real_lstm_flow['date'] == '26-1-1'].index[0]
+                    end_date_lstm = real_lstm_flow[real_lstm_flow['date'] == '40-12-31'].index[0]
                     real_lstm_flow = real_lstm_flow[start_date_lstm:end_date_lstm+1].reset_index(drop=True)
 
                     real_lstm_hymod_flow = pd.read_csv(f'output/regional_lstm_hymod/final_output/historical/hymod_lstm{id}_coverage{grid}_comb{combination}.csv')
@@ -128,7 +128,7 @@ for id in used_basin_list:
                 hfb_sim_hymod = high_flow_bias(true_hbv_flow['streamflow'], simp_hymod_flow['streamflow'])
                 
                 #for lstm model
-                if os.path.exists(f'output/regional_lstm/merged/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):
+                if os.path.exists(f'output/regional_lstm/historical/lstm_input{id}_coverage{grid}_comb{combination}.csv'):
                     nse_lstm = nse(true_hbv_flow['streamflow'], real_lstm_flow['streamflow'])
                     rmse_lstm = rmse(true_hbv_flow['streamflow'], real_lstm_flow['streamflow'])
                     pbias_lstm = pbias(true_hbv_flow['streamflow'], real_lstm_flow['streamflow'])
@@ -149,11 +149,11 @@ for id in used_basin_list:
 
                 #for lstm-simpler-hymod model
                 if os.path.exists(f'output/regional_lstm_simp_hymod/final_output/historical/hymod_lstm{id}_coverage{grid}_comb{combination}.csv'):
-                    nse_lstm_simp_hymod = nse(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
-                    rmse_lstm_simp_hymod = rmse(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
-                    pbias_lstm_simp_hymod = pbias(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
-                    kge_lstm_simp_hymod = kge(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
-                    hfb_lstm_simp_hymod = high_flow_bias(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['hymod_lstm_streamflow'])
+                    nse_lstm_simp_hymod = nse(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['simp_hymod_lstm_streamflow'])
+                    rmse_lstm_simp_hymod = rmse(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['simp_hymod_lstm_streamflow'])
+                    pbias_lstm_simp_hymod = pbias(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['simp_hymod_lstm_streamflow'])
+                    kge_lstm_simp_hymod = kge(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['simp_hymod_lstm_streamflow'])
+                    hfb_lstm_simp_hymod = high_flow_bias(true_hbv_flow['streamflow'], real_lstm_simp_hymod_flow['simp_hymod_lstm_streamflow'])
                 else:
                     nse_lstm_simp_hymod, rmse_lstm_simp_hymod, pbias_lstm_simp_hymod, kge_lstm_simp_hymod, hfb_lstm_simp_hymod = np.NAN, np.NAN, np.NAN, np.NAN, np.NAN
 

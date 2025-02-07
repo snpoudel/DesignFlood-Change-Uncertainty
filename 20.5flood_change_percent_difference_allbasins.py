@@ -219,7 +219,7 @@ for method in ['mle']: #['mle', 'lm']:
                             lstm = pd.read_csv(f'output/regional_lstm_simp_hymod/final_output/historical/hymod_lstm{basin_id}_coverage{grid}_comb{comb}.csv')
                             # lstm['year'] = pd.to_datetime(lstm['date']).dt.year
                             lstm['year'] = lstm['date'].apply(lambda x: int(x.split('-')[0]))
-                            data = lstm.groupby('year')['hymod_lstm_streamflow'].max()
+                            data = lstm.groupby('year')['simp_hymod_lstm_streamflow'].max()
                             data = data[data>0]#only keep non zero values
                             #calculate the 5, 10, and 20 years flood
                             flood_5, flood_10, flood_20 = return_flood(data,25,distribution,method), return_flood(data,50,distribution,method), return_flood(data,100,distribution,method)
@@ -311,7 +311,7 @@ for method in ['mle']: #['mle', 'lm']:
                             lstm_future = pd.read_csv(f'output/regional_lstm_simp_hymod/final_output/future/hymod_lstm{basin_id}_coverage{grid}_comb{comb}.csv')
                             # lstm_future['year'] = pd.to_datetime(lstm_future['date']).dt.year
                             lstm_future['year'] = lstm_future['date'].apply(lambda x: int(x.split('-')[0]))
-                            data = lstm_future.groupby('year')['hymod_lstm_streamflow'].max()
+                            data = lstm_future.groupby('year')['simp_hymod_lstm_streamflow'].max()
                             data = data[data>0]#only keep non zero values
                             #calculate the 5, 10, and 20 years flood
                             flood_5, flood_10, flood_20 = return_flood(data,25,distribution,method), return_flood(data,50,distribution,method), return_flood(data,100,distribution,method)

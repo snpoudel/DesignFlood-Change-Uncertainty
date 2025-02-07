@@ -1,21 +1,20 @@
 import numpy as np
 import pandas as pd
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import time
 import os
 from sklearn.preprocessing import StandardScaler
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-import gc
+import gc 
 from mpi4py import MPI
 
-#Set up communicator to parallelize job in cluster using MPI
+# # # #Set up communicator to parallelize job in cluster using MPI
 comm = MPI.COMM_WORLD #Get the default communicator object
 rank = comm.Get_rank() #Get the rank of the current process
 size = comm.Get_size() #Get the total number of processes
-
-# rank = 0
+# rank = 1
 # os.chdir('Z:/MA-Precip-Uncertainty-GaugeData')
 #precip buckets
 precip_buckets = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
@@ -33,7 +32,7 @@ NUM_HIDDEN_LAYERS = 1
 SEQUENCE_LENGTH = 365
 NUM_HIDDEN_NEURONS = 256#256
 BATCH_SIZE = 64
-LEARNING_RATE = 0.0005
+LEARNING_RATE = 0.0005#0.0001
 DROPOUT_RATE = 0.2
 
 # Function to set random seed
@@ -59,6 +58,7 @@ class LSTMModel(nn.Module):
         self.lstm = nn.LSTM(input_size, hidden_neurons, num_layers, batch_first=True)
         self.fc = nn.Linear(hidden_neurons, output_size)
         self.dropout = nn.Dropout(dropout_rate)
+        self.relu = nn.ReLU()
 
     def forward(self, x):
         h0 = torch.zeros(NUM_HIDDEN_LAYERS, x.size(0), NUM_HIDDEN_NEURONS).to(device)
@@ -91,6 +91,7 @@ start_date = date(1, 1, 1)
 end_date = date(25, 12, 31)
 n_days_train = (end_date - start_date).days + 1
 
+
 #Get standard scaler from training data
 features = []
 for basin_id in basin_list:
@@ -122,6 +123,7 @@ features = scaler.transform(features)
 
 #create sequences of features and targets
 # x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
+#create sequences for each basin and concatenate, this is done so sequence from different basins are not mixed
 #first, calculate total number of basins present in this precip bucket
 total_num_basins = os.listdir(f'data/regional_lstm_simp_hymod/processed_lstm_train_datasets/{pb}/')
 x_seq, y_seq = [], []
@@ -131,6 +133,7 @@ for j in range(len(total_num_basins)):
     y_seq.append(y_seq_temp)
 x_seq = np.vstack(x_seq) 
 y_seq = np.vstack(y_seq)
+
 
 # Dataset and DataLoader
 train_dataset = SeqDataset(x_seq, y_seq)
@@ -161,206 +164,134 @@ for epoch in range(NUM_EPOCHS):
             print(f'PB:{pb}, Epoch: [{epoch+1}/{NUM_EPOCHS}], Step: [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}, Time: {end_time - start_time:.2f} seconds')
 
 # Save the model
-torch.save(model.state_dict(), f'trained_simp_hymod_lstm_model_{pb}.pth')
+torch.save(model.state_dict(), f'regional_lstm_simp_hymod{pb}.pth')
 #time taken to train the model
 end_time = time.time()
-print(f'Time taken for training PB{pb} : {end_time - start_time:.2f} seconds')
+print(f'Time taken for training {pb}: {end_time - start_time:.2f} seconds')
+#memory cleanup
+gc.collect() #garbage collection
+torch.cuda.empty_cache() #free unused memory
 
-
+# basin_list = ['01096000']
+# coverage = [3]
+# comb = [3]
 ####################################################################################################################################################################################################################################
 #######---PREDICTION FOR HISTORICAL PERIOD---#######
-#### make prediction using trained model for historical period
-series_start_date = [date(1, 1, 1), date(50, 1, 1), date(100, 1, 1), date(150, 1, 1), date(200, 1, 1), date(250, 1, 1), date(300, 1, 1), date(350, 1, 1), date(400, 1, 1), date(450, 1, 1), date(500, 1, 1), date(550, 1, 1), date(600, 1, 1), date(650, 1, 1), date(700, 1, 1), date(750, 1, 1), date(800, 1, 1), date(850, 1, 1), date(900, 1, 1), date(950, 1, 1), date(1000, 1, 1)]
-series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 12, 31), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
+for basin_id in basin_list:
+    # for coverage in coverage:
+    for coverage in np.append(np.arange(12), [99]):
+        # for comb in comb:
+        for comb in np.arange(12):
+            file_path = f'data/regional_lstm_simp_hymod/processed_lstm_prediction_datasets/historical/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+            if os.path.exists(file_path):
+                data = pd.read_csv(file_path)
+                grab_date = data['date'].values
+                #keep date only after sequence length
+                grab_date = grab_date[SEQUENCE_LENGTH-1:]
 
-for s_date, e_date in zip(series_start_date, series_end_date):
-    start_date = s_date
-    end_date = e_date
-    n_days_test = (end_date - start_date).days + 1
+                data = data.drop(columns=['date'])
+                features = data.iloc[:, :29].values
+                targets = data.iloc[:, [-1]].values
 
-    features, targets = [], []
-    for basin_id in basin_list:
-        for coverage in np.append(np.arange(12), [99]):
-            for comb in np.arange(12):
-                file_path = f'data/regional_lstm_simp_hymod/processed_lstm_prediction_datasets/historical/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
-                if os.path.exists(file_path):
-                    data = pd.read_csv(file_path)
-                    data = data.drop(columns=['date'])
-                    features.append(data.iloc[:n_days_test, :29].values)
-                    targets.append(data.iloc[:n_days_test, [-1]].values)
-    features = np.vstack(features).astype(np.float32)
-    targets = np.vstack(targets).astype(np.float32)
+                #standardize features with training data scaler
+                features = scaler.transform(features)
 
-    #standardize features with training data scaler
-    features = scaler.transform(features)
+                #create sequences of features and targets
+                x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
 
-    #create sequences of features and targets
-    x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
+                test_dataset = SeqDataset(x_seq, y_seq)
+                test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-    test_dataset = SeqDataset(x_seq, y_seq)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+                model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
+                model.load_state_dict(torch.load(f'regional_lstm_simp_hymod{pb}.pth', weights_only=True))
+                model.eval()
 
-    model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
-    model.load_state_dict(torch.load(f'trained_simp_hymod_lstm_model_{pb}.pth', weights_only=True))
-    model.eval()
+                all_outputs, all_targets = [], []
+                with torch.no_grad():
+                    for inputs, target in test_loader:
+                        inputs, target = inputs.to(device).float(), target.to(device).float()
+                        output = model(inputs)
+                        all_outputs.append(output.cpu().numpy())
+                        all_targets.append(target.cpu().numpy())
+                all_outputs = np.concatenate(all_outputs).flatten()
+                all_targets = np.concatenate(all_targets).flatten()
 
-    all_outputs, all_targets = [], []
-    with torch.no_grad():
-        for inputs, target in test_loader:
-            inputs, target = inputs.to(device), target.to(device)
-            output = model(inputs)
-            all_outputs.append(output.cpu().numpy())
-            all_targets.append(target.cpu().numpy())
-    all_outputs = np.concatenate(all_outputs).flatten()
-    all_targets = np.concatenate(all_targets).flatten()
-
-    # print(all_outputs.shape, all_targets.shape)
-
-    #save outputs with corresponding dates for each basin
-    end_date = pd.Timestamp(end_date)
-    i = 0
-    for basin_id in basin_list:
-        for coverage in np.append(np.arange(12), [99]):
-            for comb in np.arange(12):
-                file_path = f'data/regional_lstm_simp_hymod/processed_lstm_prediction_datasets/historical/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
-                if os.path.exists(file_path):
-                    if i == 0: #first basin
-                        first_n_days_test = n_days_test - SEQUENCE_LENGTH + 1
-                        prediction_start_date = start_date + pd.DateOffset(days=SEQUENCE_LENGTH-1)
-                        test_basin_outputs = all_outputs[i * first_n_days_test:(i + 1) * first_n_days_test]
-                        test_basin_targets = all_targets[i * first_n_days_test:(i + 1) * first_n_days_test]
-                        # date_range = pd.date_range(prediction_start_date, end_date)[:len(test_basin_outputs)]
-                        date_range = [(prediction_start_date + timedelta(days=i)).isoformat() for i in range((end_date - prediction_start_date).days + 1)]
-                        date_range = date_range[:len(test_basin_outputs)]
-                        temp_df = pd.DataFrame({'date': date_range, 'true_error': test_basin_targets, 'streamflow_error': test_basin_outputs})
-
-                    else: #other basins
-                        prediction_start_date = start_date + pd.DateOffset(days=SEQUENCE_LENGTH-1)
-                        test_basin_outputs = all_outputs[i * n_days_test:(i + 1) * n_days_test]
-                        test_basin_targets = all_targets[i * n_days_test:(i + 1) * n_days_test]
-                        # date_range = pd.date_range(prediction_start_date, end_date)
-                        date_range = [(prediction_start_date + timedelta(days=i)).isoformat() for i in range((end_date - prediction_start_date).days + 1)]
-                        temp_df = pd.DataFrame({'streamflow_error': test_basin_outputs,'true_error': test_basin_targets})
-                        #only keep upto date range
-                        temp_df = temp_df[:len(date_range)]
-                        #add date to the dataframe after sequence length
-                        # temp_df['date'] = pd.date_range(prediction_start_date, end_date)
-                        temp_df['date'] = date_range
-
-                    #round streamflow and true_streamflow to 2 decimal places
-                    #dont show time in date
-                    temp_df['date'] = temp_df['date'].str.split('T').str[0]
-                    temp_df = temp_df.round(2)
-                            
-                    # Save the dataframe to CSV
-                    output_file_path = f'output/regional_lstm_simp_hymod/historical/lstm_input{basin_id}_coverage{coverage}_comb{comb}_{start_date}.csv'
-                    temp_df.to_csv(output_file_path, index=False)
-                    i += 1
-    #freeup memory and variables
-    del features, targets, x_seq, y_seq, all_outputs, all_targets, test_dataset, test_loader
-    gc.collect() #garbage collection
-    torch.cuda.empty_cache() #free unused memory
-
-    end_time = time.time()
-    print(f'Time taken for historical dataset prediction: {end_time - start_time:.2f} seconds')
+                #save outputs with corresponding dates for the basin
+                temp_df = pd.DataFrame({'date': grab_date, 'true_streamflow': all_targets, 'streamflow': all_outputs})
+                #round streamflow and true_streamflow to 3 decimal places
+                temp_df = temp_df.round(3)
+                # Save the dataframe to CSV
+                output_file_path = f'output/regional_lstm_simp_hymod/historical/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+                temp_df.to_csv(output_file_path, index=False)
 
 
+#freeup memory and variables
+del features, targets, x_seq, y_seq, all_outputs, all_targets, test_dataset, test_loader
+gc.collect() #garbage collection
+torch.cuda.empty_cache() #free unused memory
+
+end_time = time.time()
+print(f'Time taken for historical dataset prediction on basin: {end_time - start_time:.2f} seconds')
+    
+    
+# basin_list = ['01096000']
+# coverage = [3]
+# comb = [3]
 ####################################################################################################################################################################################################################################
 #######---PREDICTION FOR Future PERIOD---#######
 #### make prediction using trained model for future period
-series_start_date = [date(1, 1, 1), date(50, 1, 1), date(100, 1, 1), date(150, 1, 1), date(200, 1, 1), date(250, 1, 1), date(300, 1, 1), date(350, 1, 1), date(400, 1, 1), date(450, 1, 1), date(500, 1, 1), date(550, 1, 1), date(600, 1, 1), date(650, 1, 1), date(700, 1, 1), date(750, 1, 1), date(800, 1, 1), date(850, 1, 1), date(900, 1, 1), date(950, 1, 1), date(1000, 1, 1)]
-series_end_date = [date(50, 12, 31), date(100, 12, 31), date(150, 12, 31), date(200, 12, 31), date(250, 12, 31), date(300, 12, 31), date(350, 12, 31), date(400, 12, 31), date(450, 12, 31), date(500, 12, 31), date(550, 12, 31), date(600, 12, 31), date(650, 12, 31), date(700, 12, 31), date(750, 12, 31), date(800, 12, 31), date(850, 12, 31), date(900, 12, 31), date(950, 12, 31), date(1000, 12, 31), date(1040, 12, 31)]
+for basin_id in basin_list:
+    # for coverage in coverage:
+    for coverage in np.append(np.arange(12), [99]):
+        # for comb in comb:
+        for comb in np.arange(12):
+            file_path = f'data/regional_lstm_simp_hymod/processed_lstm_prediction_datasets/future/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+            if os.path.exists(file_path):
+                data = pd.read_csv(file_path)
+                grab_date = data['date'].values
+                #keep date only after sequence length
+                grab_date = grab_date[SEQUENCE_LENGTH-1:]
 
-for s_date, e_date in zip(series_start_date, series_end_date):
-    start_date = s_date
-    end_date = e_date
-    n_days_test = (end_date - start_date).days + 1
+                data = data.drop(columns=['date'])
+                features = data.iloc[:, :29].values
+                targets = data.iloc[:, [-1]].values
 
-    features, targets = [], []
-    for basin_id in basin_list:
-        for coverage in np.append(np.arange(12), [99]):
-            for comb in np.arange(12):
-                file_path = f'data/regional_lstm_simp_hymod/processed_lstm_prediction_datasets/future/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
-                if os.path.exists(file_path):
-                    data = pd.read_csv(file_path)
-                    data = data.drop(columns=['date'])
-                    features.append(data.iloc[:n_days_test, :29].values)
-                    targets.append(data.iloc[:n_days_test, [-1]].values)
-    features = np.vstack(features).astype(np.float32)
-    targets = np.vstack(targets).astype(np.float32)
+                #standardize features with training data scaler
+                features = scaler.transform(features)
 
-    #standardize features with training data scaler
-    features = scaler.transform(features)
+                #create sequences of features and targets
+                x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
 
-    #create sequences of features and targets
-    x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
+                test_dataset = SeqDataset(x_seq, y_seq)
+                test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-    test_dataset = SeqDataset(x_seq, y_seq)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+                model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
+                model.load_state_dict(torch.load(f'regional_lstm_simp_hymod{pb}.pth', weights_only=True))
+                model.eval()
 
-    model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
-    model.load_state_dict(torch.load(f'trained_simp_hymod_lstm_model_{pb}.pth', weights_only=True))
-    model.eval()
+                all_outputs, all_targets = [], []
+                with torch.no_grad():
+                    for inputs, target in test_loader:
+                        inputs, target = inputs.to(device).float(), target.to(device).float()
+                        output = model(inputs)
+                        all_outputs.append(output.cpu().numpy())
+                        all_targets.append(target.cpu().numpy())
+                all_outputs = np.concatenate(all_outputs).flatten()
+                all_targets = np.concatenate(all_targets).flatten()
 
-    all_outputs, all_targets = [], []
-    with torch.no_grad():
-        for inputs, target in test_loader:
-            inputs, target = inputs.to(device), target.to(device)
-            output = model(inputs)
-            all_outputs.append(output.cpu().numpy())
-            all_targets.append(target.cpu().numpy())
-    all_outputs = np.concatenate(all_outputs).flatten()
-    all_targets = np.concatenate(all_targets).flatten()
+                #save outputs with corresponding dates for the basin
+                temp_df = pd.DataFrame({'date': grab_date, 'true_streamflow': all_targets, 'streamflow': all_outputs})
+                #round streamflow and true_streamflow to 3 decimal places
+                temp_df = temp_df.round(3)
+                # Save the dataframe to CSV
+                output_file_path = f'output/regional_lstm_simp_hymod/future/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+                temp_df.to_csv(output_file_path, index=False)
 
-    # print(all_outputs.shape, all_targets.shape)
 
-    #save outputs with corresponding dates for each basin
-    end_date = pd.Timestamp(end_date)
-    i = 0
-    for basin_id in basin_list:
-        for coverage in np.append(np.arange(12), [99]):
-            for comb in np.arange(12):
-                file_path = f'data/regional_lstm_simp_hymod/processed_lstm_prediction_datasets/future/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
-                if os.path.exists(file_path):
-                    if i == 0 and start_date == date(1, 1, 1): #first basin and first date
-                        first_n_days_test = n_days_test - SEQUENCE_LENGTH + 1
-                        prediction_start_date = start_date + pd.DateOffset(days=SEQUENCE_LENGTH-1)
-                        test_basin_outputs = all_outputs[i * first_n_days_test:(i + 1) * first_n_days_test]
-                        test_basin_targets = all_targets[i * first_n_days_test:(i + 1) * first_n_days_test]
-                        # date_range = pd.date_range(prediction_start_date, end_date)[:len(test_basin_outputs)]
-                        date_range = [(prediction_start_date + timedelta(days=i)).isoformat() for i in range((end_date - prediction_start_date).days + 1)]
-                        date_range = date_range[:len(test_basin_outputs)]
-                        temp_df = pd.DataFrame({'date': date_range, 'true_error': test_basin_targets, 'streamflow_error': test_basin_outputs})
+#freeup memory and variables
+del features, targets, x_seq, y_seq, all_outputs, all_targets, test_dataset, test_loader
+gc.collect() #garbage collection
+torch.cuda.empty_cache() #free unused memory
 
-                    else: #other basins
-                        prediction_start_date = start_date + pd.DateOffset(days=SEQUENCE_LENGTH-1)
-                        test_basin_outputs = all_outputs[i * n_days_test:(i + 1) * n_days_test]
-                        test_basin_targets = all_targets[i * n_days_test:(i + 1) * n_days_test]
-                        # date_range = pd.date_range(prediction_start_date, end_date)
-                        date_range = [(prediction_start_date + timedelta(days=i)).isoformat() for i in range((end_date - prediction_start_date).days + 1)]
-                        temp_df = pd.DataFrame({'streamflow_error': test_basin_outputs,'true_error': test_basin_targets})
-                        #only keep upto date range
-                        temp_df = temp_df[:len(date_range)]
-                        #add date to the dataframe after sequence length
-                        # temp_df['date'] = pd.date_range(prediction_start_date, end_date)
-                        temp_df['date'] = date_range
-
-                    #round streamflow and true_streamflow to 2 decimal places
-                    #dont show time in date
-                    temp_df['date'] = temp_df['date'].str.split('T').str[0]
-                    temp_df = temp_df.round(2)
-                          
-                    # Save the dataframe to CSV
-                    output_file_path = f'output/regional_lstm_simp_hymod/future/lstm_input{basin_id}_coverage{coverage}_comb{comb}_{start_date}.csv'
-                    temp_df.to_csv(output_file_path, index=False)
-                    i += 1
-
-    #freeup memory and variables
-    del features, targets, x_seq, y_seq, all_outputs, all_targets, test_dataset, test_loader
-    gc.collect() #garbage collection
-    torch.cuda.empty_cache() #free unused memory
-
-    end_time = time.time()
-    print(f'Time taken for future dataset prediction: {end_time - start_time:.2f} seconds')
-
-print(f'Completed for precip bucket: {pb} and rank: {rank}')
+end_time = time.time()
+print(f'Time taken for future dataset prediction on basin: {end_time - start_time:.2f} seconds')
