@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-basin_list = pd.read_csv('data/MA_basins_gauges_2000-2020_filtered.csv', dtype={'basin_id':str})
-# used_basin_list = ['01108000', '01109060', '01177000', '01104500']
+basin_list = pd.read_csv('data/ma29basins.csv', dtype={'basin_id':str})# used_basin_list = ['01108000', '01109060', '01177000', '01104500']
 # basin_list = basin_list[basin_list['basin_id'].isin(used_basin_list)]
 id = '01108000'
 # for id in basin_list['basin_id']:

@@ -55,7 +55,7 @@ df_all = df_all[df_all['model'] != 'HBV']
 # df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
 
 #set order of model categories
-model_order = ['RECAL_HBV', 'FULL-HYMOD', 'FULL-HYMOD-LSTM' , 'LSTM', 'HYMOD-LSTM', 'HYMOD']
+model_order = ['RECAL_HBV', 'FULL-HYMOD-LSTM', 'FULL-HYMOD', 'HYMOD-LSTM',  'LSTM', 'HYMOD']
 # model_order = ['RECAL_HBV', 'FULL-HYMOD', 'HYMOD']
 
 df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
@@ -109,3 +109,28 @@ plt.show()
 #save the plot
 # seaplot.savefig('output/figures/NoLSTM_diagnosticsBIAS_allbasin.png', dpi=300) #without lstm
 seaplot.savefig('output/figures/BIAS_allbasin.png', dpi=300)
+
+
+#######################################################################################################################################################################################################
+#only save result for nse plot
+#make plot for nse, kge, rmse
+df_all_nkr = df_all[df_all['objective'].isin(['NSE'])]
+#Make boxplots using seaborn
+precip_cat_order = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
+seaplot = sns.catplot(
+            data=df_all_nkr, order = precip_cat_order,
+            x='precip_cat', y='value', row='objective',
+            hue='model', kind='box', showfliers = False, width =0.8,
+            sharey=False,  legend_out=False,
+            height = 4, aspect = 2, #aspect times height gives width of each facet
+            ) 
+seaplot.set_axis_labels('Precipitation Uncertainty (RMSE, mm/day)', "") #set x and y labels
+seaplot.legend.set_title("Model") #set legend title
+seaplot.set_titles("") #remove default titles
+plt.ylabel('Nash-Sutcliffe Efficiency')
+plt.grid(True, linestyle ='--', alpha = 0.5)
+plt.ylim(0, None)
+plt.tight_layout()
+plt.show()
+#save the plot
+seaplot.savefig('output/figures/OnlyNSE_allbasin.png', dpi=300)

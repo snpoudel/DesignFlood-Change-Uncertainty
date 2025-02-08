@@ -46,7 +46,7 @@ for method in ['mle']:
     # df_all = df_all[df_all['model'] != 'HYMOD-LSTM']
 
     # #set order of model categories
-    model_order = ['HBV Recalib', 'FULL-HYMOD-LSTM', 'Full-Hymod', 'LSTM', 'HYMOD-LSTM', 'Hymod']
+    model_order = ['HBV Recalib', 'FULL-HYMOD-LSTM', 'Full-Hymod', 'HYMOD-LSTM', 'LSTM', 'Hymod']
     # model_order = ['HBV Recalib', 'Full-Hymod', 'Hymod']
     df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
 
@@ -56,16 +56,17 @@ for method in ['mle']:
                 data=df_all, order = precip_cat_order,
                 x='precip_cat', y='value', row='objective',
                 hue='model', kind='box', showfliers = False, width = 0.8,
-                sharey=False,  legend_out=True,
+                sharey=False, legend_out=True,
                 height = 2.5, aspect = 2.5, #aspect times height gives width of each facet
                 ) 
     seaplot.set_axis_labels('Precipitation Uncertainty (RMSE mm/day)', "") #set x and y labels
-    seaplot.legend.set_title("Model") #set legend title
+    # seaplot.legend.set_title("Model") #set legend title
     seaplot.set_titles("") #remove default titles
     for index, ax in enumerate(seaplot.axes.flat): #seaplot.axes.flat is a list of all axes in facetgrid/catplot
         ax.set_ylabel(['Δ in 25yr-flood (%)', 'Δ in 50yr-flood (%)\n Δ Model(%) - Δ True(%)', 'Δ in 100yr-flood (%)'][index])
         ax.axhline(y=0, linestyle='--', color='red', alpha=0.5)
         ax.grid(True, linestyle ='--', alpha = 0.5)
+    # plt.tight_layout()
     plt.show()
     #save the plot
     seaplot.savefig(f'output/figures/difference_flood_{distribution}_{method}.png', dpi=300)

@@ -8,7 +8,7 @@ from scipy.stats import genextreme
 from scipy.stats import pearson3
 
 #function that returns flood specific return period
-def return_flood(data, return_period, distribution, method):
+def return_flood(data, return_period, distribution='gev', method='mle'):
     '''
     data: annual extreme values, eg., [10, 20, 30]
     return_period: 5-yr, eg., 5
@@ -74,82 +74,125 @@ def rmse(q_obs, q_sim):
 #########--TEST FOR PRECIPTATION--######### historical and future
 #read true precip, historical
 true_precip = pd.read_csv(f'data/true_precip/true_precip{id}.csv')
-true_precip['time'] = pd.to_datetime(true_precip['DATE'])
-#read true precip, historical
-future_true_precip = pd.read_csv(f'data/future/future_true_precip/future_true_precip{id}.csv')
-future_true_precip['time'] = pd.to_datetime(true_precip['DATE'])
-#read corresponding interpolated precip
-idw_precip_hist = pd.read_csv(f'data/idw_precip/idw_precip{id}_coverage{coverage}_comb{comb}.csv') #historical
-idw_precip_future= pd.read_csv(f'data/future/future_idw_precip/future_idw_precip{id}_coverage{coverage}_comb{comb}.csv') #future
 
-precip_rmse = rmse(true_precip['PRECIP'], idw_precip_hist['PRECIP'])
+#read corresponding interpolated precip
+noisy_precip_hist = pd.read_csv(f'data/noisy_precip/noisy_precip{id}_coverage{coverage}_comb{comb}.csv') #historical
+
+precip_rmse = rmse(true_precip['PRECIP'], noisy_precip_hist['PRECIP'])
 precip_rmse = round(precip_rmse, 2)
 
 #########--TEST FOR HBV/Truth STREAMFLOW--#########
 #read true streamflow, historical
-true_streamflow = pd.read_csv(f'output/hbv_true_streamflow/hbv_true_output_{id}.csv')
-true_streamflow['year'] = pd.to_datetime(true_streamflow['date']).dt.year
-data = true_streamflow.groupby('year')['streamflow'].max()
+true_streamflow = pd.read_csv(f'output/hbv_true/hbv_true{id}.csv')
+true_streamflow['year'] = true_streamflow['date'].apply(lambda x: int(x.split('-')[0]))
+true_streamflow = true_streamflow.groupby('year')['streamflow'].max()
 
-future_true_streamflow = pd.read_csv(f'output/future/hbv_true_future_streamflow/hbv_true_future_output_{id}.csv')
-future_true_streamflow['year'] = pd.to_datetime(true_streamflow['date']).dt.year
-data_future = future_true_streamflow.groupby('year')['streamflow'].max()
-
-
-            
-
-
-
-
+future_true_streamflow = pd.read_csv(f'output/future/hbv_true/hbv_true{id}.csv')
+future_true_streamflow['year'] = future_true_streamflow['date'].apply(lambda x: int(x.split('-')[0]))
+future_true_streamflow = future_true_streamflow.groupby('year')['streamflow'].max()
+################################################################################################################################################################################################################################################################################################################################################    
 
 #########--TEST FOR HYMOD STREAMFLOW--#########
 #read corresponding interpolated hymod streamflow
-idw_hymod = pd.read_csv(f'output/hymod_idw_streamflow/hymod_interpol_streamflow{id}_coverage{coverage}_comb{comb}.csv')
-future_idw_hymod = pd.read_csv(f'output/future/hymod_idw_future_streamflow/hymod_interpol_future_streamflow{id}_coverage{coverage}_comb{comb}.csv')
-#return period plot historical
-idw_hymod_flow = idw_hymod.copy()
-idw_hymod_flow.set_index('date', inplace=True)
-idw_hymod_flow.index = pd.to_datetime(idw_hymod_flow.index, format='%Y-%m-%d')
-#return period, future hymod
-future_idw_hymod_flow = future_idw_hymod.copy()
-future_idw_hymod_flow.set_index('date', inplace=True)
-future_idw_hymod_flow.index = pd.to_datetime(future_idw_hymod_flow.index, format='%Y-%m-%d')
+hymod = pd.read_csv(f'output/simp_hymod/simp_hymod{id}_coverage{coverage}_comb{comb}.csv')
+hymod['year'] = hymod['date'].apply(lambda x: int(x.split('-')[0]))
+hymod = hymod.groupby('year')['streamflow'].max()
+
+future_hymod = pd.read_csv(f'output/future/simp_hymod/simp_hymod{id}_coverage{coverage}_comb{comb}.csv')
+future_hymod['year'] = future_hymod['date'].apply(lambda x: int(x.split('-')[0]))
+future_hymod = future_hymod.groupby('year')['streamflow'].max()
 
 #########--TEST FOR LSTM STREAMFLOW--#########
 #read corresponding interpolated lstm streamflow
 idw_lstm = pd.read_csv(f'output/regional_lstm/historical/lstm_input{id}_coverage{coverage}_comb{comb}.csv')
+idw_lstm['year'] = idw_lstm['date'].apply(lambda x: int(x.split('-')[0]))
+idw_lstm = idw_lstm.groupby('year')['streamflow'].max()
+
 future_idw_lstm = pd.read_csv(f'output/regional_lstm/future/lstm_input{id}_coverage{coverage}_comb{comb}.csv')
-#return period plot historical
-idw_lstm_flow = idw_lstm.copy()
-idw_lstm_flow.set_index('date', inplace=True)
-idw_lstm_flow.index = pd.to_datetime(idw_lstm_flow.index, format='%Y-%m-%d')
-#return period, future lstm
-future_idw_lstm_flow = future_idw_lstm.copy()
-future_idw_lstm_flow.set_index('date', inplace=True)
-future_idw_lstm_flow.index = pd.to_datetime(future_idw_lstm_flow.index, format='%Y-%m-%d')
+future_idw_lstm['year'] = future_idw_lstm['date'].apply(lambda x: int(x.split('-')[0]))
+future_idw_lstm = future_idw_lstm.groupby('year')['streamflow'].max()
+
+##########-TEST FOR HYMOD LSTM STREAMFLOW-#########
+#read corresponding interpolated lstm streamflow
+simp_hymod_lstm = pd.read_csv(f'output/regional_lstm_simp_hymod/final_output/historical/hymod_lstm{id}_coverage{coverage}_comb{comb}.csv')
+simp_hymod_lstm['year'] = simp_hymod_lstm['date'].apply(lambda x: int(x.split('-')[0]))
+simp_hymod_lstm = simp_hymod_lstm.groupby('year')['simp_hymod_lstm_streamflow'].max()
+
+future_simp_hymod_lstm = pd.read_csv(f'output/regional_lstm_simp_hymod/final_output/future/hymod_lstm{id}_coverage{coverage}_comb{comb}.csv')
+future_simp_hymod_lstm['year'] = future_simp_hymod_lstm['date'].apply(lambda x: int(x.split('-')[0]))
+future_simp_hymod_lstm = future_simp_hymod_lstm.groupby('year')['simp_hymod_lstm_streamflow'].max()
 
 
-#plot y axis from mm/day to m3/s
-drainage_area = 677.6 #sqkm
-# drainage_area = drainage_area*86400/(1000*677.6) #delete me later
-#convert mm/day to m3/s and make the plot
-fig, axs = plt.subplots(3,1,figsize=(6,8), sharex=True)
-return_tyr_flood(true_flow['streamflow']*drainage_area*1000/86400, ax=axs[0])
-return_tyr_flood(future_flow['streamflow']*drainage_area*1000/86400, ax=axs[0])
-axs[0].set_ylabel(f'"Truth" Streamflow (m3/s)')
-axs[0].set_xlabel('Return Period (years)')
-return_tyr_flood(idw_hymod_flow['streamflow']*drainage_area*1000/86400, ax=axs[1])
-return_tyr_flood(future_idw_hymod_flow['streamflow']*drainage_area*1000/86400, ax=axs[1])
-axs[1].set_ylabel('Hymod Streamflow (m3/s)')
+# Define return periods
+return_periods = np.arange(2, 1041, 10)
+
+# Calculate flood values for each return period for historical condition
+true_floods_hist = [return_flood(true_streamflow.values, rp) for rp in return_periods]
+hymod_floods_hist = [return_flood(hymod.values, rp) for rp in return_periods]
+idw_lstm_floods_hist = [return_flood(idw_lstm.values, rp) for rp in return_periods]
+simp_hymod_lstm_floods_hist = [return_flood(simp_hymod_lstm.values, rp) for rp in return_periods]
+
+# Calculate flood values for each return period for future condition
+true_floods_future = [return_flood(future_true_streamflow.values, rp) for rp in return_periods]
+hymod_floods_future = [return_flood(future_hymod.values, rp) for rp in return_periods]
+idw_lstm_floods_future = [return_flood(future_idw_lstm.values, rp) for rp in return_periods]
+simp_hymod_lstm_floods_future = [return_flood(future_simp_hymod_lstm.values, rp) for rp in return_periods]
+
+# Function to compute empirical return periods
+def empirical_return_periods(data):
+    sorted_data = np.sort(data)[::-1]  # Sort in descending order
+    n = len(sorted_data)
+    empirical_rp = (n + 1) / np.arange(1, n + 1)
+    return empirical_rp, sorted_data
+
+# Compute empirical return periods for historical condition
+true_empirical_rp_hist, true_empirical_hist = empirical_return_periods(true_streamflow.values)
+hymod_empirical_rp_hist, hymod_empirical_hist = empirical_return_periods(hymod.values)
+idw_lstm_empirical_rp_hist, idw_lstm_empirical_hist = empirical_return_periods(idw_lstm.values)
+simp_hymod_lstm_empirical_rp_hist, simp_hymod_lstm_empirical_hist = empirical_return_periods(simp_hymod_lstm.values)
+
+# Compute empirical return periods for future condition
+true_empirical_rp_future, true_empirical_future = empirical_return_periods(future_true_streamflow.values)
+hymod_empirical_rp_future, hymod_empirical_future = empirical_return_periods(future_hymod.values)
+idw_lstm_empirical_rp_future, idw_lstm_empirical_future = empirical_return_periods(future_idw_lstm.values)
+simp_hymod_lstm_empirical_rp_future, simp_hymod_lstm_empirical_future = empirical_return_periods(future_simp_hymod_lstm.values)
+
+# Create plot
+fig, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True)
+
+# Plot for historical condition
+axs[0].plot(return_periods, true_floods_hist, label='True (GEV Fit)', linestyle='-', color='blue')
+axs[0].plot(return_periods, hymod_floods_hist, label='Hymod (GEV Fit)', linestyle='-', color='green')
+axs[0].plot(return_periods, idw_lstm_floods_hist, label='LSTM (GEV Fit)', linestyle='-', color='orange')
+axs[0].plot(return_periods, simp_hymod_lstm_floods_hist, label='Hymod LSTM (GEV Fit)', linestyle='-', color='brown')
+axs[0].scatter(true_empirical_rp_hist, true_empirical_hist,  marker='o', s=10, color='blue', alpha=0.6)
+axs[0].scatter(hymod_empirical_rp_hist, hymod_empirical_hist,  marker='s', s=10, color='green', alpha=0.6)
+axs[0].scatter(idw_lstm_empirical_rp_hist, idw_lstm_empirical_hist,  marker='^', s=10, color='orange', alpha=0.6)
+axs[0].scatter(simp_hymod_lstm_empirical_rp_hist, simp_hymod_lstm_empirical_hist,  marker='x', s=10, color='brown', alpha=0.6)
+axs[0].set_xscale('log')
+axs[0].set_ylabel('Streamflow (mm/day)')
+axs[0].set_title(f'Historical Condition - Basin ID: {id}, Precip Error: {precip_rmse}')
+axs[0].legend()
+axs[0].grid(True, which='both', linestyle='--', linewidth=0.5)
+
+# Plot for future condition
+axs[1].plot(return_periods, true_floods_future, label='True (GEV Fit)', linestyle='-', color='blue')
+axs[1].plot(return_periods, hymod_floods_future, label='Hymod (GEV Fit)', linestyle='-', color='green')
+axs[1].plot(return_periods, idw_lstm_floods_future, label='LSTM (GEV Fit)', linestyle='-', color='orange')
+axs[1].plot(return_periods, simp_hymod_lstm_floods_future, label='Hymod LSTM (GEV Fit)', linestyle='-', color='brown')
+axs[1].scatter(true_empirical_rp_future, true_empirical_future,  marker='o', s=10, color='blue', alpha=0.6)
+axs[1].scatter(hymod_empirical_rp_future, hymod_empirical_future,  marker='s', s=10, color='green', alpha=0.6)
+axs[1].scatter(idw_lstm_empirical_rp_future, idw_lstm_empirical_future,  marker='^', s=10, color='orange', alpha=0.6)
+axs[1].scatter(simp_hymod_lstm_empirical_rp_future, simp_hymod_lstm_empirical_future, marker='x', s=10, color='brown', alpha=0.6)
+axs[1].set_xscale('log')
 axs[1].set_xlabel('Return Period (years)')
-return_tyr_flood(idw_lstm_flow['streamflow']*drainage_area*1000/86400, ax=axs[2])
-return_tyr_flood(future_idw_lstm_flow['streamflow']*drainage_area*1000/86400, ax=axs[2])
-axs[2].set_ylabel('LSTM Streamflow (m3/s)')
-axs[2].set_xlabel('Return Period (years)')
-plt.suptitle(f'Basin ID: {id}, Precip error: {precip_rmse}')
+axs[1].set_ylabel('Streamflow (mm/day)')
+axs[1].set_title(f'Future Condition - Basin ID: {id}, Precip Error: {precip_rmse}')
+axs[1].legend()
+axs[1].grid(True, which='both', linestyle='--', linewidth=0.5)
+
 plt.tight_layout()
 plt.show()
-# #save the plot
-fig.savefig(f'output/figures/{id}/Return_period{id}.png', dpi=300)
-# #also save as svg
-# fig.savefig(f'inkscape/cumecs_return_period{id}.svg', dpi=300)
+
+#save the plot
+fig.savefig(f'output/figures/Return_period{id}.png', dpi=300)
