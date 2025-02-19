@@ -49,7 +49,9 @@ df_all['model'] = df_all['variable'].apply(lambda x: x.split('(')[1].split(')')[
 
 #remove HBV model
 df_all = df_all[df_all['model'] != 'HBV']
+# df_all = df_all[df_all['model'] != 'RECAL_HBV']
 # df_all = df_all[df_all['model'] != 'FULL-HYMOD']
+# df_all = df_all[df_all['model'] != 'HYMOD']
 # df_all = df_all[df_all['model'] != 'FULL-HYMOD-LSTM']
 # df_all = df_all[df_all['model'] != 'HYMOD-LSTM']
 # df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
@@ -57,6 +59,7 @@ df_all = df_all[df_all['model'] != 'HBV']
 #set order of model categories
 model_order = ['RECAL_HBV', 'FULL-HYMOD-LSTM', 'FULL-HYMOD', 'HYMOD-LSTM',  'LSTM', 'HYMOD']
 # model_order = ['RECAL_HBV', 'FULL-HYMOD', 'HYMOD']
+# model_order = [ 'FULL-HYMOD-LSTM',  'HYMOD-LSTM',  'LSTM']
 
 df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
 
@@ -134,3 +137,59 @@ plt.tight_layout()
 plt.show()
 #save the plot
 seaplot.savefig('output/figures/OnlyNSE_allbasin.png', dpi=300)
+
+
+#######################################################################################################################################################################################################
+#only show nse plot for model_order = ['RECAL_HBV', 'FULL-HYMOD', 'HYMOD']
+df_all = df_all[df_all['model'].isin(['RECAL_HBV', 'FULL-HYMOD', 'HYMOD'])]
+model_order = ['RECAL_HBV', 'FULL-HYMOD', 'HYMOD']
+df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
+#make plot for nse, kge, rmse
+df_all_nkr = df_all[df_all['objective'].isin(['NSE'])]
+#Make boxplots using seaborn
+precip_cat_order = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
+seaplot = sns.catplot(
+            data=df_all_nkr, order = precip_cat_order,
+            x='precip_cat', y='value', row='objective',
+            hue='model', kind='box', showfliers = False, width =0.8,
+            sharey=False,  legend_out=False,
+            height = 4, aspect = 2, #aspect times height gives width of each facet
+            )
+seaplot.set_axis_labels('Precipitation Uncertainty (RMSE, mm/day)', "") #set x and y labels
+seaplot.legend.set_title("Model") #set legend title
+seaplot.set_titles("") #remove default titles
+plt.ylabel('Nash-Sutcliffe Efficiency')
+plt.grid(True, linestyle ='--', alpha = 0.5)
+plt.ylim(0, None)
+plt.tight_layout()
+plt.show()
+#save the plot
+seaplot.savefig('output/figures/OnlyNSE_ProcessModels_allbasin.png', dpi=300)
+
+
+#######################################################################################################################################################################################################
+#only show nse plot for model_order = ['FULL-HYMOD-LSTM', 'HYMOD-LSTM', 'LSTM']
+df_all = df_all[df_all['model'].isin(['FULL-HYMOD-LSTM', 'HYMOD-LSTM', 'LSTM'])]
+model_order = ['FULL-HYMOD-LSTM', 'HYMOD-LSTM', 'LSTM']
+df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
+#make plot for nse, kge, rmse
+df_all_nkr = df_all[df_all['objective'].isin(['NSE'])]
+#Make boxplots using seaborn
+precip_cat_order = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
+seaplot = sns.catplot(
+            data=df_all_nkr, order = precip_cat_order,
+            x='precip_cat', y='value', row='objective',
+            hue='model', kind='box', showfliers = False, width =0.8,
+            sharey=False,  legend_out=False,
+            height = 4, aspect = 2, #aspect times height gives width of each facet
+            )
+seaplot.set_axis_labels('Precipitation Uncertainty (RMSE, mm/day)', "") #set x and y labels
+seaplot.legend.set_title("Model") #set legend title
+seaplot.set_titles("") #remove default titles
+plt.ylabel('Nash-Sutcliffe Efficiency')
+plt.grid(True, linestyle ='--', alpha = 0.5)
+plt.ylim(0, None)
+plt.tight_layout()
+plt.show()
+#save the plot
+seaplot.savefig('output/figures/OnlyNSE_LSTMModels_allbasin.png', dpi=300)

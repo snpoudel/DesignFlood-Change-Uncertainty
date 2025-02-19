@@ -107,132 +107,132 @@ features = np.vstack(features).astype(np.float32) #stack all basins
 scaler = StandardScaler()
 scaler.fit(features)
 
-# Load and preprocess data
-features, targets = [], []
-for basin_id in basin_list:
-    file_path = f'data/regional_lstm/processed_lstm_train_datasets/{pb}/lstm_input{basin_id}.csv'
-    if os.path.exists(file_path):
-        data = pd.read_csv(file_path)
-        data = data.drop(columns=['date'])
-        features.append(data.iloc[:n_days_train, :29].values) # 29 features
-        targets.append(data.iloc[:n_days_train, [-1]].values) # target is the last column
-features = np.vstack(features).astype(np.float32)
-targets = np.vstack(targets).astype(np.float32)
+# # Load and preprocess data
+# features, targets = [], []
+# for basin_id in basin_list:
+#     file_path = f'data/regional_lstm/processed_lstm_train_datasets/{pb}/lstm_input{basin_id}.csv'
+#     if os.path.exists(file_path):
+#         data = pd.read_csv(file_path)
+#         data = data.drop(columns=['date'])
+#         features.append(data.iloc[:n_days_train, :29].values) # 29 features
+#         targets.append(data.iloc[:n_days_train, [-1]].values) # target is the last column
+# features = np.vstack(features).astype(np.float32)
+# targets = np.vstack(targets).astype(np.float32)
 
-#standardize features with training data scaler
-features = scaler.transform(features)
+# #standardize features with training data scaler
+# features = scaler.transform(features)
 
-#create sequences of features and targets
-# x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
-#create sequences for each basin and concatenate, this is done so sequence from different basins are not mixed
-#first, calculate total number of basins present in this precip bucket
-total_num_basins = os.listdir(f'data/regional_lstm/processed_lstm_train_datasets/{pb}/')
-x_seq, y_seq = [], []
-for j in range(len(total_num_basins)):
-    x_seq_temp, y_seq_temp = create_sequences(features[j*n_days_train:(j+1)*n_days_train], targets[j*n_days_train:(j+1)*n_days_train], SEQUENCE_LENGTH)
-    x_seq.append(x_seq_temp)
-    y_seq.append(y_seq_temp)
-x_seq = np.vstack(x_seq) 
-y_seq = np.vstack(y_seq)
-
-
-# Dataset and DataLoader
-train_dataset = SeqDataset(x_seq, y_seq)
-train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-
-# Initialize model
-model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
-loss_fn = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-
-# Training Loop
-for epoch in range(NUM_EPOCHS):
-    model.train()
-    for i, (inputs, targets) in enumerate(train_loader):
-        inputs, targets = inputs.to(device), targets.to(device)
-
-        # Forward pass
-        predictions = model(inputs)
-        loss = loss_fn(predictions, targets)
-
-        # Backward pass
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        end_time = time.time()
-        if (i+1) % 1000 == 0:
-            print(f'PB:{pb}, Epoch: [{epoch+1}/{NUM_EPOCHS}], Step: [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}, Time: {end_time - start_time:.2f} seconds')
-
-# Save the model
-torch.save(model.state_dict(), f'regional_lstm{pb}.pth')
-#time taken to train the model
-end_time = time.time()
-print(f'Time taken for training {pb}: {end_time - start_time:.2f} seconds')
-#memory cleanup
-gc.collect() #garbage collection
-torch.cuda.empty_cache() #free unused memory
-
-# basin_list = ['01096000']
-# coverage = [3]
-# comb = [3]
-####################################################################################################################################################################################################################################
-#######---PREDICTION FOR HISTORICAL PERIOD---#######
-for basin_id in basin_list:
-    # for coverage in coverage:
-    for coverage in np.append(np.arange(12), [99]):
-        # for comb in comb:
-        for comb in np.arange(12):
-            file_path = f'data/regional_lstm/processed_lstm_prediction_datasets/historical/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
-            if os.path.exists(file_path):
-                data = pd.read_csv(file_path)
-                grab_date = data['date'].values
-                #keep date only after sequence length
-                grab_date = grab_date[SEQUENCE_LENGTH-1:]
-
-                data = data.drop(columns=['date'])
-                features = data.iloc[:, :29].values
-                targets = data.iloc[:, [-1]].values
-
-                #standardize features with training data scaler
-                features = scaler.transform(features)
-
-                #create sequences of features and targets
-                x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
-
-                test_dataset = SeqDataset(x_seq, y_seq)
-                test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
-
-                model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
-                model.load_state_dict(torch.load(f'regional_lstm{pb}.pth', weights_only=True))
-                model.eval()
-
-                all_outputs, all_targets = [], []
-                with torch.no_grad():
-                    for inputs, target in test_loader:
-                        inputs, target = inputs.to(device).float(), target.to(device).float()
-                        output = model(inputs)
-                        all_outputs.append(output.cpu().numpy())
-                        all_targets.append(target.cpu().numpy())
-                all_outputs = np.concatenate(all_outputs).flatten()
-                all_targets = np.concatenate(all_targets).flatten()
-
-                #save outputs with corresponding dates for the basin
-                temp_df = pd.DataFrame({'date': grab_date, 'true_streamflow': all_targets, 'streamflow': all_outputs})
-                #round streamflow and true_streamflow to 3 decimal places
-                temp_df = temp_df.round(3)
-                # Save the dataframe to CSV
-                output_file_path = f'output/regional_lstm/historical/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
-                temp_df.to_csv(output_file_path, index=False)
+# #create sequences of features and targets
+# # x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
+# #create sequences for each basin and concatenate, this is done so sequence from different basins are not mixed
+# #first, calculate total number of basins present in this precip bucket
+# total_num_basins = os.listdir(f'data/regional_lstm/processed_lstm_train_datasets/{pb}/')
+# x_seq, y_seq = [], []
+# for j in range(len(total_num_basins)):
+#     x_seq_temp, y_seq_temp = create_sequences(features[j*n_days_train:(j+1)*n_days_train], targets[j*n_days_train:(j+1)*n_days_train], SEQUENCE_LENGTH)
+#     x_seq.append(x_seq_temp)
+#     y_seq.append(y_seq_temp)
+# x_seq = np.vstack(x_seq) 
+# y_seq = np.vstack(y_seq)
 
 
-#freeup memory and variables
-del features, targets, x_seq, y_seq, all_outputs, all_targets, test_dataset, test_loader
-gc.collect() #garbage collection
-torch.cuda.empty_cache() #free unused memory
+# # Dataset and DataLoader
+# train_dataset = SeqDataset(x_seq, y_seq)
+# train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
-end_time = time.time()
-print(f'Time taken for historical dataset prediction on basin: {end_time - start_time:.2f} seconds')
+# # Initialize model
+# model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
+# loss_fn = nn.MSELoss()
+# optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+
+# # Training Loop
+# for epoch in range(NUM_EPOCHS):
+#     model.train()
+#     for i, (inputs, targets) in enumerate(train_loader):
+#         inputs, targets = inputs.to(device), targets.to(device)
+
+#         # Forward pass
+#         predictions = model(inputs)
+#         loss = loss_fn(predictions, targets)
+
+#         # Backward pass
+#         optimizer.zero_grad()
+#         loss.backward()
+#         optimizer.step()
+
+#         end_time = time.time()
+#         if (i+1) % 1000 == 0:
+#             print(f'PB:{pb}, Epoch: [{epoch+1}/{NUM_EPOCHS}], Step: [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}, Time: {end_time - start_time:.2f} seconds')
+
+# # Save the model
+# torch.save(model.state_dict(), f'regional_lstm{pb}.pth')
+# #time taken to train the model
+# end_time = time.time()
+# print(f'Time taken for training {pb}: {end_time - start_time:.2f} seconds')
+# #memory cleanup
+# gc.collect() #garbage collection
+# torch.cuda.empty_cache() #free unused memory
+
+# # basin_list = ['01096000']
+# # coverage = [3]
+# # comb = [3]
+# ####################################################################################################################################################################################################################################
+# #######---PREDICTION FOR HISTORICAL PERIOD---#######
+# for basin_id in basin_list:
+#     # for coverage in coverage:
+#     for coverage in np.append(np.arange(12), [99]):
+#         # for comb in comb:
+#         for comb in np.arange(12):
+#             file_path = f'data/regional_lstm/processed_lstm_prediction_datasets/historical/{pb}/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+#             if os.path.exists(file_path):
+#                 data = pd.read_csv(file_path)
+#                 grab_date = data['date'].values
+#                 #keep date only after sequence length
+#                 grab_date = grab_date[SEQUENCE_LENGTH-1:]
+
+#                 data = data.drop(columns=['date'])
+#                 features = data.iloc[:, :29].values
+#                 targets = data.iloc[:, [-1]].values
+
+#                 #standardize features with training data scaler
+#                 features = scaler.transform(features)
+
+#                 #create sequences of features and targets
+#                 x_seq, y_seq = create_sequences(features, targets, SEQUENCE_LENGTH)
+
+#                 test_dataset = SeqDataset(x_seq, y_seq)
+#                 test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+
+#                 model = LSTMModel(NUM_INPUT_FEATURES, NUM_HIDDEN_NEURONS, NUM_HIDDEN_LAYERS, NUM_OUTPUT_FEATURES, DROPOUT_RATE).to(device)
+#                 model.load_state_dict(torch.load(f'regional_lstm{pb}.pth', weights_only=True))
+#                 model.eval()
+
+#                 all_outputs, all_targets = [], []
+#                 with torch.no_grad():
+#                     for inputs, target in test_loader:
+#                         inputs, target = inputs.to(device).float(), target.to(device).float()
+#                         output = model(inputs)
+#                         all_outputs.append(output.cpu().numpy())
+#                         all_targets.append(target.cpu().numpy())
+#                 all_outputs = np.concatenate(all_outputs).flatten()
+#                 all_targets = np.concatenate(all_targets).flatten()
+
+#                 #save outputs with corresponding dates for the basin
+#                 temp_df = pd.DataFrame({'date': grab_date, 'true_streamflow': all_targets, 'streamflow': all_outputs})
+#                 #round streamflow and true_streamflow to 3 decimal places
+#                 temp_df = temp_df.round(3)
+#                 # Save the dataframe to CSV
+#                 output_file_path = f'output/regional_lstm/historical/lstm_input{basin_id}_coverage{coverage}_comb{comb}.csv'
+#                 temp_df.to_csv(output_file_path, index=False)
+
+
+# #freeup memory and variables
+# del features, targets, x_seq, y_seq, all_outputs, all_targets, test_dataset, test_loader
+# gc.collect() #garbage collection
+# torch.cuda.empty_cache() #free unused memory
+
+# end_time = time.time()
+# print(f'Time taken for historical dataset prediction on basin: {end_time - start_time:.2f} seconds')
     
     
 # basin_list = ['01096000']

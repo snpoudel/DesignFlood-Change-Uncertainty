@@ -16,8 +16,8 @@ def make_nep_plot(data_hist, data_future):
     plt.yscale('log')
     plt.plot(sorted_probability, sorted_data, marker='o', linestyle='-',
              color='red', markersize=0, linewidth=2, label='Future', alpha=0.8)
-    plt.ylim(0.001,300)
-    plt.xlim(0.25,1.05)
+    plt.ylim(0.01,None)
+    plt.xlim(0.2,None)
     plt.xlabel('Non-Exceedance Probability')
     plt.ylabel('MAP (mm/day)')
     plt.legend()

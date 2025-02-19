@@ -42,7 +42,7 @@ for id in basin_list['basin_id']:
     #---FUTURE OBSERVATION---#
     precip_in = pd.read_csv(f'data/future/future_true_precip/future_true_precip{id}.csv') 
     #Read temperature era5
-    temp_in = pd.read_csv(f'data/temperature/temp{id}.csv')
+    temp_in = pd.read_csv(f'data/future/future_temperature/future_temp{id}.csv')
     #Read latitude
     lat_in_df = lat_basin[lat_basin['STAID'] == id]
     lat_in = lat_in_df['LAT_CENT'].iloc[0]

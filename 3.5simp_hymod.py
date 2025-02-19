@@ -122,6 +122,10 @@ for combination in np.arange(12):
 
         #save parameters
         params_in.to_csv(f'output/parameters/simp_hymod/params{id}_grid{grid}_comb{combination}.csv')
+
+        # params_in = pd.read_csv(f'output/parameters/simp_hymod/params{id}_grid{grid}_comb{combination}.csv')
+        # params_in = params_in.drop(columns=['Unnamed: 0'])
+
         params_in = params_in.iloc[0,:-2] #remove basin ID column
         params_in = np.array(params_in)
 
@@ -139,7 +143,7 @@ for combination in np.arange(12):
         #Read interpolated precipitation
         precip_in = pd.read_csv(f'data/future/future_noisy_precip/future_noisy_precip{id}_coverage{grid}_comb{combination}.csv')
         #Read temperature era5
-        temp_in = pd.read_csv(f'data/temperature/temp{id}.csv')
+        temp_in = pd.read_csv(f'data/future/future_temperature/future_temp{id}.csv')
 
         #Read latitude
         lat_in_df = lat_basin[lat_basin['STAID'] == id]

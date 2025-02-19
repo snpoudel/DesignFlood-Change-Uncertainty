@@ -302,7 +302,7 @@ for method in ['mle']: #['mle', 'lm']:
                             flood_5, flood_10, flood_20 = return_flood(data,25,distribution,method), return_flood(data,50,distribution,method), return_flood(data,100,distribution,method)
                         else:
                             flood_5, flood_10, flood_20 = np.NaN, np.NaN, np.NaN
-                        temp_df_lstm_fullhymodf = pd.DataFrame({'model':'HYMOD-LSTM Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
+                        temp_df_lstm_fullhymodf = pd.DataFrame({'model':'FULL-HYMOD-LSTM Future', 'grid':grid, 'comb':comb, '5yr_flood':flood_5, '10yr_flood':flood_10, '20yr_flood':flood_20, 'precip_rmse':precip_rmse}, index=[0])
                         df_tyr_flood = pd.concat([df_tyr_flood, temp_df_lstm_fullhymodf], ignore_index=True)
 
                         #HYMOD-LSTM model future

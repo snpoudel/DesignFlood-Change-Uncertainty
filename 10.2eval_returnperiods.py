@@ -62,7 +62,7 @@ def return_flood(data, return_period, distribution='gev', method='mle'):
 
 #read the list of basin ID
 id = '01108000'
-coverage = 99 #99 is for truth
+coverage = 6 #99 is for truth
 comb = 0
 
 #write a function to calculate RMSE
@@ -159,19 +159,18 @@ simp_hymod_lstm_empirical_rp_future, simp_hymod_lstm_empirical_future = empirica
 
 # Create plot
 fig, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True)
-
 # Plot for historical condition
 axs[0].plot(return_periods, true_floods_hist, label='True (GEV Fit)', linestyle='-', color='blue')
 axs[0].plot(return_periods, hymod_floods_hist, label='Hymod (GEV Fit)', linestyle='-', color='green')
 axs[0].plot(return_periods, idw_lstm_floods_hist, label='LSTM (GEV Fit)', linestyle='-', color='orange')
 axs[0].plot(return_periods, simp_hymod_lstm_floods_hist, label='Hymod LSTM (GEV Fit)', linestyle='-', color='brown')
-axs[0].scatter(true_empirical_rp_hist, true_empirical_hist,  marker='o', s=10, color='blue', alpha=0.6)
-axs[0].scatter(hymod_empirical_rp_hist, hymod_empirical_hist,  marker='s', s=10, color='green', alpha=0.6)
-axs[0].scatter(idw_lstm_empirical_rp_hist, idw_lstm_empirical_hist,  marker='^', s=10, color='orange', alpha=0.6)
-axs[0].scatter(simp_hymod_lstm_empirical_rp_hist, simp_hymod_lstm_empirical_hist,  marker='x', s=10, color='brown', alpha=0.6)
+axs[0].scatter(true_empirical_rp_hist, true_empirical_hist,  marker='o', s=5, color='blue', alpha=0.6)
+axs[0].scatter(hymod_empirical_rp_hist, hymod_empirical_hist,  marker='s', s=5, color='green', alpha=0.6)
+axs[0].scatter(idw_lstm_empirical_rp_hist, idw_lstm_empirical_hist,  marker='^', s=5, color='orange', alpha=0.6)
+axs[0].scatter(simp_hymod_lstm_empirical_rp_hist, simp_hymod_lstm_empirical_hist,  marker='x', s=5, color='brown', alpha=0.6)
 axs[0].set_xscale('log')
 axs[0].set_ylabel('Streamflow (mm/day)')
-axs[0].set_title(f'Historical Condition - Basin ID: {id}, Precip Error: {precip_rmse}')
+axs[0].set_title(f'Historical, Precip Error: {precip_rmse} mm/day')
 axs[0].legend()
 axs[0].grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -180,14 +179,14 @@ axs[1].plot(return_periods, true_floods_future, label='True (GEV Fit)', linestyl
 axs[1].plot(return_periods, hymod_floods_future, label='Hymod (GEV Fit)', linestyle='-', color='green')
 axs[1].plot(return_periods, idw_lstm_floods_future, label='LSTM (GEV Fit)', linestyle='-', color='orange')
 axs[1].plot(return_periods, simp_hymod_lstm_floods_future, label='Hymod LSTM (GEV Fit)', linestyle='-', color='brown')
-axs[1].scatter(true_empirical_rp_future, true_empirical_future,  marker='o', s=10, color='blue', alpha=0.6)
-axs[1].scatter(hymod_empirical_rp_future, hymod_empirical_future,  marker='s', s=10, color='green', alpha=0.6)
-axs[1].scatter(idw_lstm_empirical_rp_future, idw_lstm_empirical_future,  marker='^', s=10, color='orange', alpha=0.6)
-axs[1].scatter(simp_hymod_lstm_empirical_rp_future, simp_hymod_lstm_empirical_future, marker='x', s=10, color='brown', alpha=0.6)
+axs[1].scatter(true_empirical_rp_future, true_empirical_future,  marker='o', s=5, color='blue', alpha=0.6)
+axs[1].scatter(hymod_empirical_rp_future, hymod_empirical_future,  marker='s', s=5, color='green', alpha=0.6)
+axs[1].scatter(idw_lstm_empirical_rp_future, idw_lstm_empirical_future,  marker='^', s=5, color='orange', alpha=0.6)
+axs[1].scatter(simp_hymod_lstm_empirical_rp_future, simp_hymod_lstm_empirical_future, marker='x', s=5, color='brown', alpha=0.6)
 axs[1].set_xscale('log')
 axs[1].set_xlabel('Return Period (years)')
 axs[1].set_ylabel('Streamflow (mm/day)')
-axs[1].set_title(f'Future Condition - Basin ID: {id}, Precip Error: {precip_rmse}')
+axs[1].set_title(f'Future , Precip Error: {precip_rmse}')
 axs[1].legend()
 axs[1].grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -195,4 +194,4 @@ plt.tight_layout()
 plt.show()
 
 #save the plot
-fig.savefig(f'output/figures/Return_period{id}.png', dpi=300)
+fig.savefig(f'output/figures/01108000/Return_period{id}.png', dpi=300)

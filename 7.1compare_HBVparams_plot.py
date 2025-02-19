@@ -35,7 +35,7 @@ df_error0 = pd.concat([hbv_params, true_param], ignore_index=True)
 palette1 = [sns.color_palette('Set2')[2], sns.color_palette('Set2')[1]]
 hbv_params = pd.DataFrame()
 total_grid = basin_list[basin_list['basin_id'] == id]['num_stations'].values[0]
-grid = total_grid - 2
+grid = total_grid - 3
 for comb in np.arange(10):
     if os.path.exists(f'output/parameters/hbv_recalib/params{id}_grid{grid}_comb{comb}.csv'):
         file = pd.read_csv(f'output/parameters/hbv_recalib/params{id}_grid{grid}_comb{comb}.csv')
@@ -48,7 +48,7 @@ df_error1out = pd.concat([hbv_params, true_param], ignore_index=True)
 palette2 = [sns.color_palette('Set2')[4], sns.color_palette('Set2')[1]]
 hbv_params = pd.DataFrame()
 total_grid = basin_list[basin_list['basin_id'] == id]['num_stations'].values[0]
-grid = total_grid - 8
+grid = total_grid - 6
 for comb in np.arange(10):
     if os.path.exists(f'output/parameters/hbv_recalib/params{id}_grid{grid}_comb{comb}.csv'):
         file = pd.read_csv(f'output/parameters/hbv_recalib/params{id}_grid{grid}_comb{comb}.csv')
@@ -74,7 +74,7 @@ fig, axs = plt.subplots(nrows=1*total_cases, ncols=6, figsize=(9, 5))
 axs = axs.flatten()
 # Create a box plot for each variable
 for i, var in enumerate(vars):
-    plt.suptitle(f'Re-HBV calibrated vs true parameters for basin: {id} \na)true precip with n=10 gauges b) precip with n-2 gauges c) precip with n-4 gauges')
+    plt.suptitle(f'Re-HBV calibrated vs true parameters for basin: {id} \na)true precip with n=10 gauges b) precip with n-3 gauges c) precip with n-6 gauges')
     sns.swarmplot(data=df_error0, y=var, ax=axs[i], hue='tag', palette=palette0, size =5)
     # axs[i].set_title(f'{vars_label[i]}')
     axs[i].set_title(vars[i])
@@ -121,4 +121,4 @@ plt.show()
 #save plot
 # fig.savefig(f'output/figures/{id}/10param_comparision.png', dpi=300)
 
-fig.savefig(f'output/figures/REHBV_true_vs_calib_parameters.png', dpi=300)
+fig.savefig(f'output/figures/01108000/REHBV_true_vs_calib_parameters.png', dpi=300)

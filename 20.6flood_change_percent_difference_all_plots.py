@@ -41,13 +41,21 @@ for method in ['mle']:
     df_all = pd.concat([df_5yr, df_10yr, df_20yr], axis=0)
     df_all = df_all.dropna(axis='rows')
 
+    #show top 10 highest values
+    # print(df_all.sort_values('value', ascending=False).head(10))
+
     # df_all = df_all[df_all['model'] != 'LSTM'] #remove LSTM model as well
     # df_all = df_all[df_all['model'] != 'FULL-HYMOD-LSTM'] 
     # df_all = df_all[df_all['model'] != 'HYMOD-LSTM']
+    # df_all = df_all[df_all['model'] != 'HBV Recalib']
+    # df_all = df_all[df_all['model'] != 'Full-Hymod']
+    # df_all = df_all[df_all['model'] != 'Hymod']
 
     # #set order of model categories
     model_order = ['HBV Recalib', 'FULL-HYMOD-LSTM', 'Full-Hymod', 'HYMOD-LSTM', 'LSTM', 'Hymod']
     # model_order = ['HBV Recalib', 'Full-Hymod', 'Hymod']
+    # model_order = ['FULL-HYMOD-LSTM', 'HYMOD-LSTM', 'LSTM']
+
     df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
 
     #Make boxplots using seaborn
@@ -69,7 +77,32 @@ for method in ['mle']:
     # plt.tight_layout()
     plt.show()
     #save the plot
-    seaplot.savefig(f'output/figures/difference_flood_{distribution}_{method}.png', dpi=300)
+    # seaplot.savefig(f'output/figures/difference_flood_{distribution}_{method}.png', dpi=300)
+    # seaplot.savefig(f'output/figures/ProcessModel_difference_flood_{distribution}_{method}.png', dpi=300)
+    # seaplot.savefig(f'output/figures/LSTM_difference_flood_{distribution}_{method}.png', dpi=300)
     #also save as a pdf file
     # seaplot.savefig(f'output/figures/change_flood_{distribution}_{method}.pdf')
     # seaplot.savefig('output/figures/NoLSTM_tyr-flood_allbasin.png', dpi=300)
+
+
+
+##############################################################################################################################################################################
+#only make plot for change in 50-yr flood
+seaplot = sns.catplot(
+            data=df_10yr, order = precip_cat_order,
+            x='precip_cat', y='value', row='objective',
+            hue='model', kind='box', showfliers = False, width = 0.8, linewidth=0.8,
+            sharey=False, legend=False, # set legend to False to remove legend
+            height = 3, aspect = 1.8, #aspect times height gives width of each facet
+            ) 
+seaplot.set_axis_labels('Precipitation Uncertainty (RMSE mm/day)', "") #set x and y labels
+seaplot.set_titles("") #remove default titles
+for ax in seaplot.axes.flat:
+    ax.axhline(y=0, linestyle='--', color='red', alpha=0.5)
+    ax.set_ylabel('Δ in 50yr-flood (%)')
+    ax.grid(True, linestyle ='--', alpha = 0.5)
+    ax.set_ylim(-70, 140)
+plt.show()
+#save the plot
+seaplot.savefig(f'output/figures/difference50_flood_{distribution}_{method}.png', dpi=300)
+
