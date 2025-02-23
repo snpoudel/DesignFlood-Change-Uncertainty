@@ -104,5 +104,5 @@ for ax in seaplot.axes.flat:
     ax.set_ylim(-70, 140)
 plt.show()
 #save the plot
-seaplot.savefig(f'output/figures/difference50_flood_{distribution}_{method}.png', dpi=300)
+# seaplot.savefig(f'output/figures/difference50_flood_{distribution}_{method}.png', dpi=300)
 

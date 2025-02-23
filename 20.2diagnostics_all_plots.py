@@ -116,7 +116,6 @@ seaplot.savefig('output/figures/BIAS_allbasin.png', dpi=300)
 
 #######################################################################################################################################################################################################
 #only save result for nse plot
-#make plot for nse, kge, rmse
 df_all_nkr = df_all[df_all['objective'].isin(['NSE'])]
 #Make boxplots using seaborn
 precip_cat_order = ['0', '0-1', '1-2', '2-3', '3-4', '4-6', '6-8']
