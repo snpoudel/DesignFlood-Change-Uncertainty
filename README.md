@@ -1,52 +1,124 @@
-# Uncertainties in hydrological change projections under climate change
-**⚠️Repository is under construction!!**
+# Uncertainties in Hydrological Change Projections under Climate Change
 
-This repository contains the scripts and data used for the study "Title of the Paper" published in *Name of Journal*. 
-The study investigates the impact of input, model, and parameter uncertainty on hydrological change projections over 30 basin in Massachussetts, US. A set of hydrological models including process-based models, deep learning model (LSTM), and hybrid models (LSTM + process-based models) are used to estimate the hydrological changes under different climate scenarios. The link to the paper is provided here: [Link to the paper](https:link).
+🚧 **Repository Under Construction** 🚧
 
-## The repository is organized into the following sections:
-- **data**: The study used a stochastic weather generator to create 1040-years of synthetic weather data for 30 basins in Massachusetts, US. The size of total data is around 1000 GB, which is too large to provide in this repository. The acquistion and processing of the data is described in the paper. The final processed data that came out of the analysis is provided here which can be used to reproduce the figures in the paper.
-- **figures**: Contains the figures along with corresponding script used to generate the figures.
-- **scripts**: Contains the scripts used for the analysis.
+Welcome to the repository for **"Title of the Paper"**, published in *Name of Journal*. This study explores the impact of **input, model, and parameter uncertainty** on hydrological change projections across **30 basins in Massachusetts, USA**. We utilize multiple hydrological models, including:
 
-## The python scripts are created in a sequential manner in terms of data pre-processing, model training and prediction, and model evaluation, analysis, and visualization. The scripts are organized into the following sections:
+- **Process-based models**
+- **Deep learning models (LSTM)**
+- **Hybrid models (LSTM + Process-based models)**
 
-**Pre-processing**: Scripts used to pre-process the data, the pre-processed inputs are fed into the hydrological models. Here are the list of pre-processing scrips with a brief description:
-    - 1.process_swg.py: This script is used to process the output file format of the stochastic weather generator to a format that is easier to work with. This scripts outputs csv files of the weather data (temperature, precipitatoin) for each gauging station in the study area for 1040-years and for a baseline and four future climate scenarios.
-    - 2.1true_precip.py: This script calculates the areal average true precipitation by inverse distance weighting interpolation of the precipitation data. The true precip for a basin represents precip estimated using all gauging stations available for the basin.
-    - 2.2future_true_precip.py: This script calculates the areal average true precipitation for the future climate scenarios. The true precip for a basin represents precip estimated using all gauging stations available for the basin.
-    - 2.3noisy_precip_hist_future.py: This script calculates the areal average noisy precipitation for the historical and future climate scenarios. The noisy precip for a basin represents precip estimated by randomly sampling the precipitation gauges available for the basin.
-    - 2.4temperature_hist_future.py: This script calculates mean temperature for the historical and future climate scenarios.
-    - 2.5regional_lstm_precip_bucket_histogram.py;" This script calculates the error in terms of RMSE of noisy precipitaiton by comparing with the true precipitation. Then categorizes the precipitation data into different buckets of error.
-    - 2.6prepare_regional_lstm_train_dataset.py: This script combines the catchment statics and dynamics to create a dataset that is used to train the regional LSTM model. The regional LSTM model is prepared for each precipitation error bucket.
-    - 2.7prepare_regional_lstm_prediction_dataset.py: This script prepares the dataset that the regional trained with the training dataset will use to make predictions. The dataset is prepared for each precipitation error bucket.
-    - 2.8prepare_hymod_lstm_dataset.py: This script prepares both the training and prediction dataset for the hybrid model (FULL-HYMOD + LSTM). The dataset is prepared for each precipitation error bucket.
-    - 2.9prepare_simp_hymod_lstm_dataset.py: This script prepares both the training and prediction dataset for the hybrid model (HYMOD + LSTM). The dataset is prepared for each precipitation error bucket.
+📄 Read the full paper here: [Link to the paper](https://link)
 
-**Model training and prediction**: Scripts used to train the hydrological models and make predictions. Here are the list of model training and prediction scrips with a brief description:
-    - 3.1hbv_true.py: This script runs the truth model (hbv_model.py) to generate streamflow simulation using true precipitation data for all study basins.
-    - 3.2hbv_noisy.py: This script runs the truth model (hbv_model.py) to generate streamflow simulation using noisy precipitation data for all study basins.
-    - 3.3rehbv.py: This script recalibrates the truth model (hbv_model.py) using the noisy precipitation data to generate streamflow simulation for all study basins.
-    - 3.4hymod.py: This script runs the hymod model (hymod_model.py) to generate streamflow simulation using both true and noisy precipitation data for all study basins.
-    - 3.5simp_hymod.py: This script runs the simplified hymod model (simp_hymod_model.py) to generate streamflow simulation using both true and noisy precipitation data for all study basins.
-    - 3.6regionalLSTM.py: This script trains the regional LSTM model and make prediction for each precipitation error bucket. 
-    - 3.7hymod_lstm.py: This script trains the hybrid model (FULL-HYMOD + LSTM) and make prediction for each precipitation error bucket.
-    - 3.7hymod_lstm_summed_output.py: This script simply sums the output of the hybrid model (FULL-HYMOD + LSTM) to the output of the FULL-HYMOD model to get the final output of the hybrid model.
-    - 3.8simp_hymod_lstm.py: This script trains the hybrid model (HYMOD + LSTM) and make prediction for each precipitation error bucket.
-    - 3.8simp_hymod_lstm_summed_output.py: This script simply sums the output of the hybrid model (HYMOD + LSTM) to the output of the HYMOD model to get the final output of the hybrid model.
-    - 3.9lstm_tuning.py: This script runs 4-fold cross-validation of the regional LSTM model and provides the best hyperparameters values which are used in the regional LSTM model training.
-    - 3.10residual_lstm_tuning.py: This script runs 4-fold cross-validation of the residual LSTM model and provides the best hyperparameters values which are used in the residual LSTM model (hybrid) training.
-    - 3.11plot_lstm_tuning.py: This script plots the results of the lstm tuning and residual lstm tuning scripts.
+Citation:
 
-**Model evaluation, analysis, and visualization**: Scripts used to evaluate the model performance, analyze the results, and visualize the results. Here are the list of model evaluation, analysis, and visualization scrips with a brief description:
-    - 4.1plot_HBVparams.py: This script plots the parameters of the rehbv model (recalibrated HBV model) for a given basin.
-    - 4.2plot_HYMOD_params.py: This script plots the parameters of the hymod model for a given basin.
-    - 4.3plot_SIMP-HYMOD_params.py: This script plots the parameters of the simplified hymod model for a given basin.
-    - 5.1plot_precip_streamflow_timeseries.py: This script plots the time series of precipitation and streamflow for a given basin.
-    - 5.2plot_returnperiods.py: This script plots the return periods of streamflow for a given basin.
-    - 6.1summary_metrics_diagnostics.py: This script calculates the summary metrics for the model performance for all basins.
-    - 6.2plot_summary_metrics.py: This script plots the summary metrics for the model performance for all basins.
-    - 7.1estimate_flood_change.py: This script estimates the flood change (e.g., change in 25-year return period) for all basins.
-    - 7.2plot_flood_change.py: This script plots the flood change for all basins.
-    - 7.3estimate_pooled_flood_change.py: This script estimates the pooled flood change (e.g., change in 25-year return period) for all basins. 
-    - 7.4plot_pooled_flood_change.py: This script plots the pooled flood change for all basins.
+```bibtex
+@article{your_citation_key,
+  title={Title of the Paper},
+  author={Author1, Author2, Author3},
+  journal={Name of Journal},
+  year={2023},
+  volume={X},
+  number={Y},
+  pages={Z-ZZ},
+  publisher={Publisher}
+}
+```
+
+---
+
+## 📂 Repository Structure
+
+This repository is organized into the following sections:
+
+### 1️⃣ **Data** 📊
+- **Data Source:** A **stochastic weather generator** was used to simulate **1,040 years** of weather data for the study area.
+- **Size Limitation:** The full dataset (~1000 GB) is not included in this repository.
+- **Provided Data:** We share **processed datasets** that can be used to **reproduce figures** from the paper.
+
+### 2️⃣ **Figures** 📈
+- Contains **figures** along with the **corresponding scripts** used to generate them.
+
+### 3️⃣ **Scripts** 🖥️
+- Includes all scripts for **data processing, model training, prediction, and analysis**.
+
+---
+
+## 🛠 **Scripts Overview**
+The scripts are structured **sequentially**, covering:
+
+1. **Pre-processing**
+2. **Model Training & Prediction**
+3. **Model Evaluation, Analysis & Visualization**
+
+---
+
+### 🔹 **1. Pre-processing Scripts**
+Scripts for preparing the dataset before feeding into hydrological models.
+
+| Script | Description |
+|--------|------------|
+| `1.process_swg.py` | Converts stochastic weather generator output into a usable CSV format. |
+| `2.1true_precip.py` | Computes areal-averaged true precipitation using **Inverse Distance Weighting (IDW)**. |
+| `2.2future_true_precip.py` | Computes true precipitation for future climate scenarios. |
+| `2.3noisy_precip_hist_future.py` | Computes areal-averaged **noisy precipitation** for historical and future scenarios. |
+| `2.4temperature_hist_future.py` | Computes mean temperature for historical and future scenarios. |
+| `2.5regional_lstm_precip_bucket_histogram.py` | Categorizes precipitation data into **error buckets** using RMSE. |
+| `2.6prepare_regional_lstm_train_dataset.py` | Prepares dataset for training the **Regional LSTM Model** per error bucket. |
+| `2.7prepare_regional_lstm_prediction_dataset.py` | Prepares dataset for **regional LSTM model predictions**. |
+| `2.8prepare_hymod_lstm_dataset.py` | Prepares dataset for **FULL-HYMOD + LSTM hybrid model**. |
+| `2.9prepare_simp_hymod_lstm_dataset.py` | Prepares dataset for **HYMOD + LSTM hybrid model**. |
+
+---
+
+### 🔹 **2. Model Training & Prediction**
+Scripts for training hydrological models and making predictions.
+
+| Script | Description |
+|--------|------------|
+| `3.1hbv_true.py` | Runs **HBV model** (`hbv_model.py`) using true precipitation data. |
+| `3.2hbv_noisy.py` | Runs **HBV model** (`hbv_model.py`) using noisy precipitation data. |
+| `3.3rehbv.py` | Recalibrates **HBV model** (`hbv_model.py`) using noisy precipitation data. |
+| `3.4hymod.py` | Runs **HYMOD model** (`hymod_model.py`) using true and noisy precipitation. |
+| `3.5simp_hymod.py` | Runs **simplified HYMOD model** (`simp_hymod_model.py`) using true and noisy precipitation. |
+| `3.6regionalLSTM.py` | Trains and predicts using the **Regional LSTM model** per error bucket. |
+| `3.7hymod_lstm.py` | Trains and predicts using the **FULL-HYMOD + LSTM hybrid model**. |
+| `3.7hymod_lstm_summed_output.py` | Computes final **FULL-HYMOD + LSTM** output by summing model outputs. |
+| `3.8simp_hymod_lstm.py` | Trains and predicts using the **HYMOD + LSTM hybrid model**. |
+| `3.8simp_hymod_lstm_summed_output.py` | Computes final **HYMOD + LSTM** output by summing model outputs. |
+| `3.9lstm_tuning.py` | Runs **4-fold cross-validation** for LSTM model hyperparameter tuning. |
+| `3.10residual_lstm_tuning.py` | Runs **4-fold cross-validation** for residual LSTM model tuning. |
+| `3.11plot_lstm_tuning.py` | Visualizes LSTM tuning results. |
+
+---
+
+### 🔹 **3. Model Evaluation, Analysis & Visualization**
+Scripts for model assessment, result analysis, and visualization.
+
+#### **📌 Model Parameters Visualization**
+| Script | Description |
+|--------|------------|
+| `4.1plot_HBVparams.py` | Plots **HBV model parameters** for a given basin. |
+| `4.2plot_HYMOD_params.py` | Plots **HYMOD model parameters**. |
+| `4.3plot_SIMP-HYMOD_params.py` | Plots **simplified HYMOD model parameters**. |
+
+#### **📌 Simulated Streamflow Visualization**
+| Script | Description |
+|--------|------------|
+| `5.1plot_precip_streamflow_timeseries.py` | Plots **precipitation & streamflow time series**. |
+| `5.2plot_returnperiods.py` | Plots **return periods of streamflow**. |
+
+#### **📌 Model Summary Performance Metrics**
+| Script | Description |
+|--------|------------|
+| `6.1summary_metrics_diagnostics.py` | Computes **summary metrics** for model performance. |
+| `6.2plot_summary_metrics.py` | Visualizes **summary metrics**. |
+
+#### **📌 Flood Change Analysis**
+| Script | Description |
+|--------|------------|
+| `7.1estimate_flood_change.py` | Estimates **flood change** (e.g., 25-year return period). |
+| `7.2plot_flood_change.py` | Visualizes flood change for all basins. |
+| `7.3estimate_pooled_flood_change.py` | Computes **pooled flood change** estimates. |
+| `7.4plot_pooled_flood_change.py` | Visualizes **pooled flood change** results. |
+
