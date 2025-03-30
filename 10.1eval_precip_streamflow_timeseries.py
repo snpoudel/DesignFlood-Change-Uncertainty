@@ -34,7 +34,7 @@ precip_rmse8 = round(precip_rmse8, 1)
 
 # print(precip_rmse2, precip_rmse8)
 #plot window
-plot_start = 10021 #start at least from second year to match with LSTM streamflow
+plot_start = 10015 #start at least from second year to match with LSTM streamflow
 plot_end = plot_start + 60
 
 #plot the true and interpolated precip
@@ -62,8 +62,9 @@ interpol_streamflow8 = pd.read_csv(f'output/regional_lstm/historical/lstm_input{
 axes[3].plot(true_streamflow['date'][plot_start:plot_end], true_streamflow['streamflow'][plot_start:plot_end])
 axes[3].plot(true_streamflow['date'][plot_start:plot_end], interpol_streamflow2['streamflow'][plot_start-364:plot_end-364], linestyle = ':')
 axes[3].plot(true_streamflow['date'][plot_start:plot_end], interpol_streamflow8['streamflow'][plot_start-364:plot_end-364], linestyle = '--')
-axes[3].set_ylabel("LSTM flow")
+axes[3].set_ylabel("LSTM Flow")
 axes[3].set_xlabel("Days")
+axes[3].set_ylim(0,4.5)
 axes[3].grid(True, linestyle='--', alpha = 0.5)
 
 
@@ -74,7 +75,8 @@ interpol_streamflow8 = pd.read_csv(f'output/regional_lstm_simp_hymod/final_outpu
 axes[2].plot(true_streamflow['date'][plot_start:plot_end], true_streamflow['streamflow'][plot_start:plot_end])
 axes[2].plot(true_streamflow['date'][plot_start:plot_end], interpol_streamflow2['simp_hymod_lstm_streamflow'][plot_start-364:plot_end-364], linestyle = ':')
 axes[2].plot(true_streamflow['date'][plot_start:plot_end], interpol_streamflow8['simp_hymod_lstm_streamflow'][plot_start-364:plot_end-364], linestyle = '--')
-axes[2].set_ylabel("HYMOD-LSTM flow")
+axes[2].set_ylabel("HYMOD-LSTM Flow")
+axes[2].set_ylim(0,4.5)
 axes[2].grid(True, linestyle='--', alpha = 0.5)
 
 #########--TEST FOR SIMP HYMOD STREAMFLOW--#########
@@ -84,14 +86,19 @@ interpol_streamflow8 = pd.read_csv(f'output/simp_hymod/simp_hymod{id}_coverage{c
 axes[1].plot(true_streamflow['date'][plot_start:plot_end], true_streamflow['streamflow'][plot_start:plot_end])
 axes[1].plot(true_streamflow['date'][plot_start:plot_end], interpol_streamflow2['streamflow'][plot_start:plot_end], linestyle = ':')
 axes[1].plot(true_streamflow['date'][plot_start:plot_end], interpol_streamflow8['streamflow'][plot_start:plot_end], linestyle = '--')
-axes[1].set_ylabel("HYMOD flow")
+axes[1].set_ylabel("HYMOD Flow")
+axes[1].set_ylim(0,4.5)
 axes[1].grid(True, linestyle='--', alpha = 0.5)
-axes[1].set_xticks(range(1,61,10))
+axes[1].set_xticks(range(0,61,10))
+#set x label values as numbers from 1 to 60
+axes[1].set_xticklabels(np.array([1,11,21,31,41,51, 60]))
 plt.tight_layout()
 plt.show()
 
 #save the plot
 fig.savefig(f'output/figures/01108000/HistTimeseries{id}.png', dpi = 300)
+#save inkcspae
+fig.savefig(f'output/figures/01108000/HistTimeseries{id}.svg', dpi = 300)
 
 
 
