@@ -6,6 +6,5 @@
 /results_before_swg_data
 /FINAL-FIGURES
 /inkscape
-/*.pth
-/*.sh
-/3.12merge_lstm_output.py
+/scripts/*.pth
+/scripts/*.sh
