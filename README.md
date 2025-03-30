@@ -10,7 +10,7 @@
 ## The python scripts are created in a sequential manner in terms of data pre-processing, model training and prediction, and model evaluation, analysis, and visualization. The scripts are organized into the following sections:
 
 - **pre-processing**: Scripts used to pre-process the data, the pre-processed inputs are fed into the hydrological models. Here are the list of pre-processing scrips with a brief description:
-    - `1.process_swg.py`: This script is used to process the output file format of the stochastic weather generator to a format that is easier to work with. This scripts outputs csv files of the weather data (temperature, precipitatoin) for each gauging station in the study area for 1040-years and for a baseline and four future climate scenarios.
+    - '1.process_swg.py': This script is used to process the output file format of the stochastic weather generator to a format that is easier to work with. This scripts outputs csv files of the weather data (temperature, precipitatoin) for each gauging station in the study area for 1040-years and for a baseline and four future climate scenarios.
     - '2.1true_precip.py': This script calculates the areal average true precipitation by inverse distance weighting interpolation of the precipitation data. The true precip for a basin represents precip estimated using all gauging stations available for the basin.
     - '2.2future_true_precip.py': This script calculates the areal average true precipitation for the future climate scenarios. The true precip for a basin represents precip estimated using all gauging stations available for the basin.
     - '2.3noisy_precip_hist_future.py': This script calculates the areal average noisy precipitation for the historical and future climate scenarios. The noisy precip for a basin represents precip estimated by randomly sampling the precipitation gauges available for the basin.
@@ -35,3 +35,16 @@
     - '3.9lstm_tuning.py': This script runs 4-fold cross-validation of the regional LSTM model and provides the best hyperparameters values which are used in the regional LSTM model training.
     - '3.10residual_lstm_tuning.py': This script runs 4-fold cross-validation of the residual LSTM model and provides the best hyperparameters values which are used in the residual LSTM model (hybrid) training.
     - '3.11plot_lstm_tuning.py': This script plots the results of the lstm tuning and residual lstm tuning scripts.
+
+- **model evaluation, analysis, and visualization**: Scripts used to evaluate the model performance, analyze the results, and visualize the results. Here are the list of model evaluation, analysis, and visualization scrips with a brief description:
+    - '4.1plot_HBVparams.py': This script plots the parameters of the rehbv model (recalibrated HBV model) for a given basin.
+    - '4.2plot_HYMOD_params.py': This script plots the parameters of the hymod model for a given basin.
+    - '4.3plot_SIMP-HYMOD_params.py': This script plots the parameters of the simplified hymod model for a given basin.
+    - '5.1plot_precip_streamflow_timeseries.py': This script plots the time series of precipitation and streamflow for a given basin.
+    - '5.2plot_returnperiods.py': This script plots the return periods of streamflow for a given basin.
+    - '6.1summary_metrics_diagnostics.py': This script calculates the summary metrics for the model performance for all basins.
+    - '6.2plot_summary_metrics.py': This script plots the summary metrics for the model performance for all basins.
+    - '7.1estimate_flood_change.py': This script estimates the flood change (e.g., change in 25-year return period) for all basins.
+    - '7.2plot_flood_change.py': This script plots the flood change for all basins.
+    - '7.3estimate_pooled_flood_change.py': This script estimates the pooled flood change (e.g., change in 25-year return period) for all basins. 
+    - '7.4plot_pooled_flood_change.py': This script plots the pooled flood change for all basins.
