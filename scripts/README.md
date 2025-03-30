@@ -1,4 +1,3 @@
-## **scripts Overview**
 The scripts are structured **sequentially**, covering:
 
 1. **Pre-processing**
