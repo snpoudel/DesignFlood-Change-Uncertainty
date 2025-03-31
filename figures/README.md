@@ -1,1 +1,1 @@
-## List of figures in the paper and correspoinding scrips to generate them
+## List of figures in the paper and correspoinding scrips to generate them, also a data folder which has model outputs to generate the figures
