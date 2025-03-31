@@ -22,17 +22,16 @@ Citation:
 }
 ```
 
----
 
 ## 📂 Repository Structure
 
 This repository is organized into the following sections:
 
-### 1️⃣ **scripts** 
-- Contains scripts for data processing, model training, prediction, and analysis.
-
-### 2️⃣ **figures** 
+### 📂 **figures** 
 - Contains the figures along with corresponding script used to generate the figures.
 
-### 3️⃣ **sub-experiments** 
+### 📂 **scripts** 
+- Contains scripts for data processing, model training, prediction, and analysis.
+
+### 📂 **sub-experiments** 
 - Contains the scripts for the sub-experiments conducted in the study. This incluedes sensitivity analysis on the results from the main experiment.
