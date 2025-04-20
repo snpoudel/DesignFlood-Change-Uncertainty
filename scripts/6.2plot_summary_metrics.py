@@ -4,9 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
+import os
 warnings.filterwarnings("ignore")
 #set colorblind friendly colors from seaborn
 sns.set_palette('colorblind')
+
+#set working directory one level down
+os.chdir(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 #read input
 df = pd.read_csv('output/allbasins_diagnostics_validperiod.csv')
@@ -54,6 +58,15 @@ df_all['model'] = df_all['model'].replace('RECAL_HBV', 'HBV-Recalib')
 
 #set order of model categories
 model_order = ['HBV-Recalib', 'LSTM', 'FULL-HYMOD-LSTM', 'FULL-HYMOD', 'HYMOD-LSTM',  'HYMOD']
+#change name of all models to be more readable
+df_all['model'] = df_all['model'].replace({
+    'HBV-Recalib': r'HBV$_{\mathrm{Recalib}}$',
+    'LSTM': r'LSTM',
+    'FULL-HYMOD-LSTM': r'HYMOD$_{\mathrm{Full,pp}}$',
+    'FULL-HYMOD': r'HYMOD$_{\mathrm{Full}}$',
+    'HYMOD-LSTM': r'HYMOD$_{\mathrm{Simple,pp}}$',
+    'HYMOD': r'HYMOD$_{\mathrm{Simple}}$'
+})
 
 df_all['model'] = pd.Categorical(df_all['model'], categories=model_order, ordered=True)
 
