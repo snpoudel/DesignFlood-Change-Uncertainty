@@ -1,9 +1,9 @@
-# Uncertainties in Hydrological Change Projections under Climate Change
+# Uncertainties in Design Flood Change Prediction under Climate Change
 
 🚧 **Repository Under Construction** 🚧
 
 Welcome to the repository for **"Title of the Paper"**, published in *Name of Journal*.
-The study investigates the impact of input, model, and parameter uncertainty on hydrological change projections across 30 basin in Massachussetts, US. A set of hydrological models including process-based models, deep learning model (LSTM), and hybrid models (LSTM + process-based models) are used to estimate the hydrological changes under different climate scenarios. 
+This study examines how input, model, and parameter uncertainties affect projections of design flood changes across 30 basins in Massachusetts, USA. A set of hydrological models including process-based, deep learning (LSTM), and hybrid models (process-based + LSTM postprocessor) are used to estimate the hydrological changes under different climate scenarios. 
 
 📄 Read the full paper here: [Add link to the paper here](https://link)
 
@@ -27,11 +27,8 @@ Citation:
 
 This repository is organized into the following sections:
 
-### 📂 **figures** 
-- Contains the figures along with corresponding script used to generate the figures.
-
 ### 📂 **scripts** 
-- Contains scripts for data processing, model training, prediction, and analysis.
+- Contains scripts for data processing, model training and analysis, and result visualization. A brief description of each script is provided in the accompanying README file.
 
 ### 📂 **sub-experiments** 
-- Contains the scripts for the sub-experiments conducted in the study. This incluedes sensitivity analysis on the results from the main experiment.
+- Contains the scripts for the sub-experiments conducted in the study. This incluedes sensitivity analysis on the results from the main experiment. A brief description of each sub-experiments is provided in the accompanying README file.
