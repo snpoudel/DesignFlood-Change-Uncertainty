@@ -1,26 +1,11 @@
-# Uncertainties in Design Flood Change Prediction under Climate Change
+# Uncertainties in Design Flood Change Prediction Under Climate Change
 
-🚧 **Repository Under Construction** 🚧
+Welcome to the repository for **"Uncertainty in Estimating the Relative Change of Design Floods under Climate Change: a Stylized Experiment with Process-Based, Deep Learning, and Hybrid Models"**.
 
-Welcome to the repository for **"Title of the Paper"**, published in *Name of Journal*.
-This study examines how input, model, and parameter uncertainties affect projections of design flood changes across 30 basins in Massachusetts, USA. A set of hydrological models including process-based, deep learning (LSTM), and hybrid models (process-based + LSTM postprocessor) are used to estimate the hydrological changes under different climate scenarios. 
+This study explores uncertainty in estimating changes in design floods using six hydrological models - including process-based, deep learning, and hybrid approaches - across 30 basins in Massachusetts, USA. We evaluate how model structure, input error, and climate scenarios affect relative change estimates to support reliable hydrological projections for long-term planning.
 
-📄 Read the full paper here: [Add link to the paper here](https://link)
-
-Citation:
-
-```bibtex
-@article{your_citation_key,
-  title={Title of the Paper},
-  author={Author1, Author2, Author3},
-  journal={Name of Journal},
-  year={2023},
-  volume={X},
-  number={Y},
-  pages={Z-ZZ},
-  publisher={Publisher}
-}
-```
+This is currently under review for publication, but the preprint is available on ESS Open Archive.
+[📄 Read the preprint here](https://doi.org/10.22541/essoar.175069522.21075713/v1)
 
 
 ## 📂 Repository Structure
