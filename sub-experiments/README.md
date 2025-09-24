@@ -19,3 +19,12 @@ To address equifinality, the main experiment was repeated using multi-variable o
 
 ## 6. Handling Equifinality with Multi-Objective Optimization
 To address equifinality, the main experiment was repeated using multi-objective optimization approach. Here, optimization was carried out to simultaneously minimize different components of streamflow, including low flow, high flow, and total flow. The corresponding scripts for models, performance evaluation, flood change analysis, and plotting are provided in the `Exp-equifinality-multiobjective` folder.
+
+## 7. Sobol Sensitivity Analysis
+To quantitatively attribute how much the error variability in flood change projections is due to different sources of uncertainty (hydrological model types, precipitation error, and climate change scenarios), a Sobol sensitivity analysis was conducted. The scripts for performing the Sobol sensitivity analysis and generating the related plots are provided in the `Exp-sobol-sensitivity-analysis` folder.
+
+## 8. Convergent Cross Mapping
+To explore the impact of equifinality on the flood change projection using a causal inference approach, Convergent Cross Mapping (CCM) technique was used. The scripts for performing CCM analysis and generating the related plots are provided in the `Exp-convergent-cross-mapping` folder.
+
+## 9. GR4J as Truth Model
+The entire experimental setup was repeated using GR4J as the truth model instead the original HBV model. The script for developing the GR4J truth models, and developing competing models based on the GR4J truth models, and the analysis for comparision of model performance and flood change projections are provided in the `Exp-GR4J-truth-model` folder.
