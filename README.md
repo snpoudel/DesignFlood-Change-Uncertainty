@@ -8,7 +8,7 @@ This paper has been published in _Journal of Hydrology_.
 
 **Read the paper here:** https://www.sciencedirect.com/science/article/pii/S0022169425017676?via%3Dihub#b0225
 
-**Cite:** Poudel, S., Najibi, N., & Steinschneider, S. (2026). Uncertainty in estimating the relative change of design floods under climate change: A stylized experiment with process-based, deep learning, and hybrid models. Journal of Hydrology, 664, 134427. https://doi.org/10.1016/j.jhydrol.2025.134427
+**Cite:** Poudel, S., Najibi, N., & Steinschneider, S. (2025). Uncertainty in estimating the relative change of design floods under climate change: A stylized experiment with process-based, deep learning, and hybrid models. Journal of Hydrology, 664, 134427. https://doi.org/10.1016/j.jhydrol.2025.134427
 
 
 
